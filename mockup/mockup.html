@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian — Private Car & Chauffeur Booking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board:#13100b;
+    --board-2:#1b1610;
+    --board-glow:#2a2014;
+    --ink:#1b1813;
+    --ink-soft:#5c544a;
+    --paper:#f4ece0;
+    --card:#fffdf8;
+    --line:rgba(27,24,19,.12);
+    --line-soft:rgba(27,24,19,.07);
+    --brass:#a9763a;
+    --brass-hi:#c89a52;
+    --brass-deep:#7c5526;
+    --forest:#3a6b4d;
+    --forest-bg:#e3ede2;
+    --clay:#a8492f;
+    --clay-bg:#f3e0d8;
+    --amber:#9c7320;
+    --amber-bg:#f1e7cf;
+    --cream-deep:#e9dec9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;
+    background:var(--board);
+    color:var(--paper);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    position:relative;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(120vw 60vh at 80% -10%, rgba(168,118,58,.18), transparent 60%),
+      radial-gradient(80vw 50vh at 0% 30%, rgba(124,85,38,.10), transparent 55%);
+  }
+  /* grain */
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 28px}
+
+  /* ---------- header ---------- */
+  header.top{padding:64px 0 26px}
+  .brandline{display:flex;align-items:center;gap:14px;margin-bottom:54px}
+  .mark{
+    width:34px;height:34px;border:1.5px solid var(--brass-hi);border-radius:50%;
+    display:grid;place-items:center;flex:none;position:relative;
+  }
+  .mark::before{content:"";width:11px;height:11px;border-radius:50%;background:var(--brass-hi)}
+  .mark::after{content:"";position:absolute;width:22px;height:1.5px;background:var(--brass-hi);transform:rotate(-32deg)}
+  .brandtxt{font-family:'Spline Sans Mono',monospace;letter-spacing:.42em;font-size:12px;text-transform:uppercase;color:var(--brass-hi)}
+  .brandtag{font-family:'Spline Sans Mono',monospace;letter-spacing:.3em;font-size:11px;color:#8a7a63;margin-left:auto;text-transform:uppercase}
+
+  h1{
+    font-family:'Fraunces',serif;font-weight:400;font-size:clamp(46px,8.5vw,108px);
+    line-height:.93;letter-spacing:-.02em;max-width:14ch;
+  }
+  h1 em{font-style:italic;color:var(--brass-hi)}
+  .lede{
+    margin-top:30px;max-width:54ch;font-size:18px;line-height:1.6;color:#cbbfa9;
+    border-left:2px solid var(--brass);padding-left:20px;
+  }
+  .metarow{display:flex;flex-wrap:wrap;gap:0;margin-top:46px;border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1)}
+  .meta{flex:1 1 180px;padding:18px 22px 18px 0;border-right:1px solid rgba(255,255,255,.07)}
+  .meta:last-child{border-right:none}
+  .meta dt{font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#8a7a63;margin-bottom:7px}
+  .meta dd{font-size:15px;color:#e6dcc8;font-weight:500}
+
+  /* ---------- role nav ---------- */
+  .roles{position:sticky;top:0;z-index:30;background:rgba(19,16,11,.86);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08);margin-top:60px}
+  .roles .wrap{display:flex;align-items:center;gap:8px;padding-top:14px;padding-bottom:14px}
+  .roles .lbl{font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#7d6e58;margin-right:8px}
+  .seg{appearance:none;border:1px solid rgba(255,255,255,.14);background:transparent;color:#cbbfa9;font-family:'Hanken Grotesk';font-size:13px;font-weight:600;padding:8px 16px;border-radius:100px;cursor:pointer;transition:.22s}
+  .seg:hover{border-color:var(--brass);color:#fff}
+  .seg.on{background:var(--brass);border-color:var(--brass);color:#1b130a}
+
+  /* ---------- sections ---------- */
+  section.role{padding:74px 0 30px;border-bottom:1px dashed rgba(255,255,255,.1)}
+  .rolehd{display:flex;align-items:flex-end;gap:22px;margin-bottom:44px;flex-wrap:wrap}
+  .rolenum{font-family:'Spline Sans Mono',monospace;font-size:13px;color:var(--brass-hi);letter-spacing:.1em}
+  .roletitle{font-family:'Fraunces',serif;font-size:clamp(30px,4.4vw,52px);font-weight:400;letter-spacing:-.01em;line-height:1}
+  .roledesc{color:#a99a82;font-size:15px;max-width:40ch;margin-left:auto;line-height:1.55}
+
+  .stage{display:flex;gap:46px;flex-wrap:wrap;align-items:flex-start}
+  .shot{position:relative}
+  .caption{font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a63;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+  .caption b{color:var(--brass-hi);font-weight:600}
+
+  /* ---------- phone ---------- */
+  .phone{
+    width:330px;background:#0c0a07;border-radius:42px;padding:11px;flex:none;
+    box-shadow:0 2px 0 rgba(255,255,255,.05) inset, 0 40px 70px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(168,118,58,.18);
+  }
+  .screen{position:relative;background:var(--paper);border-radius:32px;overflow:hidden;height:686px;color:var(--ink)}
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:13px 24px 6px;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:500;color:var(--ink)}
+  .statusbar .dots{display:flex;gap:5px;align-items:center}
+  .statusbar .sig{display:flex;gap:2px;align-items:flex-end;height:11px}
+  .statusbar .sig i{width:3px;background:var(--ink);border-radius:1px}
+  .statusbar .sig i:nth-child(1){height:4px}.statusbar .sig i:nth-child(2){height:6px}.statusbar .sig i:nth-child(3){height:8px}.statusbar .sig i:nth-child(4){height:11px}
+  .batt{width:22px;height:11px;border:1.3px solid var(--ink);border-radius:3px;position:relative;padding:1.5px}
+  .batt::after{content:"";position:absolute;right:-3px;top:3.5px;width:2px;height:4px;background:var(--ink);border-radius:0 1px 1px 0}
+  .batt i{display:block;height:100%;width:70%;background:var(--ink);border-radius:1px}
+  .body{padding:6px 22px 26px;height:calc(686px - 40px);overflow:hidden}
+
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:10px 0 18px}
+  .appbar .logo{font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:.34em;color:var(--brass-deep);text-transform:uppercase}
+  .appbar .av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#2c2519,#5a4a30);display:grid;place-items:center;color:#f3e4c8;font-size:12px;font-weight:600}
+  .ico{width:18px;height:18px;display:inline-block;vertical-align:middle}
+
+  .h-eyebrow{font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--brass);margin-bottom:7px}
+  .h-title{font-family:'Fraunces',serif;font-size:27px;font-weight:400;line-height:1.05;letter-spacing:-.01em;margin-bottom:18px}
+  .h-title.sm{font-size:23px}
+
+  /* route field */
+  .route{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:4px 16px;box-shadow:0 8px 22px -18px rgba(0,0,0,.5)}
+  .rrow{display:flex;align-items:center;gap:13px;padding:13px 0}
+  .rrow+.rrow{border-top:1px solid var(--line-soft)}
+  .pin{width:11px;height:11px;border-radius:50%;flex:none;margin-top:3px}
+  .pin.a{background:var(--forest)}
+  .pin.b{background:var(--clay)}
+  .rrow .lab{font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+  .rrow .val{font-size:15px;font-weight:600;margin-top:2px}
+  .swap{margin-left:auto;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--brass-deep);flex:none}
+
+  .twocol{display:flex;gap:12px;margin-top:14px}
+  .field{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .field .lab{font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  .field .val{font-size:15px;font-weight:600;margin-top:5px;display:flex;align-items:center;gap:6px}
+
+  /* mini map */
+  .map{margin-top:16px;border-radius:18px;overflow:hidden;border:1px solid var(--line);height:132px;position:relative;background:#eee6d6}
+  .map svg{display:block;width:100%;height:100%}
+
+  /* vehicle */
+  .vehicle{display:flex;gap:13px;align-items:center;margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+  .vthumb{width:74px;height:50px;border-radius:10px;flex:none;background:
+    linear-gradient(180deg,#23201a,#3a3327);position:relative;overflow:hidden}
+  .vthumb::before{content:"";position:absolute;left:9px;right:9px;bottom:11px;height:15px;border-radius:7px 9px 4px 4px;background:#0e0c08;box-shadow:0 -7px 0 -2px #1c1813}
+  .vthumb::after{content:"";position:absolute;left:15px;right:15px;top:13px;height:13px;border-radius:8px 8px 2px 2px;background:#cdbf9c;opacity:.85}
+  .vmeta .nm{font-weight:700;font-size:15px}
+  .vmeta .sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .tag{display:inline-block;font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.08em;padding:3px 8px;border-radius:6px;margin-top:6px;background:var(--cream-deep);color:var(--brass-deep)}
+
+  /* price breakdown */
+  .price{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 16px}
+  .prow{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;color:var(--ink-soft)}
+  .prow span:last-child{font-family:'Spline Sans Mono',monospace;color:var(--ink);font-weight:500}
+  .ptotal{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;padding-top:12px;border-top:1px solid var(--line)}
+  .ptotal .t{font-family:'Fraunces',serif;font-size:15px}
+  .ptotal .n{font-family:'Spline Sans Mono',monospace;font-size:24px;font-weight:600;letter-spacing:-.02em}
+
+  .cta{margin-top:18px;width:100%;border:none;background:var(--ink);color:var(--paper);font-family:'Hanken Grotesk';font-weight:700;font-size:15px;padding:16px;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:.2s}
+  .cta:hover{background:var(--brass-deep)}
+  .cta.brass{background:var(--brass);color:#1b130a}
+  .cta.ghost{background:transparent;border:1.4px solid var(--ink);color:var(--ink)}
+
+  /* status pill */
+  .pill{display:inline-flex;align-items:center;gap:6px;font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:100px;font-weight:500}
+  .pill .d{width:6px;height:6px;border-radius:50%}
+  .pill.confirmed{background:var(--forest-bg);color:var(--forest)} .pill.confirmed .d{background:var(--forest)}
+  .pill.pending{background:var(--amber-bg);color:var(--amber)} .pill.pending .d{background:var(--amber)}
+  .pill.progress{background:#e0e8ef;color:#2f5e85} .pill.progress .d{background:#2f5e85}
+  .pill.cancelled{background:var(--clay-bg);color:var(--clay)} .pill.cancelled .d{background:var(--clay)}
+  .pill.done{background:#e6e2d8;color:#6a5f4c} .pill.done .d{background:#6a5f4c}
+
+  /* booking card */
+  .bcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin-top:13px;box-shadow:0 10px 24px -22px rgba(0,0,0,.6)}
+  .bcard .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px}
+  .bcard .ref{font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:var(--ink-soft);letter-spacing:.06em}
+  .bline{display:flex;align-items:center;gap:9px;font-size:13.5px;padding:3px 0}
+  .bline .dotline{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .bline .dotline i{width:7px;height:7px;border-radius:50%}
+  .bcard .when{display:flex;gap:14px;margin-top:11px;padding-top:11px;border-top:1px solid var(--line-soft);font-size:12.5px;color:var(--ink-soft)}
+  .bcard .when b{color:var(--ink);font-weight:600;display:block;margin-top:2px;font-size:13.5px}
+
+  .sect-lbl{font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin:22px 0 4px}
+
+  /* calendar */
+  .cal{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+  .calhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .calhd .mo{font-family:'Fraunces',serif;font-size:19px}
+  .calhd .nav{display:flex;gap:6px}
+  .calhd .nav button{width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+  .dow span{text-align:center;font-family:'Spline Sans Mono',monospace;font-size:9.5px;color:var(--ink-soft);letter-spacing:.04em}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .day{aspect-ratio:1;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;position:relative;cursor:pointer;border:1px solid transparent}
+  .day .dt{font-family:'Spline Sans Mono',monospace}
+  .day.avail{background:var(--forest-bg);color:var(--forest)}
+  .day.booked{background:var(--clay-bg);color:var(--clay)}
+  .day.block{background:#ece6da;color:#8a7d66;background-image:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,.045) 4px,rgba(0,0,0,.045) 8px)}
+  .day.sel{outline:2px solid var(--brass);outline-offset:1px}
+  .day .mk{font-size:8px;font-family:'Spline Sans Mono',monospace;opacity:.8;margin-top:1px}
+  .legend{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+  .legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-soft)}
+  .legend i{width:11px;height:11px;border-radius:3px}
+
+  /* daily strip */
+  .slot{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+  .slot .hr{font-family:'Spline Sans Mono',monospace;font-size:12px;color:var(--ink-soft);width:46px}
+  .slot .bar{flex:1;height:30px;border-radius:8px;display:flex;align-items:center;padding:0 11px;font-size:12px;font-weight:600}
+  .slot .bar.a{background:var(--forest-bg);color:var(--forest)}
+  .slot .bar.b{background:var(--clay-bg);color:var(--clay)}
+  .slot .bar.k{background:#ece6da;color:#8a7d66}
+
+  /* trip stepper */
+  .stepper{display:flex;flex-direction:column;gap:0;margin-top:6px}
+  .step{display:flex;gap:13px;position:relative;padding-bottom:18px}
+  .step:last-child{padding-bottom:0}
+  .step .col{display:flex;flex-direction:column;align-items:center;flex:none}
+  .step .node{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;background:var(--paper);font-size:11px;color:var(--ink-soft);z-index:2}
+  .step .ln{width:2px;flex:1;background:var(--line);margin-top:2px}
+  .step.done .node{background:var(--forest);border-color:var(--forest);color:#fff}
+  .step.done .ln{background:var(--forest)}
+  .step.now .node{background:var(--brass);border-color:var(--brass);color:#1b130a}
+  .step .txt .t{font-weight:700;font-size:14px}
+  .step .txt .s{font-size:12px;color:var(--ink-soft);margin-top:1px}
+  .step.now .txt .t{color:var(--brass-deep)}
+
+  .earn{margin-top:16px;background:linear-gradient(135deg,#241d12,#3a2f1b);border-radius:16px;padding:16px;color:#f1e6d0}
+  .earn .l{font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#bfa97f}
+  .earn .v{font-family:'Spline Sans Mono',monospace;font-size:30px;font-weight:600;margin-top:6px;letter-spacing:-.02em}
+  .earn .sub{font-size:12px;color:#bfa97f;margin-top:3px}
+
+  /* admin */
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:6px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .kpi .l{font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+  .kpi .v{font-family:'Spline Sans Mono',monospace;font-size:23px;font-weight:600;margin-top:8px;letter-spacing:-.02em}
+  .kpi .trend{font-size:11px;margin-top:3px;color:var(--forest);font-weight:600}
+  .kpi .trend.down{color:var(--clay)}
+
+  .tbl{margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .trow{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:12.5px}
+  .trow+.trow{border-top:1px solid var(--line-soft)}
+  .trow .who{font-weight:600;flex:1;min-width:0}
+  .trow .who small{display:block;font-weight:400;color:var(--ink-soft);font-family:'Spline Sans Mono',monospace;font-size:10px;margin-top:2px}
+  .trow .amt{font-family:'Spline Sans Mono',monospace;font-weight:500}
+
+  .util{margin-top:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px}
+  .util .bars{display:flex;align-items:flex-end;gap:7px;height:74px;margin-top:12px}
+  .util .bars .b{flex:1;background:var(--cream-deep);border-radius:5px 5px 0 0;position:relative}
+  .util .bars .b.hi{background:var(--brass)}
+  .util .bars .b span{position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:8.5px;color:var(--ink-soft)}
+
+  .annot{position:absolute;font-family:'Fraunces',serif;font-style:italic;font-size:14px;color:#b9a682;max-width:160px;line-height:1.4}
+  .annot::before{content:"";position:absolute;width:30px;height:1px;background:var(--brass)}
+
+  footer{padding:80px 0 70px;text-align:center;position:relative;z-index:1}
+  footer .big{font-family:'Fraunces',serif;font-size:clamp(28px,5vw,56px);font-weight:400;letter-spacing:-.01em}
+  footer .sm{font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7d6e58;margin-top:22px}
+
+  .hide{display:none}
+  @media(max-width:560px){
+    .wrap{padding:0 16px}
+    .phone{width:300px}
+    header.top{padding:42px 0 18px}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brandline">
+      <span class="mark"></span>
+      <span class="brandtxt">Meridian</span>
+      <span class="brandtag">Product Mockup · v0.9</span>
+    </div>
+    <h1>The drive, <em>booked</em> — without the group chat.</h1>
+    <p class="lede">A booking platform for independent chauffeurs, limousine operators and airport-transfer drivers. Direct bookings, calendar availability and online payment — so the work stops living in Messenger, WhatsApp and a spreadsheet.</p>
+    <dl class="metarow">
+      <div class="meta"><dt>Built for</dt><dd>One driver, many vehicles</dd></div>
+      <div class="meta"><dt>Roles</dt><dd>Customer · Driver · Admin</dd></div>
+      <div class="meta"><dt>Stack</dt><dd>Flutter · Supabase · Maps</dd></div>
+      <div class="meta"><dt>Payments</dt><dd>PayMongo / Xendit (PHP)</dd></div>
+    </dl>
+  </div>
+</header>
+
+<nav class="roles">
+  <div class="wrap">
+    <span class="lbl">View</span>
+    <button class="seg on" data-f="all">Everything</button>
+    <button class="seg" data-f="customer">Customer</button>
+    <button class="seg" data-f="driver">Driver</button>
+    <button class="seg" data-f="admin">Admin</button>
+  </div>
+</nav>
+
+<!-- ===================== CUSTOMER ===================== -->
+<section class="role" data-role="customer">
+  <div class="wrap">
+    <div class="rolehd">
+      <span class="rolenum">01 / Customer</span>
+      <h2 class="roletitle">Book a ride in four taps</h2>
+      <p class="roledesc">Pickup, time, vehicle, pay. Availability is checked before money ever changes hands.</p>
+    </div>
+
+    <div class="stage">
+
+      <!-- Screen: Booking builder -->
+      <div class="shot">
+        <div class="caption"><b>A.</b> Booking builder</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian</span><div class="av">JL</div></div>
+            <div class="h-eyebrow">New booking</div>
+            <div class="h-title">Where are we<br>headed?</div>
+
+            <div class="route">
+              <div class="rrow"><span class="pin a"></span><div><div class="lab">Pickup</div><div class="val">BGC · Bonifacio High Street</div></div><span class="swap">⇅</span></div>
+              <div class="rrow"><span class="pin b"></span><div><div class="lab">Drop-off</div><div class="val">NAIA Terminal 3, Pasay</div></div></div>
+            </div>
+
+            <div class="twocol">
+              <div class="field"><div class="lab">Date</div><div class="val">Sat · Jun 13</div></div>
+              <div class="field"><div class="lab">Pickup time</div><div class="val">4:30 PM</div></div>
+            </div>
+
+            <div class="map">
+              <svg viewBox="0 0 300 132" preserveAspectRatio="none">
+                <rect width="300" height="132" fill="#e9e0cf"/>
+                <g stroke="#d8ccb4" stroke-width="6" opacity=".55" fill="none">
+                  <path d="M-10 38 H310"/><path d="M-10 92 H310"/><path d="M60 -10 V142"/><path d="M210 -10 V142"/>
+                </g>
+                <g stroke="#cabfa6" stroke-width="2" opacity=".7" fill="none">
+                  <path d="M-10 64 H310"/><path d="M130 -10 V142"/><path d="M255 -10 V142"/>
+                </g>
+                <path d="M52 100 C 110 96, 150 60, 250 34" fill="none" stroke="#a9763a" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
+                <circle cx="52" cy="100" r="7" fill="#3a6b4d" stroke="#fff" stroke-width="2.5"/>
+                <circle cx="250" cy="34" r="7" fill="#a8492f" stroke="#fff" stroke-width="2.5"/>
+              </svg>
+            </div>
+
+            <div class="vehicle">
+              <div class="vthumb"></div>
+              <div class="vmeta"><div class="nm">Toyota Alphard</div><div class="sub">2023 · up to 7 guests</div><span class="tag">14.2 km · ~38 min</span></div>
+            </div>
+
+            <button class="cta brass">Check availability &amp; price →</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- Screen: Price + confirm -->
+      <div class="shot">
+        <div class="caption"><b>B.</b> Fare &amp; payment</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian</span><div class="av">JL</div></div>
+            <div class="h-eyebrow">Slot available ✓</div>
+            <div class="h-title sm">Confirm your<br>fare</div>
+
+            <div class="bcard" style="margin-top:4px">
+              <div class="bline"><span class="pin a" style="margin-top:0"></span><span>BGC · Bonifacio High Street</span></div>
+              <div class="bline"><span class="pin b" style="margin-top:0"></span><span>NAIA Terminal 3, Pasay</span></div>
+              <div class="when"><div>Date<b>Sat, Jun 13</b></div><div>Pickup<b>4:30 PM</b></div><div>Vehicle<b>Alphard</b></div></div>
+            </div>
+
+            <div class="price">
+              <div class="prow"><span>Base rate</span><span>₱2,500</span></div>
+              <div class="prow"><span>Distance · 14.2 km</span><span>₱710</span></div>
+              <div class="prow"><span>Airport meet &amp; greet</span><span>₱500</span></div>
+              <div class="ptotal"><span class="t">Total fare</span><span class="n">₱3,710</span></div>
+            </div>
+
+            <div class="sect-lbl">Pay with</div>
+            <div class="twocol" style="margin-top:6px">
+              <div class="field" style="border-color:var(--brass);background:#fbf3e4"><div class="lab">GCash</div><div class="val">via PayMongo</div></div>
+              <div class="field"><div class="lab">Card</div><div class="val">•••• 4921</div></div>
+            </div>
+
+            <button class="cta">Pay ₱3,710 securely 🔒</button>
+            <p style="text-align:center;font-size:11px;color:var(--ink-soft);margin-top:11px;font-family:'Spline Sans Mono',monospace">Free cancellation up to 12h before</p>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- Screen: My trips -->
+      <div class="shot">
+        <div class="caption"><b>C.</b> My trips</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian</span><div class="av">JL</div></div>
+            <div class="h-title sm" style="margin-bottom:6px">Your trips</div>
+
+            <div class="bcard">
+              <div class="top"><span class="ref">#MRD-4471</span><span class="pill confirmed"><span class="d"></span>Confirmed</span></div>
+              <div class="bline"><div class="dotline"><i style="background:var(--forest)"></i></div><span>BGC → NAIA T3</span></div>
+              <div class="when"><div>Sat, Jun 13 · 4:30 PM</div></div>
+              <div class="when" style="border:none;padding-top:8px;margin-top:6px"><div>Driver<b>Ramon dela Cruz</b></div><div>Car<b>Alphard · ABC 1234</b></div></div>
+            </div>
+
+            <div class="bcard">
+              <div class="top"><span class="ref">#MRD-4468</span><span class="pill pending"><span class="d"></span>Awaiting pay</span></div>
+              <div class="bline"><div class="dotline"><i style="background:var(--amber)"></i></div><span>Makati → Clark Airport</span></div>
+              <div class="when"><div>Tue, Jun 16 · 6:00 AM · ₱5,250</div></div>
+            </div>
+
+            <div class="bcard" style="opacity:.78">
+              <div class="top"><span class="ref">#MRD-4402</span><span class="pill done"><span class="d"></span>Completed</span></div>
+              <div class="bline"><div class="dotline"><i style="background:#6a5f4c"></i></div><span>Cebu City → Mactan Airport</span></div>
+              <div class="when"><div>Fri, May 30 · ₱1,980 · ★ Rated</div></div>
+            </div>
+
+            <button class="cta ghost" style="margin-top:14px">+ New booking</button>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DRIVER ===================== -->
+<section class="role" data-role="driver">
+  <div class="wrap">
+    <div class="rolehd">
+      <span class="rolenum">02 / Driver</span>
+      <h2 class="roletitle">One calendar, every booking</h2>
+      <p class="roledesc">Ramon runs three vehicles solo. Availability auto-blocks on confirmed trips; he blocks the rest by hand.</p>
+    </div>
+
+    <div class="stage">
+
+      <!-- Calendar -->
+      <div class="shot">
+        <div class="caption"><b>A.</b> Availability — month</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian · Driver</span><div class="av">RC</div></div>
+            <div class="cal">
+              <div class="calhd"><span class="mo">June 2026</span><div class="nav"><button>‹</button><button>›</button></div></div>
+              <div class="dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+              <div class="grid" id="calGrid"></div>
+              <div class="legend">
+                <span><i style="background:var(--forest-bg)"></i>Available</span>
+                <span><i style="background:var(--clay-bg)"></i>Booked</span>
+                <span><i style="background:#ece6da"></i>Blocked</span>
+              </div>
+            </div>
+            <button class="cta brass" style="margin-top:16px">Block time off</button>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- Daily + incoming -->
+      <div class="shot">
+        <div class="caption"><b>B.</b> Day view &amp; new request</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian · Driver</span><div class="av">RC</div></div>
+            <div class="h-eyebrow">Saturday, Jun 13</div>
+            <div class="h-title sm" style="margin-bottom:10px">Today's hours</div>
+            <div class="slot"><span class="hr">08:00</span><div class="bar a">Available</div></div>
+            <div class="slot"><span class="hr">10:00</span><div class="bar b">Booked · BGC→NAIA</div></div>
+            <div class="slot"><span class="hr">12:00</span><div class="bar b">Booked · BGC→NAIA</div></div>
+            <div class="slot"><span class="hr">14:00</span><div class="bar a">Available</div></div>
+            <div class="slot"><span class="hr">16:00</span><div class="bar k">Blocked · Maintenance</div></div>
+
+            <div class="sect-lbl">New request</div>
+            <div class="bcard" style="margin-top:6px;border-color:var(--brass)">
+              <div class="top"><span class="ref">#MRD-4472 · just now</span><span class="pill pending"><span class="d"></span>Pending</span></div>
+              <div class="bline"><span class="pin a" style="margin-top:0"></span><span>Alabang Town Center</span></div>
+              <div class="bline"><span class="pin b" style="margin-top:0"></span><span>NAIA T1 · Sun 8:00 AM</span></div>
+              <div class="when"><div>Guest<b>M. Reyes</b></div><div>Fare<b>₱2,890</b></div></div>
+              <div class="twocol" style="margin-top:12px">
+                <button class="cta brass" style="margin-top:0;padding:12px;font-size:14px">Accept</button>
+                <button class="cta ghost" style="margin-top:0;padding:12px;font-size:14px">Decline</button>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- Trip in progress -->
+      <div class="shot">
+        <div class="caption"><b>C.</b> Trip lifecycle</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian · Driver</span><div class="av">RC</div></div>
+            <div class="bcard" style="margin-top:2px">
+              <div class="top"><span class="ref">#MRD-4471</span><span class="pill progress"><span class="d"></span>In progress</span></div>
+              <div class="bline"><span class="pin a" style="margin-top:0"></span><span>BGC · Bonifacio High Street</span></div>
+              <div class="bline"><span class="pin b" style="margin-top:0"></span><span>NAIA Terminal 3</span></div>
+              <div class="when"><div>Guest<b>J. Lim</b></div><div>Car<b>Alphard</b></div><div>Fare<b>₱3,710</b></div></div>
+            </div>
+
+            <div class="sect-lbl">Status</div>
+            <div class="stepper">
+              <div class="step done"><div class="col"><div class="node">✓</div><div class="ln"></div></div><div class="txt"><div class="t">Booking received</div><div class="s">Sat 2:14 PM</div></div></div>
+              <div class="step done"><div class="col"><div class="node">✓</div><div class="ln"></div></div><div class="txt"><div class="t">Accepted</div><div class="s">Sat 2:15 PM</div></div></div>
+              <div class="step now"><div class="col"><div class="node">●</div><div class="ln"></div></div><div class="txt"><div class="t">Trip started</div><div class="s">En route · 4:32 PM</div></div></div>
+              <div class="step"><div class="col"><div class="node"></div></div><div class="txt"><div class="t">Complete trip</div><div class="s">Tap when dropped off</div></div></div>
+            </div>
+
+            <div class="earn">
+              <div class="l">Earnings · this week</div>
+              <div class="v">₱42,300</div>
+              <div class="sub">11 completed trips · +₱3,710 pending</div>
+            </div>
+
+            <button class="cta" style="margin-top:14px">Mark trip complete</button>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ADMIN ===================== -->
+<section class="role" data-role="admin">
+  <div class="wrap">
+    <div class="rolehd">
+      <span class="rolenum">03 / Admin</span>
+      <h2 class="roletitle">The whole operation, at a glance</h2>
+      <p class="roledesc">Users, bookings, pricing and the three reports that matter: trips, revenue, utilisation.</p>
+    </div>
+
+    <div class="stage">
+
+      <!-- Dashboard -->
+      <div class="shot">
+        <div class="caption"><b>A.</b> Dashboard</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian · Admin</span><div class="av">AD</div></div>
+            <div class="h-eyebrow">Monday, Jun 1</div>
+            <div class="h-title sm" style="margin-bottom:12px">Overview</div>
+            <div class="kpis">
+              <div class="kpi"><div class="l">Trips today</div><div class="v">6</div><div class="trend">▲ 2 vs avg</div></div>
+              <div class="kpi"><div class="l">Revenue · MTD</div><div class="v">₱248k</div><div class="trend">▲ 18%</div></div>
+              <div class="kpi"><div class="l">Utilisation</div><div class="v">71%</div><div class="trend down">▼ 4%</div></div>
+              <div class="kpi"><div class="l">Active cars</div><div class="v">3</div><div class="trend">All in service</div></div>
+            </div>
+            <div class="sect-lbl">Recent bookings</div>
+            <div class="tbl">
+              <div class="trow"><span class="pill confirmed"><span class="d"></span></span><div class="who">J. Lim<small>BGC → NAIA T3</small></div><span class="amt">₱3,710</span></div>
+              <div class="trow"><span class="pill pending"><span class="d"></span></span><div class="who">M. Reyes<small>Alabang → NAIA T1</small></div><span class="amt">₱2,890</span></div>
+              <div class="trow"><span class="pill progress"><span class="d"></span></span><div class="who">G. Santos<small>Ortigas → Makati</small></div><span class="amt">₱1,450</span></div>
+              <div class="trow"><span class="pill cancelled"><span class="d"></span></span><div class="who">P. Cruz<small>QC → BGC</small></div><span class="amt">₱1,200</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- Reports -->
+      <div class="shot">
+        <div class="caption"><b>B.</b> Reports</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian · Admin</span><div class="av">AD</div></div>
+            <div class="h-title sm" style="margin-bottom:12px">Reports</div>
+            <div class="util">
+              <div class="kpi" style="border:none;padding:0"><div class="l">Monthly revenue · 2026</div><div class="v">₱248,400</div></div>
+              <div class="bars">
+                <div class="b" style="height:42%"><span>Feb</span></div>
+                <div class="b" style="height:55%"><span>Mar</span></div>
+                <div class="b" style="height:48%"><span>Apr</span></div>
+                <div class="b" style="height:70%"><span>May</span></div>
+                <div class="b hi" style="height:88%"><span>Jun</span></div>
+              </div>
+            </div>
+            <div class="kpis" style="margin-top:24px">
+              <div class="kpi"><div class="l">Daily trips · avg</div><div class="v">5.4</div></div>
+              <div class="kpi"><div class="l">Fleet utilisation</div><div class="v">71%</div></div>
+            </div>
+            <div class="sect-lbl">Per vehicle</div>
+            <div class="tbl">
+              <div class="trow"><div class="who">Toyota Alphard<small>2023 · 7-seat</small></div><span class="amt">82%</span></div>
+              <div class="trow"><div class="who">Mercedes V-Class<small>2022 · 6-seat</small></div><span class="amt">64%</span></div>
+              <div class="trow"><div class="who">Toyota Hiace Grandia<small>2021 · 10-seat</small></div><span class="amt">68%</span></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- Pricing config -->
+      <div class="shot">
+        <div class="caption"><b>C.</b> Pricing engine</div>
+        <div class="phone"><div class="screen">
+          <div class="statusbar"><span>9:41</span><div class="dots"><div class="sig"><i></i><i></i><i></i><i></i></div><span>5G</span><div class="batt"><i></i></div></div></div>
+          <div class="body">
+            <div class="appbar"><span class="logo">Meridian · Admin</span><div class="av">AD</div></div>
+            <div class="h-eyebrow">Configure</div>
+            <div class="h-title sm" style="margin-bottom:14px">Pricing rules</div>
+
+            <div class="sect-lbl" style="margin-top:0">Base &amp; distance</div>
+            <div class="field" style="margin-bottom:10px"><div class="lab">Base rate</div><div class="val" style="justify-content:space-between"><span>₱2,500</span><span style="font-family:'Spline Sans Mono';font-size:11px;color:var(--ink-soft)">flat</span></div></div>
+            <div class="field" style="margin-bottom:10px"><div class="lab">Distance fee</div><div class="val" style="justify-content:space-between"><span>₱50</span><span style="font-family:'Spline Sans Mono';font-size:11px;color:var(--ink-soft)">/ km</span></div></div>
+
+            <div class="sect-lbl">Add-ons</div>
+            <div class="tbl">
+              <div class="trow"><div class="who">Airport meet &amp; greet</div><span class="amt">₱500</span></div>
+              <div class="trow"><div class="who">Child seat</div><span class="amt">₱250</span></div>
+              <div class="trow"><div class="who">Extra waiting · /hr</div><span class="amt">₱400</span></div>
+            </div>
+
+            <div class="price" style="margin-top:16px;background:#fbf3e4;border-color:var(--brass)">
+              <div class="prow" style="color:var(--ink)"><span>Sample · 14.2 km + meet &amp; greet</span></div>
+              <div class="ptotal" style="border-color:rgba(168,118,58,.4)"><span class="t">Computed fare</span><span class="n">₱3,710</span></div>
+            </div>
+            <button class="cta brass" style="margin-top:16px">Save rules</button>
+          </div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="big">Stop chasing bookings.<br>Start driving them.</div>
+    <div class="sm">Meridian · Mockup · Customer · Driver · Admin</div>
+  </div>
+</footer>
+
+<script>
+  // Build June 2026 calendar (Jun 1 = Monday). A=available, B=booked, K=blocked.
+  (function(){
+    var grid = document.getElementById('calGrid');
+    if(!grid) return;
+    var booked = {6:1,13:1,20:1,21:1};      // confirmed trips
+    var block  = {16:1,17:1,18:1};          // vacation
+    for(var d=1; d<=30; d++){
+      var cls='day avail', mk='A';
+      if(booked[d]){cls='day booked'; mk='B';}
+      else if(block[d]){cls='day block'; mk='✕';}
+      var el=document.createElement('div');
+      el.className=cls;
+      el.innerHTML='<span class="dt">'+d+'</span><span class="mk">'+mk+'</span>';
+      if(d===13) el.classList.add('sel');
+      el.addEventListener('click',function(){
+        grid.querySelectorAll('.day.sel').forEach(function(n){n.classList.remove('sel')});
+        this.classList.add('sel');
+      });
+      grid.appendChild(el);
+    }
+  })();
+
+  // Role filter
+  var segs = document.querySelectorAll('.seg');
+  var sections = document.querySelectorAll('section.role');
+  segs.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      segs.forEach(function(b){b.classList.remove('on')});
+      this.classList.add('on');
+      var f=this.dataset.f;
+      sections.forEach(function(s){
+        s.classList.toggle('hide', f!=='all' && s.dataset.role!==f);
+      });
+      window.scrollTo({top: f==='all'?0:document.querySelector('.roles').offsetTop, behavior:'smooth'});
+    });
+  });
+</script>
+</body>
+</html>

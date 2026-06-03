@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripReserve — Full App Mockup</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#FF6B35;--primary-dark:#E05520;--primary-light:#FFF0EB;--primary-muted:#FFD5C5;
+  --navy:#1B2B4B;--navy-light:#2E4A7A;
+  --gold:#F4B942;--gold-light:#FEF3D0;
+  --success:#27AE60;--success-light:#E8F8F0;
+  --error:#E74C3C;--error-light:#FDECEA;
+  --blue:#2E6BD6;--blue-light:#E4EDFB;
+  --text:#1A1A2E;--text-secondary:#4A4A6A;--muted:#888899;--placeholder:#BBBBCC;
+  --surface:#FFFFFF;--background:#F5F5F8;--border:#EBEBF0;
+  --map-bg:#E8E4D9;--road:#FFFFFF;--block:#C8C0B0;
+}
+body{background:#0D1117;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
+  display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:32px 20px 60px;color:#fff}
+.header{text-align:center;margin-bottom:24px}
+.header .label{font-size:11px;letter-spacing:3px;color:#555;text-transform:uppercase;margin-bottom:6px}
+.header .title{font-size:32px;font-weight:800;color:var(--primary)}
+.header .subtitle{font-size:13px;color:#666;margin-top:4px}
+.nav-pills{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:24px;max-width:760px;align-items:center}
+.nav-group{width:100%;text-align:center;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#FF6B35;margin:10px 0 2px;font-weight:700}
+.pill{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#777;padding:5px 12px;border-radius:20px;font-size:11px;cursor:pointer;transition:all .18s ease}
+.pill:hover{background:rgba(255,107,53,0.15);color:var(--primary);border-color:rgba(255,107,53,0.3)}
+.pill.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:700}
+.phone-outer{width:393px;height:852px;background:#111;border-radius:54px;border:10px solid #2a2a2a;
+  box-shadow:0 0 0 1px #111,inset 0 0 0 1px #444,0 50px 100px rgba(0,0,0,0.7);overflow:hidden;position:relative}
+.dynamic-island{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:124px;height:36px;background:#0D1117;border-radius:20px;z-index:200}
+.sbar{position:absolute;top:0;left:0;right:0;height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 8px;z-index:150;pointer-events:none}
+.sbar.dark{color:#fff}.sbar.light{color:var(--text)}
+.sbar .time{font-size:15px;font-weight:700}
+.sbar .icons{display:flex;gap:5px;align-items:center}
+.screen{position:absolute;top:0;left:0;right:0;bottom:0;display:none;overflow:hidden}
+.screen.active{display:block}
+
+/* COMMON */
+.sheet-handle{width:40px;height:4px;background:#DDDDE8;border-radius:2px;margin:0 auto 16px}
+.btn-primary{width:100%;padding:17px 24px;background:var(--primary);color:#fff;border:none;border-radius:16px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-0.2px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(255,107,53,0.38);transition:all .15s ease}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(1px)}
+.btn-primary:active{transform:scale(0.98) translateY(1px)}
+.btn-secondary{width:100%;padding:14px;background:var(--background);color:var(--text);border:none;border-radius:16px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-danger{width:100%;padding:15px;background:var(--error-light);color:var(--error);border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer}
+.input-box{width:100%;padding:14px 16px;background:var(--background);border:1.5px solid var(--border);border-radius:14px;font-size:15px;color:var(--text);outline:none}
+.input-box:focus{border-color:var(--primary)}
+.back-btn{width:38px;height:38px;background:var(--background);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);flex-shrink:0}
+.field-label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px}
+.bottom-nav{position:absolute;bottom:0;left:0;right:0;height:80px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 16px 16px;z-index:20}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.bnav-item.active .bnav-svg{color:var(--primary)}.bnav-item .bnav-svg{color:var(--muted)}
+.bnav-label{font-size:10px;color:var(--muted)}.bnav-item.active .bnav-label{color:var(--primary);font-weight:700}
+.route-dot-pickup{width:10px;height:10px;border-radius:50%;background:var(--success);border:2px solid white;box-shadow:0 2px 6px rgba(39,174,96,0.45);flex-shrink:0}
+.route-dot-dropoff{width:10px;height:10px;border-radius:50%;background:var(--primary);border:2px solid white;box-shadow:0 2px 6px rgba(255,107,53,0.45);flex-shrink:0}
+.route-line-connector{width:2px;flex:1;background:var(--border);margin:3px 0}
+.ltfrb-badge{display:flex;align-items:center;gap:4px;background:var(--success-light);color:var(--success);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
+
+/* scrollable page */
+.page{position:absolute;inset:0;overflow-y:auto;background:var(--surface)}
+.page::-webkit-scrollbar{display:none}
+.page-head{position:sticky;top:0;background:var(--surface);padding:58px 20px 14px;border-bottom:1px solid var(--border);z-index:5;display:flex;align-items:center;gap:12px}
+.page-title{font-size:20px;font-weight:800;color:var(--text)}
+.page-body{padding:16px 20px 40px}
+.section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin:18px 0 10px}
+.section-title:first-child{margin-top:4px}
+
+/* status pills */
+.stat{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+.stat .d{width:6px;height:6px;border-radius:50%}
+.st-pending{background:var(--gold-light);color:#B7860B}.st-pending .d{background:#E0A800}
+.st-confirmed{background:var(--success-light);color:var(--success)}.st-confirmed .d{background:var(--success)}
+.st-progress{background:var(--blue-light);color:var(--blue)}.st-progress .d{background:var(--blue)}
+.st-completed{background:#ECECF2;color:#6A6A80}.st-completed .d{background:#6A6A80}
+.st-cancelled{background:var(--error-light);color:var(--error)}.st-cancelled .d{background:var(--error)}
+
+/* booking cards */
+.bcard{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:15px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 16px -12px rgba(0,0,0,.3)}
+.bcard .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.bcard .ref{font-size:11px;color:var(--muted);font-weight:600}
+.brow{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text);padding:2px 0}
+.bmeta{display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.bmeta b{display:block;color:var(--text);font-weight:700;margin-top:2px;font-size:13px}
+
+/* fare breakdown + addons */
+.fare-break{background:var(--background);border-radius:14px;padding:14px 16px;border:1.5px solid var(--border)}
+.fb-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary);padding:5px 0}
+.fb-row b{color:var(--text);font-weight:600}
+.fb-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:8px;padding-top:10px;border-top:1px solid var(--border)}
+.fb-total .l{font-size:14px;font-weight:700;color:var(--text)}
+.fb-total .v{font-size:22px;font-weight:800;color:var(--primary)}
+.addon{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--background);border:1.5px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer}
+.addon.on{border-color:var(--primary);background:var(--primary-light)}
+.addon .nm{font-size:14px;font-weight:600;color:var(--text)}
+.addon .pr{font-size:12px;color:var(--muted);margin-top:2px}
+.chk{width:22px;height:22px;border-radius:7px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.addon.on .chk{background:var(--primary);border-color:var(--primary)}
+.avail-banner{display:flex;align-items:center;gap:8px;background:var(--success-light);color:var(--success);font-size:13px;font-weight:700;padding:11px 14px;border-radius:12px;margin-bottom:14px}
+
+/* payment */
+.pay-method{display:flex;align-items:center;gap:12px;padding:14px;background:var(--background);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;cursor:pointer}
+.pay-method.sel{border-color:var(--primary);background:var(--primary-light)}
+.pay-logo{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:11px;flex-shrink:0}
+.radio{margin-left:auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0}
+.pay-method.sel .radio{border-color:var(--primary);border-width:6px}
+
+/* date picker / calendar */
+.cal-wrap{background:var(--background);border-radius:16px;padding:16px;border:1.5px solid var(--border)}
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.cal-month{font-size:16px;font-weight:800;color:var(--text)}
+.cal-nav{display:flex;gap:6px}
+.cal-nav button{width:28px;height:28px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.cal-dow span{text-align:center;font-size:10px;color:var(--muted);font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-day{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;color:var(--text);background:var(--surface);border:1.5px solid transparent}
+.cal-day.av{background:var(--success-light);color:var(--success)}
+.cal-day.bk{background:var(--primary-light);color:var(--primary)}
+.cal-day.bl{background:#ECECF2;color:#9A9AAB;background-image:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,.04) 4px,rgba(0,0,0,.04) 8px)}
+.cal-day .mk{font-size:8px;margin-top:1px}
+.cal-day.sel{border-color:var(--primary);outline:2px solid var(--primary);outline-offset:1px}
+.cal-legend{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+.cal-legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.cal-legend i{width:11px;height:11px;border-radius:3px}
+.time-chips{display:flex;flex-wrap:wrap;gap:8px}
+.tchip{padding:10px 16px;border-radius:12px;background:var(--background);border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
+.tchip.sel{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* hour slots */
+.hour{display:flex;align-items:center;gap:12px;padding:7px 0}
+.hour .h{font-size:12px;color:var(--muted);width:48px;font-weight:600}
+.hour .bar{flex:1;height:32px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700}
+.hour .bar.av{background:var(--success-light);color:var(--success)}
+.hour .bar.bk{background:var(--primary-light);color:var(--primary)}
+.hour .bar.bl{background:#ECECF2;color:#9A9AAB}
+
+/* stepper */
+.stepper{margin-top:8px}
+.step{display:flex;gap:14px;padding-bottom:18px}
+.step:last-child{padding-bottom:0}
+.step .scol{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.step .node{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);z-index:2}
+.step .line{width:2px;flex:1;background:var(--border);margin-top:2px;min-height:14px}
+.step.done .node{background:var(--success);border-color:var(--success);color:#fff}
+.step.done .line{background:var(--success)}
+.step.now .node{background:var(--primary);border-color:var(--primary);color:#fff}
+.step .stitle{font-size:14px;font-weight:700;color:var(--text)}
+.step .ssub{font-size:12px;color:var(--muted);margin-top:1px}
+.step.now .stitle{color:var(--primary)}
+
+/* vehicles */
+.veh{display:flex;gap:12px;align-items:center;padding:13px;background:var(--background);border:1.5px solid var(--border);border-radius:16px;margin-bottom:10px}
+.veh-thumb{width:74px;height:52px;border-radius:10px;background:linear-gradient(180deg,#2E4A7A,#1B2B4B);flex-shrink:0;position:relative;overflow:hidden}
+.veh-thumb::before{content:"";position:absolute;left:10px;right:10px;bottom:11px;height:15px;border-radius:7px 9px 4px 4px;background:#0F1C30;box-shadow:0 -7px 0 -2px #243B5F}
+.veh-thumb::after{content:"";position:absolute;left:16px;right:16px;top:13px;height:13px;border-radius:8px 8px 2px 2px;background:#9DB3D6;opacity:.9}
+.veh .nm{font-size:15px;font-weight:700;color:var(--text)}
+.veh .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.veh .tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;margin-top:6px;background:var(--primary-light);color:var(--primary)}
+.veh .edit{margin-left:auto;color:var(--muted);cursor:pointer;flex-shrink:0}
+
+/* kpi / dashboard */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px}
+.kpi .k{font-size:11px;color:var(--muted);font-weight:600}
+.kpi .v{font-size:24px;font-weight:800;color:var(--text);margin-top:6px}
+.kpi .t{font-size:11px;margin-top:3px;font-weight:700;color:var(--success)}
+.kpi .t.down{color:var(--error)}
+.qact{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.qa{background:var(--background);border:1.5px solid var(--border);border-radius:14px;padding:12px 4px;text-align:center;cursor:pointer}
+.qa .qicon{display:flex;justify-content:center;margin-bottom:6px;color:var(--primary)}
+.qa .ql{font-size:10px;font-weight:700;color:var(--text)}
+.lrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.lrow:last-child{border:none}
+.lrow .who{flex:1;min-width:0}
+.lrow .who .nm{font-size:14px;font-weight:600;color:var(--text)}
+.lrow .who .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.lrow .amt{font-size:14px;font-weight:800;color:var(--text);flex-shrink:0}
+.avatar-sm{width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.role-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px}
+.rb-customer{background:var(--blue-light);color:var(--blue)}
+.rb-driver{background:var(--primary-light);color:var(--primary)}
+.rb-admin{background:var(--navy);color:#fff}
+.filter-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:6px}
+.filter-chips::-webkit-scrollbar{display:none}
+.fchip{padding:7px 14px;border-radius:20px;background:var(--background);border:1.5px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;cursor:pointer}
+.fchip.sel{background:var(--primary);border-color:var(--primary);color:#fff}
+.bars{display:flex;align-items:flex-end;gap:8px;height:120px;padding:10px 0 22px}
+.bars .b{flex:1;background:var(--primary-muted);border-radius:6px 6px 0 0;position:relative}
+.bars .b.hi{background:var(--primary)}
+.bars .b span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9px;color:var(--muted)}
+.menu-item{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.menu-item .mi-icon{width:38px;height:38px;border-radius:11px;background:var(--background);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0}
+.menu-item .mi-label{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.menu-item .mi-chev{color:var(--placeholder)}
+.notif{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid var(--border)}
+.notif .ni{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif .nt{font-size:14px;font-weight:600;color:var(--text)}
+.notif .ns{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.notif .ntime{font-size:11px;color:var(--placeholder);margin-top:4px}
+.toggle{width:46px;height:27px;border-radius:14px;background:var(--primary);position:relative;flex-shrink:0}
+.toggle::after{content:"";position:absolute;top:3px;right:3px;width:21px;height:21px;border-radius:50%;background:#fff}
+.toggle.off{background:#D4D4DE}.toggle.off::after{right:auto;left:3px}
+
+/* splash + login + otp reuse */
+.splash-bg{position:absolute;inset:0;background:var(--navy)}
+.splash-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.splash-logo{width:90px;height:90px;background:var(--primary);border-radius:28px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 16px 40px rgba(255,107,53,0.4)}
+.splash-name{font-size:40px;font-weight:900;color:#fff;letter-spacing:-1px}
+.splash-tagline{font-size:14px;color:rgba(255,255,255,0.5);margin-top:8px}
+.splash-dots{display:flex;gap:8px;margin-top:60px}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2)}
+.dot.active{background:var(--primary);width:24px;border-radius:4px}
+.login-top{padding:80px 28px 24px;text-align:center}
+.login-logo{width:64px;height:64px;background:var(--primary);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.login-h{font-size:26px;font-weight:800;color:var(--text)}
+.login-sub{font-size:14px;color:var(--muted);margin-top:6px}
+.footer-fixed{position:absolute;bottom:48px;left:28px;right:28px}
+.terms{text-align:center;font-size:11px;color:var(--muted);line-height:1.6;margin-top:14px}
+.terms span{color:var(--primary);font-weight:600}
+.otp-boxes{display:flex;gap:10px;margin:32px 0 0}
+.otp-box{flex:1;height:58px;background:var(--background);border:2px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:var(--text)}
+.otp-box.filled{border-color:var(--primary);background:var(--primary-light)}
+.otp-resend{text-align:center;font-size:13px;color:var(--muted);margin-top:20px}
+.otp-resend span{color:var(--primary);font-weight:600}
+
+/* home / search / confirm reuse */
+.home-header{position:absolute;top:60px;left:0;right:0;padding:0 20px;display:flex;align-items:center;justify-content:space-between;z-index:10}
+.greeting-box{background:rgba(255,255,255,0.92);border-radius:16px;padding:10px 14px}
+.greeting-hi{font-size:12px;color:var(--muted)}.greeting-name{font-size:15px;font-weight:700;color:var(--text)}
+.avatar{width:44px;height:44px;border-radius:22px;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,0.2);cursor:pointer}
+.home-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;padding:16px 20px 0}
+.where-input{display:flex;align-items:center;gap:12px;background:var(--background);border-radius:14px;padding:14px 16px;margin-bottom:16px;border:1.5px solid var(--border);cursor:pointer}
+.where-text{font-size:15px;color:var(--placeholder);flex:1}
+.services-row{display:flex;gap:10px;margin-bottom:16px}
+.svc-card{flex:1;background:var(--background);border-radius:14px;padding:12px 10px;text-align:center;cursor:pointer;border:1.5px solid transparent}
+.svc-icon{display:flex;align-items:center;justify-content:center;margin-bottom:6px;color:var(--text-secondary)}
+.svc-name{font-size:11px;font-weight:600;color:var(--text)}
+.svc-card.active-svc{background:var(--primary-light);border:1.5px solid var(--primary);border-bottom:3px solid var(--primary)}
+.svc-card.active-svc .svc-name,.svc-card.active-svc .svc-icon{color:var(--primary)}
+.promo-banner{background:linear-gradient(135deg,var(--navy),var(--navy-light));border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:80px}
+.promo-text{color:#fff;font-size:13px;font-weight:600}.promo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px}
+.promo-badge{background:var(--gold);color:var(--navy);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:800}
+.search-header{padding:60px 20px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.route-line{display:flex;align-items:stretch;gap:12px}
+.route-dots{display:flex;flex-direction:column;align-items:center;padding:14px 0}
+.route-fields{flex:1;display:flex;flex-direction:column;gap:8px}
+.route-field{padding:12px 14px;background:var(--background);border-radius:12px;font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;border:1.5px solid var(--border)}
+.route-field.placeholder{color:var(--placeholder)}
+.search-list{padding:16px 20px}
+.search-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.search-icon{width:40px;height:40px;border-radius:12px;background:var(--background);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text-secondary)}
+.search-item-name{font-size:14px;font-weight:600;color:var(--text)}
+.search-item-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.confirm-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px 32px;max-height:78%;overflow-y:auto}
+.confirm-sheet::-webkit-scrollbar{display:none}
+.route-summary{background:var(--background);border-radius:14px;padding:14px 16px;margin-bottom:16px}
+.rs-row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.rs-text{font-size:13px;color:var(--text);flex:1}
+.car-types{display:flex;gap:8px;margin-bottom:16px}
+.car-type{flex:1;border:1.5px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text-secondary)}
+.car-type.selected{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+.car-type-name{font-size:11px;font-weight:700;color:var(--text);margin-top:2px}
+.car-type.selected .car-type-name{color:var(--primary)}
+.car-type-price{font-size:11px;color:var(--muted)}
+
+/* active ride */
+.ride-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px 32px}
+.driver-card{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.driver-photo{width:56px;height:56px;border-radius:28px;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;flex-shrink:0}
+.driver-name{font-size:16px;font-weight:700;color:var(--text)}
+.driver-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.driver-rating{display:flex;align-items:center;gap:4px;margin-top:4px}
+.rating-val{font-size:13px;font-weight:600;color:var(--text)}
+.plate{background:var(--background);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:800;color:var(--text)}
+.eta-bar{background:var(--background);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.eta-main{font-size:20px;font-weight:800;color:var(--text)}.eta-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.eta-status{font-size:12px;color:var(--success);font-weight:700;background:var(--success-light);padding:6px 12px;border-radius:10px}
+.comm-row{display:flex;gap:10px;margin-bottom:16px}
+.comm-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:var(--background);border-radius:14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
+.sos-btn{width:100%;padding:16px;background:var(--error);color:#fff;border:none;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(231,76,60,0.38)}
+.complete-content{padding:70px 28px 0;text-align:center}
+.complete-icon{width:80px;height:80px;background:var(--success-light);border-radius:40px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.complete-h{font-size:26px;font-weight:800;color:var(--text)}
+.complete-sub{font-size:14px;color:var(--muted);margin-top:6px}
+.trip-card{background:var(--background);border-radius:18px;padding:18px;margin:22px 0}
+.trip-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.trip-row:last-child{border:none}
+.trip-key{font-size:13px;color:var(--muted)}.trip-val{font-size:14px;font-weight:700;color:var(--text)}
+.trip-val.fare{font-size:20px;color:var(--primary)}
+.rating-content{padding:70px 28px 0;text-align:center}
+.rating-driver-pic{width:80px;height:80px;border-radius:40px;background:var(--navy);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:700;margin:0 auto 12px}
+.rating-h{font-size:20px;font-weight:800;color:var(--text)}
+.rating-sub{font-size:14px;color:var(--muted);margin-top:6px;line-height:1.5}
+.stars-row{display:flex;justify-content:center;gap:8px;margin:24px 0 20px}
+.comment-box{background:var(--background);border-radius:14px;padding:14px;font-size:14px;color:var(--muted);text-align:left;line-height:1.6;margin-bottom:16px;border:1.5px solid var(--border);min-height:74px}
+.skip-btn{text-align:center;font-size:14px;color:var(--muted);margin-top:12px;cursor:pointer}
+
+/* driver dashboard */
+.driver-header{padding:60px 20px 18px;display:flex;justify-content:space-between;align-items:center}
+.dg-hi{font-size:13px;color:rgba(255,255,255,0.5)}
+.dg-name{font-size:20px;font-weight:800;color:#fff}
+.online-toggle{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:8px 14px;cursor:pointer}
+.toggle-text{font-size:13px;font-weight:700;color:var(--success)}
+.driver-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 18px}
+.dstat{background:rgba(255,255,255,0.07);border-radius:16px;padding:15px;border-top:1px solid rgba(255,255,255,0.12)}
+.dstat-val{font-size:23px;font-weight:800;color:#fff}
+.dstat-key{font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px}
+.dstat-sub{font-size:11px;color:var(--success);margin-top:2px;font-weight:600}
+.driver-sheet{position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;padding:18px 20px 28px}
+.recent-trip{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+.rt-route{font-size:13px;font-weight:600;color:var(--text)}
+.rt-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.rt-fare{font-size:15px;font-weight:800;color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="label">UI / UX Mockup · Full Feature Set</div>
+  <div class="title">TripReserve</div>
+  <div class="subtitle">Car &amp; Chauffeur Booking · Customer · Driver · Admin</div>
+</div>
+
+<div class="nav-pills" id="navPills"></div>
+
+<div class="phone-outer">
+  <div class="dynamic-island"></div>
+  <div class="sbar dark" id="sb">
+    <div class="time">9:41</div>
+    <div class="icons">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" opacity="0.3"/></svg>
+      <svg width="15" height="12" viewBox="0 0 15 12" fill="currentColor"><path d="M7.5 2.5C9.8 2.5 11.9 3.5 13.3 5.1L14.8 3.6C13 1.7 10.4 0.5 7.5 0.5C4.6 0.5 2 1.7 0.2 3.6L1.7 5.1C3.1 3.5 5.2 2.5 7.5 2.5Z"/><circle cx="7.5" cy="10" r="1.5"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="currentColor"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1" fill="none"/><rect x="1.5" y="2.5" width="17" height="7" rx="1.5"/><path d="M23 4v4a2 2 0 000-4z"/></svg>
+    </div>
+  </div>
+
+  <!-- 1 SPLASH -->
+  <div class="screen active" id="s1">
+    <div class="splash-bg"></div>
+    <div class="splash-content">
+      <div class="splash-logo"><svg viewBox="0 0 52 52" fill="none" width="52" height="52"><path d="M26 8C16 8 8 16 8 26C8 36 16 44 26 44C36 44 44 36 44 26" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M36 12L44 26L36 40" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="26" r="5" fill="white"/></svg></div>
+      <div class="splash-name">TripReserve</div>
+      <div class="splash-tagline">Reserve your ride, arrive in style</div>
+      <div class="splash-dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+  </div>
+
+  <!-- 2 LOGIN -->
+  <div class="screen" id="s2" style="background:var(--surface)">
+    <div class="login-top">
+      <div class="login-logo"><svg viewBox="0 0 52 52" fill="none" width="36" height="36"><path d="M26 8C16 8 8 16 8 26C8 36 16 44 26 44C36 44 44 36 44 26" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M36 12L44 26L36 40" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="26" cy="26" r="5" fill="white"/></svg></div>
+      <div class="login-h">Welcome to TripReserve</div>
+      <div class="login-sub">Sign in or create an account</div>
+    </div>
+    <div style="padding:8px 28px 0">
+      <div class="field-label">Email Address</div>
+      <input class="input-box" type="email" value="marco@email.com" style="margin-bottom:14px">
+      <div class="field-label">Password</div>
+      <input class="input-box" type="password" value="••••••••" style="margin-bottom:10px">
+      <div style="text-align:right;font-size:13px;color:var(--primary);font-weight:600">Forgot password?</div>
+    </div>
+    <div class="footer-fixed">
+      <button class="btn-primary" onclick="show(3)">Continue<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      <button class="btn-secondary" style="margin-top:10px">Create new account</button>
+      <div class="terms">By continuing you agree to our <span>Terms</span> &amp; <span>Privacy Policy</span></div>
+    </div>
+  </div>
+
+  <!-- 3 OTP -->
+  <div class="screen" id="s3" style="background:var(--surface)">
+    <div style="padding:80px 28px 0">
+      <div class="back-btn" onclick="show(2)" style="margin-bottom:28px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+      <div class="login-h">Verify your email</div>
+      <div class="login-sub" style="line-height:1.5">We sent a 6-digit code to<br><span style="color:var(--primary);font-weight:600">marco@email.com</span></div>
+      <div class="otp-boxes"><div class="otp-box filled">4</div><div class="otp-box filled">8</div><div class="otp-box filled">2</div><div class="otp-box">_</div><div class="otp-box">_</div><div class="otp-box">_</div></div>
+      <div class="otp-resend">Didn't get it? <span>Resend in 0:42</span></div>
+    </div>
+    <div class="footer-fixed"><button class="btn-primary" onclick="show(4)">Verify &amp; Continue<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+  </div>
+
+  <!-- 4 HOME -->
+  <div class="screen" id="s4" style="background:var(--map-bg)">
+    <svg width="393" height="852" viewBox="0 0 393 852" style="position:absolute;top:0;left:0">
+      <rect width="393" height="852" fill="#E8E4D9"/>
+      <rect x="0" y="180" width="393" height="22" fill="#FFF" opacity="0.9"/><rect x="0" y="340" width="393" height="18" fill="#FFF" opacity="0.9"/><rect x="0" y="490" width="393" height="14" fill="#FFF" opacity="0.85"/>
+      <rect x="80" y="0" width="18" height="852" fill="#FFF" opacity="0.9"/><rect x="200" y="0" width="22" height="852" fill="#FFF" opacity="0.9"/><rect x="310" y="0" width="16" height="852" fill="#FFF" opacity="0.85"/>
+      <rect x="15" y="60" width="58" height="110" rx="4" fill="#C4BAA8"/><rect x="110" y="60" width="80" height="110" rx="4" fill="#BFB5A3"/><rect x="232" y="60" width="68" height="110" rx="4" fill="#C4BAA8"/><rect x="334" y="60" width="45" height="110" rx="4" fill="#C8BFB0"/>
+      <rect x="15" y="210" width="58" height="120" rx="4" fill="#C8BFB0"/><rect x="110" y="210" width="80" height="120" rx="4" fill="#BFB5A3"/><rect x="232" y="210" width="68" height="120" rx="4" fill="#C4BAA8"/>
+      <rect x="15" y="370" width="58" height="100" rx="6" fill="#B8D9A0"/><text x="44" y="425" font-size="9" fill="#999" text-anchor="middle">Park</text>
+      <text x="196" y="175" font-size="9" fill="#AAA" text-anchor="middle">Osmeña Blvd</text><text x="196" y="335" font-size="9" fill="#AAA" text-anchor="middle">Archbishop Reyes Ave</text>
+      <g transform="translate(130,280)"><circle r="18" fill="#FF6B35" opacity="0.15"/><circle r="13" fill="#FF6B35"/><g transform="translate(-7,-5) scale(0.58)"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z" stroke="white" stroke-width="2" fill="none"/><circle cx="7.5" cy="17.5" r="1.5" fill="white"/><circle cx="16.5" cy="17.5" r="1.5" fill="white"/></g></g>
+      <g transform="translate(270,160)"><circle r="18" fill="#FF6B35" opacity="0.15"/><circle r="13" fill="#FF6B35"/><g transform="translate(-7,-5) scale(0.58)"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z" stroke="white" stroke-width="2" fill="none"/><circle cx="7.5" cy="17.5" r="1.5" fill="white"/><circle cx="16.5" cy="17.5" r="1.5" fill="white"/></g></g>
+      <g transform="translate(211,350)"><circle r="22" fill="#1B2B4B" opacity="0.12"/><circle r="10" fill="#1B2B4B"/><circle r="5" fill="white"/></g>
+    </svg>
+    <div class="home-header">
+      <div class="greeting-box"><div class="greeting-hi">Good morning,</div><div class="greeting-name">Marco</div></div>
+      <div class="avatar" onclick="show(15)">M</div>
+    </div>
+    <div class="home-sheet">
+      <div class="sheet-handle"></div>
+      <div class="where-input" onclick="show(5)">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="#27AE60"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="white"/></svg>
+        <div class="where-text">Where are you going?</div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BBBBCC" stroke-width="1.75"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+      <div class="services-row">
+        <div class="svc-card active-svc" onclick="show(5)"><div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div><div class="svc-name">Book Now</div></div>
+        <div class="svc-card" onclick="show(6)"><div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4M8 2v4M3 10h5"/><circle cx="17" cy="17" r="4"/><path d="M17 15v2l1.5 1.5"/></svg></div><div class="svc-name">Schedule</div></div>
+        <div class="svc-card" onclick="show(5)"><div class="svc-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></div><div class="svc-name">Airport</div></div>
+      </div>
+      <div class="promo-banner"><div><div class="promo-text">First booking promo!</div><div class="promo-sub">₱100 off your first trip</div></div><div class="promo-badge">USE: TRIP100</div></div>
+      <div class="bottom-nav">
+        <div class="bnav-item active"><div class="bnav-svg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="bnav-label">Home</div></div>
+        <div class="bnav-item" onclick="show(13)"><div class="bnav-svg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8M16 12H8M12 16H8"/></svg></div><div class="bnav-label">Trips</div></div>
+        <div class="bnav-item" onclick="show(15)"><div class="bnav-svg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg></div><div class="bnav-label">Profile</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 SEARCH -->
+  <div class="screen" id="s5" style="background:var(--surface)">
+    <div class="search-header">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div class="back-btn" onclick="show(4)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text)">Plan your trip</div></div>
+      <div class="route-line">
+        <div class="route-dots"><div class="route-dot-pickup"></div><div class="route-line-connector"></div><div class="route-dot-dropoff"></div></div>
+        <div class="route-fields">
+          <div class="route-field"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="1.75"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>Ayala Center Cebu, Cebu Business Park</div>
+          <div class="route-field placeholder"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BBBBCC" stroke-width="1.75"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search destination…</div>
+        </div>
+      </div>
+    </div>
+    <div class="search-list">
+      <div class="section-title">Google Places suggestions</div>
+      <div class="search-item" onclick="show(6)"><div class="search-icon" style="background:var(--primary-light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.75"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="search-item-name">Mactan-Cebu Intl Airport</div><div class="search-item-sub">Airport Rd, Lapu-Lapu City</div></div></div>
+      <div class="search-item" onclick="show(6)"><div class="search-icon" style="background:var(--primary-light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.75"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="search-item-name">SM Seaside City Cebu</div><div class="search-item-sub">SRP, Cebu City</div></div></div>
+      <div class="section-title">Saved Places</div>
+      <div class="search-item" onclick="show(6)"><div class="search-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><div class="search-item-name">Home</div><div class="search-item-sub">Banawa Hills, Cebu City</div></div></div>
+      <div class="search-item" onclick="show(6)"><div class="search-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><div><div class="search-item-name">Work</div><div class="search-item-sub">Cebu IT Park, Apas</div></div></div>
+    </div>
+  </div>
+
+  <!-- 6 SCHEDULE -->
+  <div class="screen" id="s6"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(5)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Schedule trip</div></div>
+    <div class="page-body">
+      <div class="route-summary" style="margin-bottom:18px"><div class="rs-row"><div class="route-dot-pickup"></div><div class="rs-text">Ayala Center Cebu</div></div><div style="padding-left:4px"><div class="route-line-connector" style="height:12px;margin-left:4px"></div></div><div class="rs-row"><div class="route-dot-dropoff"></div><div class="rs-text">Mactan-Cebu Intl Airport</div></div></div>
+      <div class="section-title">Pick a date</div>
+      <div class="cal-wrap">
+        <div class="cal-head"><div class="cal-month">June 2026</div><div class="cal-nav"><button>‹</button><button>›</button></div></div>
+        <div class="cal-dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+        <div class="cal-grid" id="schedCal"></div>
+      </div>
+      <div class="section-title">Pickup time</div>
+      <div class="time-chips">
+        <div class="tchip">3:00 PM</div><div class="tchip">3:30 PM</div><div class="tchip">4:00 PM</div><div class="tchip sel">4:30 PM</div><div class="tchip">5:00 PM</div><div class="tchip">5:30 PM</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding:14px;background:var(--background);border-radius:14px;border:1.5px solid var(--border)">
+        <div><div style="font-size:14px;font-weight:600;color:var(--text)">Round trip</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Add a return pickup</div></div>
+        <div class="toggle off"></div>
+      </div>
+      <button class="btn-primary" style="margin-top:20px" onclick="show(7)">Continue<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+  </div></div>
+
+  <!-- 7 CONFIRM & FARE -->
+  <div class="screen" id="s7" style="background:var(--map-bg)">
+    <svg width="393" height="852" viewBox="0 0 393 852" style="position:absolute;top:0;left:0">
+      <rect width="393" height="852" fill="#E8E4D9"/><rect x="0" y="180" width="393" height="22" fill="#FFF" opacity="0.9"/><rect x="80" y="0" width="18" height="500" fill="#FFF" opacity="0.9"/><rect x="200" y="0" width="22" height="500" fill="#FFF" opacity="0.9"/>
+      <rect x="15" y="60" width="58" height="110" rx="4" fill="#C4BAA8"/><rect x="110" y="60" width="80" height="110" rx="4" fill="#BFB5A3"/><rect x="232" y="60" width="68" height="110" rx="4" fill="#C4BAA8"/>
+      <polyline points="211,120 211,191 295,191 295,330" stroke="#3B82F6" stroke-width="4" stroke-dasharray="8,5" fill="none" stroke-linecap="round"/>
+      <circle cx="211" cy="115" r="10" fill="#27AE60"/><circle cx="211" cy="115" r="5" fill="white"/>
+      <g transform="translate(295,335)"><path d="M0-16 C-8-16 -14-10 -14-2 C-14 6 0 18 0 18 C0 18 14 6 14-2 C14-10 8-16 0-16Z" fill="#FF6B35"/><circle cx="0" cy="-2" r="5" fill="white"/></g>
+    </svg>
+    <div style="position:absolute;top:62px;left:20px;z-index:10"><div class="back-btn" onclick="show(6)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div></div>
+    <div class="confirm-sheet">
+      <div class="sheet-handle"></div>
+      <div class="avail-banner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg>Slot available · Sat, Jun 13 · 4:30 PM</div>
+      <div class="route-summary"><div class="rs-row"><div class="route-dot-pickup"></div><div class="rs-text">Ayala Center Cebu, Cebu Business Park</div></div><div style="padding-left:4px"><div class="route-line-connector" style="height:12px;margin-left:4px"></div></div><div class="rs-row"><div class="route-dot-dropoff"></div><div class="rs-text">Mactan-Cebu Intl Airport, Lapu-Lapu</div></div></div>
+      <div class="section-title">Vehicle</div>
+      <div class="car-types">
+        <div class="car-type selected"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg><div class="car-type-name">Sedan</div><div class="car-type-price">4 seats</div></div>
+        <div class="car-type"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg><div class="car-type-name">SUV</div><div class="car-type-price">6 seats</div></div>
+        <div class="car-type"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="1" y="7" width="22" height="11" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><div class="car-type-name">Van</div><div class="car-type-price">10 seats</div></div>
+      </div>
+      <div class="section-title">Add-ons</div>
+      <div class="addon" onclick="this.classList.toggle('on')"><div><div class="nm">Airport meet &amp; greet</div><div class="pr">+ ₱150</div></div><div class="chk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div></div>
+      <div class="addon" onclick="this.classList.toggle('on')"><div><div class="nm">Child seat</div><div class="pr">+ ₱80</div></div><div class="chk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div></div>
+      <div class="section-title">Fare estimate (pricing engine)</div>
+      <div class="fare-break">
+        <div class="fb-row"><span>Base fare · Sedan</span><b>₱350</b></div>
+        <div class="fb-row"><span>Distance · 13.8 km</span><b>₱195</b></div>
+        <div class="fb-row"><span>Add-ons</span><b>₱0</b></div>
+        <div class="fb-total"><span class="l">Total</span><span class="v">₱545</span></div>
+      </div>
+      <button class="btn-primary" style="margin-top:16px" onclick="show(8)">Continue to payment<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <!-- 8 PAYMENT -->
+  <div class="screen" id="s8"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(7)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Payment</div></div>
+    <div class="page-body">
+      <div style="text-align:center;padding:8px 0 18px"><div style="font-size:12px;color:var(--muted);font-weight:600">AMOUNT DUE</div><div style="font-size:40px;font-weight:800;color:var(--text);margin-top:4px">₱545.00</div><div style="font-size:12px;color:var(--muted)">Ayala Center → Mactan Airport · Jun 13</div></div>
+      <div class="section-title">Pay with · PayMongo</div>
+      <div class="pay-method sel"><div class="pay-logo" style="background:#0070E0">G</div><div><div style="font-size:14px;font-weight:700;color:var(--text)">GCash</div><div style="font-size:12px;color:var(--muted)">•••• 8842</div></div><div class="radio"></div></div>
+      <div class="pay-method"><div class="pay-logo" style="background:#16A34A">M</div><div><div style="font-size:14px;font-weight:700;color:var(--text)">Maya</div><div style="font-size:12px;color:var(--muted)">e-wallet</div></div><div class="radio"></div></div>
+      <div class="pay-method"><div class="pay-logo" style="background:#1A1A2E"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.75"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg></div><div><div style="font-size:14px;font-weight:700;color:var(--text)">Credit / Debit Card</div><div style="font-size:12px;color:var(--muted)">Visa •••• 4921</div></div><div class="radio"></div></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:14px;font-size:12px;color:var(--muted)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888899" stroke-width="1.75"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Secured by PayMongo · funds held until trip is confirmed</div>
+      <button class="btn-primary" style="margin-top:18px" onclick="show(9)">Pay ₱545.00 securely 🔒</button>
+    </div>
+  </div></div>
+
+  <!-- 9 BOOKING CONFIRMED -->
+  <div class="screen" id="s9" style="background:var(--surface)">
+    <div class="complete-content" style="padding-top:64px">
+      <div class="complete-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="1.75"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <div class="complete-h">Booking confirmed!</div>
+      <div class="complete-sub">Payment received · a driver has been assigned</div>
+      <div class="trip-card" style="text-align:left">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:12px;color:var(--muted);font-weight:600">#TRV-2048</span><span class="stat st-confirmed"><span class="d"></span>Confirmed</span></div>
+        <div class="trip-row"><div class="trip-key">Date &amp; time</div><div class="trip-val">Sat, Jun 13 · 4:30 PM</div></div>
+        <div class="trip-row"><div class="trip-key">Driver</div><div class="trip-val">Noel Abella</div></div>
+        <div class="trip-row"><div class="trip-key">Vehicle</div><div class="trip-val">Toyota Innova · GAB 8821</div></div>
+        <div class="trip-row"><div class="trip-key">Paid</div><div class="trip-val fare">₱545.00</div></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;justify-content:center;font-size:12px;color:var(--success);font-weight:600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="1.75"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>This slot is now reserved on the driver's calendar</div>
+    </div>
+    <div class="footer-fixed"><button class="btn-primary" onclick="show(13)">View my bookings</button><button class="btn-secondary" style="margin-top:10px" onclick="show(4)">Back to home</button></div>
+  </div>
+
+  <!-- 10 ACTIVE TRIP -->
+  <div class="screen" id="s10" style="background:var(--map-bg)">
+    <svg width="393" height="852" viewBox="0 0 393 852" style="position:absolute;top:0;left:0">
+      <rect width="393" height="852" fill="#E8E4D9"/><rect x="0" y="180" width="393" height="22" fill="#FFF" opacity="0.9"/><rect x="80" y="0" width="18" height="500" fill="#FFF" opacity="0.9"/><rect x="200" y="0" width="22" height="500" fill="#FFF" opacity="0.9"/>
+      <rect x="15" y="60" width="58" height="110" rx="4" fill="#C4BAA8"/><rect x="110" y="60" width="80" height="110" rx="4" fill="#BFB5A3"/>
+      <polyline points="130,290 130,191 211,191 211,130" stroke="#3B82F6" stroke-width="3" stroke-dasharray="6,4" fill="none" stroke-linecap="round"/>
+      <g transform="translate(130,295)"><circle r="20" fill="#FF6B35" opacity="0.15"/><circle r="13" fill="#FF6B35"/><g transform="translate(-7,-5) scale(0.58)"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z" stroke="white" stroke-width="2" fill="none"/><circle cx="7.5" cy="17.5" r="1.5" fill="white"/><circle cx="16.5" cy="17.5" r="1.5" fill="white"/></g></g>
+      <g transform="translate(211,125)"><circle r="10" fill="#1B2B4B"/><circle r="5" fill="white"/></g>
+    </svg>
+    <div class="ride-sheet">
+      <div class="sheet-handle"></div>
+      <div class="driver-card">
+        <div class="driver-photo">NA</div>
+        <div style="flex:1"><div class="driver-name">Noel Abella</div><div class="driver-meta">Toyota Innova · Silver</div>
+          <div class="driver-rating"><svg width="14" height="14" viewBox="0 0 24 24" fill="#F4B942" stroke="#F4B942"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span class="rating-val">4.9 · Top Driver</span></div>
+        </div>
+        <div><div class="plate">GAB 8821</div><div style="margin-top:6px"><div class="ltfrb-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>LTFRB</div></div></div>
+      </div>
+      <div class="eta-bar"><div><div class="eta-main">4 min away</div><div class="eta-sub">Arriving at Ayala Center, Gate 2</div></div><div class="eta-status">On the way</div></div>
+      <div class="comm-row">
+        <div class="comm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>Chat</div>
+        <div class="comm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 9.81 19.79 19.79 0 0 1 1 1.18 2 2 0 0 1 2.96 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call</div>
+        <div class="comm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>Share</div>
+      </div>
+      <button class="sos-btn" onclick="alert('SOS Alert sent to your emergency contacts and authorities!')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.75"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></svg>SOS Emergency</button>
+    </div>
+  </div>
+
+  <!-- 11 TRIP COMPLETE -->
+  <div class="screen" id="s11" style="background:var(--surface)">
+    <div class="complete-content">
+      <div class="complete-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="1.75"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <div class="complete-h">You've arrived!</div>
+      <div class="complete-sub">Mactan-Cebu Intl Airport, Lapu-Lapu</div>
+      <div class="trip-card">
+        <div class="trip-row"><div class="trip-key">Route</div><div class="trip-val" style="font-size:12px">Ayala → Mactan Airport</div></div>
+        <div class="trip-row"><div class="trip-key">Distance</div><div class="trip-val">13.8 km</div></div>
+        <div class="trip-row"><div class="trip-key">Duration</div><div class="trip-val">32 min</div></div>
+        <div class="trip-row"><div class="trip-key">Payment</div><div class="trip-val">GCash · Paid</div></div>
+        <div class="trip-row"><div class="trip-key">Total Fare</div><div class="trip-val fare">₱545.00</div></div>
+      </div>
+    </div>
+    <div class="footer-fixed"><button class="btn-primary" onclick="show(12)">Rate your driver<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button><button class="btn-secondary" style="margin-top:10px" onclick="show(4)">Back to home</button></div>
+  </div>
+
+  <!-- 12 RATING -->
+  <div class="screen" id="s12" style="background:var(--surface)">
+    <div class="rating-content">
+      <div class="rating-driver-pic">NA</div>
+      <div class="rating-h">How was Noel?</div>
+      <div class="rating-sub">Your feedback helps keep TripReserve<br>safe and great for everyone</div>
+      <div class="stars-row">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="#F4B942" stroke="#F4B942"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="#F4B942" stroke="#F4B942"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="#F4B942" stroke="#F4B942"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="#F4B942" stroke="#F4B942"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#DDD"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;justify-content:center">
+        <div style="background:var(--primary-light);border:1.5px solid var(--primary);color:var(--primary);padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600">Safe Driver</div>
+        <div style="background:var(--background);border:1.5px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600">On Time</div>
+        <div style="background:var(--background);border:1.5px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600">Clean Car</div>
+      </div>
+      <div class="comment-box">Add a comment (optional)…</div>
+    </div>
+    <div class="footer-fixed"><button class="btn-primary" onclick="show(4)">Submit rating</button><div class="skip-btn" onclick="show(4)">Skip for now</div></div>
+  </div>
+
+  <!-- 13 MY BOOKINGS -->
+  <div class="screen" id="s13"><div class="page">
+    <div class="page-head" style="justify-content:space-between"><div class="page-title">My bookings</div><div onclick="show(16)" style="position:relative;cursor:pointer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A4A6A" stroke-width="1.75"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--primary);border-radius:50%"></span></div></div>
+    <div class="page-body" style="padding-bottom:96px">
+      <div class="filter-chips"><div class="fchip sel">All</div><div class="fchip">Pending</div><div class="fchip">Confirmed</div><div class="fchip">Completed</div><div class="fchip">Cancelled</div></div>
+      <div class="bcard" onclick="show(14)"><div class="top"><span class="ref">#TRV-2048</span><span class="stat st-confirmed"><span class="d"></span>Confirmed</span></div><div class="brow"><div class="route-dot-pickup"></div>Ayala Center → Mactan Airport</div><div class="bmeta"><div>When<b>Sat, Jun 13 · 4:30 PM</b></div><div>Fare<b>₱545</b></div></div></div>
+      <div class="bcard" onclick="show(14)"><div class="top"><span class="ref">#TRV-2041</span><span class="stat st-pending"><span class="d"></span>Awaiting payment</span></div><div class="brow"><div class="route-dot-pickup"></div>IT Park → SM Seaside (SRP)</div><div class="bmeta"><div>When<b>Tue, Jun 16 · 9:00 AM</b></div><div>Fare<b>₱380</b></div></div></div>
+      <div class="bcard" onclick="show(10)"><div class="top"><span class="ref">#TRV-2033</span><span class="stat st-progress"><span class="d"></span>In progress</span></div><div class="brow"><div class="route-dot-pickup"></div>Mandaue → Mactan Airport</div><div class="bmeta"><div>Now<b>Driver en route</b></div><div>Fare<b>₱420</b></div></div></div>
+      <div class="bcard" onclick="show(11)" style="opacity:.85"><div class="top"><span class="ref">#TRV-2020</span><span class="stat st-completed"><span class="d"></span>Completed</span></div><div class="brow"><div class="route-dot-pickup"></div>SM City Cebu → Banawa</div><div class="bmeta"><div>May 30 · ★ Rated</div><div>Fare<b>₱265</b></div></div></div>
+      <div class="bcard" style="opacity:.8"><div class="top"><span class="ref">#TRV-2011</span><span class="stat st-cancelled"><span class="d"></span>Cancelled</span></div><div class="brow"><div class="route-dot-pickup"></div>Lahug → Ayala Center</div><div class="bmeta"><div>May 24 · Refunded</div><div>Fare<b>₱180</b></div></div></div>
+    </div>
+    <div class="bottom-nav">
+      <div class="bnav-item" onclick="show(4)"><div class="bnav-svg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="bnav-label">Home</div></div>
+      <div class="bnav-item active"><div class="bnav-svg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8M16 12H8M12 16H8"/></svg></div><div class="bnav-label">Trips</div></div>
+      <div class="bnav-item" onclick="show(15)"><div class="bnav-svg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg></div><div class="bnav-label">Profile</div></div>
+    </div>
+  </div></div>
+
+  <!-- 14 BOOKING DETAIL / CANCEL -->
+  <div class="screen" id="s14"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(13)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Booking details</div></div>
+    <div class="page-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:13px;color:var(--muted);font-weight:600">#TRV-2048</span><span class="stat st-confirmed"><span class="d"></span>Confirmed</span></div>
+      <div class="route-summary"><div class="rs-row"><div class="route-dot-pickup"></div><div class="rs-text">Ayala Center Cebu, Cebu Business Park</div></div><div style="padding-left:4px"><div class="route-line-connector" style="height:12px;margin-left:4px"></div></div><div class="rs-row"><div class="route-dot-dropoff"></div><div class="rs-text">Mactan-Cebu Intl Airport, Lapu-Lapu</div></div></div>
+      <div class="section-title">Trip</div>
+      <div class="fare-break"><div class="fb-row"><span>Date &amp; time</span><b>Sat, Jun 13 · 4:30 PM</b></div><div class="fb-row"><span>Vehicle</span><b>Sedan · Toyota Innova</b></div><div class="fb-row"><span>Driver</span><b>Noel Abella · GAB 8821</b></div></div>
+      <div class="section-title">Payment</div>
+      <div class="fare-break"><div class="fb-row"><span>Base fare</span><b>₱350</b></div><div class="fb-row"><span>Distance · 13.8 km</span><b>₱195</b></div><div class="fb-row"><span>Method</span><b>GCash · Paid</b></div><div class="fb-total"><span class="l">Total paid</span><span class="v">₱545</span></div></div>
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <button class="btn-secondary" style="flex:1">Reschedule</button>
+        <button class="btn-danger" style="flex:1" onclick="alert('Booking cancelled. Refund issued and the slot has been released on the driver\'s calendar.')">Cancel</button>
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:12px">Free cancellation up to 12 hours before pickup</div>
+    </div>
+  </div></div>
+
+  <!-- 15 PROFILE -->
+  <div class="screen" id="s15"><div class="page">
+    <div class="page-head" style="justify-content:space-between"><div class="page-title">Profile</div><div style="font-size:13px;color:var(--primary);font-weight:600;cursor:pointer">Edit</div></div>
+    <div class="page-body" style="padding-bottom:96px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
+        <div style="width:64px;height:64px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">MT</div>
+        <div><div style="font-size:18px;font-weight:800;color:var(--text)">Marco Tan</div><div style="font-size:13px;color:var(--muted)">marco@email.com</div><span class="role-badge rb-customer" style="margin-top:6px;display:inline-block">Customer</span></div>
+      </div>
+      <div class="section-title">Account</div>
+      <div class="menu-item"><div class="mi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="mi-label">Personal info &amp; phone</div><svg class="mi-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="menu-item"><div class="mi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg></div><div class="mi-label">Payment methods</div><svg class="mi-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="menu-item"><div class="mi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="mi-label">Saved places</div><svg class="mi-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="menu-item" onclick="show(16)"><div class="mi-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div><div class="mi-label">Notifications</div><svg class="mi-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="section-title">Switch role</div>
+      <div class="menu-item" onclick="show(17)"><div class="mi-icon" style="background:var(--primary-light);color:var(--primary)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div><div class="mi-label">Switch to Driver mode</div><svg class="mi-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m9 18 6-6-6-6"/></svg></div>
+      <div class="menu-item" onclick="show(24)"><div class="mi-icon" style="background:var(--navy);color:#fff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg></div><div class="mi-label">Open Admin console</div><svg class="mi-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m9 18 6-6-6-6"/></svg></div>
+      <button class="btn-secondary" style="margin-top:18px;color:var(--error)">Log out</button>
+    </div>
+  </div></div>
+
+  <!-- 16 NOTIFICATIONS -->
+  <div class="screen" id="s16"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(13)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Notifications</div></div>
+    <div class="page-body">
+      <div class="notif"><div class="ni" style="background:var(--success-light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="1.75"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div class="nt">Booking confirmed</div><div class="ns">#TRV-2048 to Mactan Airport is confirmed for Sat, Jun 13. A receipt was emailed to you.</div><div class="ntime">2 min ago</div></div></div>
+      <div class="notif"><div class="ni" style="background:var(--blue-light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2E6BD6" stroke-width="1.75"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="m2 7 10 6 10-6"/></svg></div><div><div class="nt">Payment received</div><div class="ns">₱545.00 via GCash was successfully processed.</div><div class="ntime">3 min ago</div></div></div>
+      <div class="notif"><div class="ni" style="background:var(--primary-light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.75"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div><div><div class="nt">Driver assigned</div><div class="ns">Noel Abella (Toyota Innova) will be your chauffeur.</div><div class="ntime">3 min ago</div></div></div>
+      <div class="notif"><div class="ni" style="background:var(--gold-light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E0A800" stroke-width="1.75"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="nt">Trip reminder</div><div class="ns">Your pickup is in 12 hours. Free cancellation ends soon.</div><div class="ntime">Yesterday</div></div></div>
+      <div class="notif"><div class="ni" style="background:var(--primary-light)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B35" stroke-width="1.75"><path d="M20 12v10H4V12"/><rect x="2" y="7" width="20" height="5"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7"/></svg></div><div><div class="nt">₱100 off your next trip</div><div class="ns">Use code TRIP100 before Jun 30.</div><div class="ntime">2 days ago</div></div></div>
+    </div>
+  </div></div>
+
+  <!-- 17 DRIVER DASHBOARD -->
+  <div class="screen" id="s17" style="background:#0F1C30">
+    <div class="driver-header"><div><div class="dg-hi">Good morning,</div><div class="dg-name">Driver Noel</div></div><div class="online-toggle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg><div class="toggle-text">Online</div></div></div>
+    <div class="driver-stats">
+      <div class="dstat"><div class="dstat-val">₱3,840</div><div class="dstat-key">Today's Earnings</div><div class="dstat-sub">↑ +14% vs yesterday</div></div>
+      <div class="dstat"><div class="dstat-val">9</div><div class="dstat-key">Trips Today</div><div class="dstat-sub">Goal: 12 trips</div></div>
+      <div class="dstat"><div class="dstat-val">4.9</div><div class="dstat-key">Your Rating</div><div class="dstat-sub" style="color:#F4B942">Top Driver</div></div>
+      <div class="dstat"><div class="dstat-val">96%</div><div class="dstat-key">Acceptance</div><div class="dstat-sub">Excellent</div></div>
+    </div>
+    <div class="driver-sheet">
+      <div class="qact" style="margin-bottom:16px">
+        <div class="qa" onclick="show(18)"><div class="qicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="ql">Requests</div></div>
+        <div class="qa" onclick="show(22)"><div class="qicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></div><div class="ql">Calendar</div></div>
+        <div class="qa" onclick="show(20)"><div class="qicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M19 17H5a2 2 0 0 1-2-2v-4l2-5h14l2 5v4a2 2 0 0 1-2 2z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg></div><div class="ql">Vehicles</div></div>
+        <div class="qa" onclick="show(19)"><div class="qicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="ql">Trip</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:14px;font-weight:700;color:var(--text)">Recent Trips</div><div style="font-size:12px;color:var(--primary);font-weight:600">See all</div></div>
+      <div class="recent-trip"><div><div class="rt-route">Lahug → Mandaue City</div><div class="rt-meta">5.4 km · 18 min · 10:32 AM</div></div><div class="rt-fare">₱210</div></div>
+      <div class="recent-trip" style="border:none"><div><div class="rt-route">Talamban → Cebu IT Park</div><div class="rt-meta">7.8 km · 24 min · 9:08 AM</div></div><div class="rt-fare">₱290</div></div>
+    </div>
+  </div>
+
+  <!-- 18 INCOMING REQUEST -->
+  <div class="screen" id="s18" style="background:#0F1C30">
+    <div style="padding:64px 20px 0;text-align:center;color:#fff">
+      <div style="font-size:13px;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase">New booking request</div>
+      <div style="font-size:34px;font-weight:800;margin-top:6px">0:18</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:2px">Respond before it expires</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;background:var(--surface);border-radius:24px 24px 0 0;padding:22px 20px 30px">
+      <div class="sheet-handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="display:flex;align-items:center;gap:10px"><div class="avatar-sm" style="background:var(--blue)">MR</div><div><div style="font-size:15px;font-weight:700;color:var(--text)">M. Reyes</div><div style="font-size:12px;color:var(--muted)">★ 4.8 · 23 trips</div></div></div><span class="stat st-pending"><span class="d"></span>Pending</span></div>
+      <div class="route-summary"><div class="rs-row"><div class="route-dot-pickup"></div><div class="rs-text">Cebu IT Park, Apas</div></div><div style="padding-left:4px"><div class="route-line-connector" style="height:12px;margin-left:4px"></div></div><div class="rs-row"><div class="route-dot-dropoff"></div><div class="rs-text">Mactan-Cebu Intl Airport</div></div></div>
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <div style="flex:1;background:var(--background);border-radius:12px;padding:12px;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--text)">Sun · 8:00 AM</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Scheduled</div></div>
+        <div style="flex:1;background:var(--background);border-radius:12px;padding:12px;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--text)">11.2 km</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Distance</div></div>
+        <div style="flex:1;background:var(--primary-light);border-radius:12px;padding:12px;text-align:center"><div style="font-size:15px;font-weight:800;color:var(--primary)">₱620</div><div style="font-size:10px;color:var(--muted);margin-top:2px">You earn</div></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-secondary" style="flex:1" onclick="show(17)">Decline</button>
+        <button class="btn-primary" style="flex:1.4" onclick="show(19)">Accept request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 19 TRIP STATUS (DRIVER) -->
+  <div class="screen" id="s19"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(17)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Active trip</div></div>
+    <div class="page-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:13px;color:var(--muted);font-weight:600">#TRV-2048 · J. Lim</span><span class="stat st-progress"><span class="d"></span>In progress</span></div>
+      <div class="route-summary"><div class="rs-row"><div class="route-dot-pickup"></div><div class="rs-text">Ayala Center Cebu, Gate 2</div></div><div style="padding-left:4px"><div class="route-line-connector" style="height:12px;margin-left:4px"></div></div><div class="rs-row"><div class="route-dot-dropoff"></div><div class="rs-text">Mactan-Cebu Intl Airport</div></div></div>
+      <div class="section-title">Trip status</div>
+      <div class="stepper">
+        <div class="step done"><div class="scol"><div class="node"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="line"></div></div><div><div class="stitle">Booking received</div><div class="ssub">Sat 2:14 PM</div></div></div>
+        <div class="step done"><div class="scol"><div class="node"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div><div class="line"></div></div><div><div class="stitle">Accepted</div><div class="ssub">Sat 2:15 PM</div></div></div>
+        <div class="step now"><div class="scol"><div class="node">●</div><div class="line"></div></div><div><div class="stitle">En route to pickup</div><div class="ssub">4 min away · started 4:26 PM</div></div></div>
+        <div class="step"><div class="scol"><div class="node"></div><div class="line"></div></div><div><div class="stitle">Trip started</div><div class="ssub">Tap when passenger is on board</div></div></div>
+        <div class="step"><div class="scol"><div class="node"></div></div><div><div class="stitle">Completed</div><div class="ssub">Records earnings &amp; frees the slot</div></div></div>
+      </div>
+      <div style="background:linear-gradient(135deg,#241d12,#3a2f1b);border-radius:16px;padding:16px;color:#f1e6d0;margin-top:18px"><div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#bfa97f">This trip earns</div><div style="font-size:28px;font-weight:800;margin-top:4px">₱545</div></div>
+      <button class="btn-primary" style="margin-top:16px" onclick="alert('Trip marked complete. Earnings recorded and the calendar slot is released.')">Mark trip complete</button>
+    </div>
+  </div></div>
+
+  <!-- 20 MY VEHICLES -->
+  <div class="screen" id="s20"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(17)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">My vehicles</div></div>
+    <div class="page-body">
+      <div class="veh"><div class="veh-thumb"></div><div><div class="nm">Toyota Innova</div><div class="sub">2022 · Silver · 7 seats</div><span class="tag">Sedan</span></div><div class="edit" onclick="show(21)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></div></div>
+      <div class="veh"><div class="veh-thumb"></div><div><div class="nm">Toyota Vios</div><div class="sub">2021 · White · 4 seats</div><span class="tag">Sedan</span></div><div class="edit" onclick="show(21)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></div></div>
+      <div class="veh"><div class="veh-thumb"></div><div><div class="nm">Hyundai Grand Starex</div><div class="sub">2020 · Black · 10 seats</div><span class="tag">Van</span></div><div class="edit" onclick="show(21)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></div></div>
+      <button class="btn-primary" style="margin-top:8px" onclick="show(21)">+ Add a vehicle</button>
+    </div>
+  </div></div>
+
+  <!-- 21 ADD / EDIT VEHICLE -->
+  <div class="screen" id="s21"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(20)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Add vehicle</div></div>
+    <div class="page-body">
+      <div style="background:var(--background);border:1.5px dashed var(--border);border-radius:16px;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);margin-bottom:18px;cursor:pointer"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg><div style="font-size:13px;font-weight:600">Upload vehicle photo</div></div>
+      <div class="field-label">Make</div><input class="input-box" value="Toyota" style="margin-bottom:14px">
+      <div class="field-label">Model</div><input class="input-box" value="Innova" style="margin-bottom:14px">
+      <div style="display:flex;gap:12px"><div style="flex:1"><div class="field-label">Year</div><input class="input-box" value="2022"></div><div style="flex:1"><div class="field-label">Capacity</div><input class="input-box" value="7"></div></div>
+      <div class="field-label" style="margin-top:14px">Vehicle type</div>
+      <div class="time-chips"><div class="tchip sel">Sedan</div><div class="tchip">SUV</div><div class="tchip">Van</div></div>
+      <button class="btn-primary" style="margin-top:22px" onclick="show(20)">Save vehicle</button>
+    </div>
+  </div></div>
+
+  <!-- 22 AVAILABILITY CALENDAR -->
+  <div class="screen" id="s22"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(17)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Availability</div></div>
+    <div class="page-body">
+      <div class="cal-wrap">
+        <div class="cal-head"><div class="cal-month">June 2026</div><div class="cal-nav"><button>‹</button><button>›</button></div></div>
+        <div class="cal-dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+        <div class="cal-grid" id="availCal"></div>
+        <div class="cal-legend"><span><i style="background:var(--success-light)"></i>Available</span><span><i style="background:var(--primary-light)"></i>Booked</span><span><i style="background:#ECECF2"></i>Blocked</span></div>
+      </div>
+      <button class="btn-primary" style="margin-top:18px" onclick="show(23)">Block time off</button>
+    </div>
+  </div></div>
+
+  <!-- 23 DAY VIEW + BLOCK -->
+  <div class="screen" id="s23"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(22)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Sat, Jun 13</div></div>
+    <div class="page-body">
+      <div class="section-title">Hours</div>
+      <div class="hour"><div class="h">08:00</div><div class="bar av">Available</div></div>
+      <div class="hour"><div class="h">10:00</div><div class="bar bk">Booked · IT Park pickup</div></div>
+      <div class="hour"><div class="h">12:00</div><div class="bar bk">Booked · Mactan transfer</div></div>
+      <div class="hour"><div class="h">14:00</div><div class="bar av">Available</div></div>
+      <div class="hour"><div class="h">16:00</div><div class="bar bk">Booked · Ayala → Airport</div></div>
+      <div class="hour"><div class="h">18:00</div><div class="bar bl">Blocked · Maintenance</div></div>
+      <div class="section-title">Block time off</div>
+      <div class="time-chips" style="margin-bottom:14px"><div class="tchip sel">Full day</div><div class="tchip">Partial hours</div><div class="tchip">Vacation</div></div>
+      <div class="field-label">Reason (optional)</div>
+      <input class="input-box" placeholder="e.g. Vehicle maintenance" style="margin-bottom:18px">
+      <button class="btn-primary" onclick="show(22)">Save block</button>
+    </div>
+  </div></div>
+
+  <!-- 24 ADMIN DASHBOARD -->
+  <div class="screen" id="s24"><div class="page" style="background:var(--background)">
+    <div style="background:var(--navy);padding:58px 20px 22px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:12px;color:rgba(255,255,255,.5);letter-spacing:1px;text-transform:uppercase">Admin Console</div><div style="font-size:22px;font-weight:800;color:#fff;margin-top:2px">Overview</div></div><div class="avatar-sm" style="background:rgba(255,255,255,.15)">AD</div></div>
+    </div>
+    <div class="page-body" style="padding-top:18px">
+      <div class="kpi-grid">
+        <div class="kpi"><div class="k">Trips today</div><div class="v">6</div><div class="t">▲ 2 vs avg</div></div>
+        <div class="kpi"><div class="k">Revenue · MTD</div><div class="v">₱248k</div><div class="t">▲ 18%</div></div>
+        <div class="kpi"><div class="k">Utilisation</div><div class="v">71%</div><div class="t down">▼ 4%</div></div>
+        <div class="kpi"><div class="k">Active cars</div><div class="v">3</div><div class="t">All in service</div></div>
+      </div>
+      <div class="section-title">Manage</div>
+      <div class="qact">
+        <div class="qa" onclick="show(25)"><div class="qicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M14 8H8M16 12H8"/></svg></div><div class="ql">Bookings</div></div>
+        <div class="qa" onclick="show(26)"><div class="qicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="ql">Users</div></div>
+        <div class="qa" onclick="show(27)"><div class="qicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="ql">Pricing</div></div>
+        <div class="qa" onclick="show(28)"><div class="qicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div><div class="ql">Reports</div></div>
+      </div>
+      <div class="section-title">Recent bookings</div>
+      <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:4px 14px">
+        <div class="lrow"><span class="stat st-confirmed"><span class="d"></span></span><div class="who"><div class="nm">J. Lim</div><div class="sub">Ayala → Mactan Airport</div></div><span class="amt">₱545</span></div>
+        <div class="lrow"><span class="stat st-pending"><span class="d"></span></span><div class="who"><div class="nm">M. Reyes</div><div class="sub">IT Park → Mactan Airport</div></div><span class="amt">₱620</span></div>
+        <div class="lrow"><span class="stat st-progress"><span class="d"></span></span><div class="who"><div class="nm">G. Santos</div><div class="sub">Mandaue → SM Seaside</div></div><span class="amt">₱310</span></div>
+        <div class="lrow"><span class="stat st-cancelled"><span class="d"></span></span><div class="who"><div class="nm">P. Cruz</div><div class="sub">Lahug → Ayala</div></div><span class="amt">₱180</span></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- 25 ADMIN MANAGE BOOKINGS -->
+  <div class="screen" id="s25"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(24)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Bookings</div></div>
+    <div class="page-body">
+      <div class="filter-chips"><div class="fchip sel">All</div><div class="fchip">Pending</div><div class="fchip">Confirmed</div><div class="fchip">In progress</div><div class="fchip">Completed</div><div class="fchip">Cancelled</div></div>
+      <div class="bcard"><div class="top"><span class="ref">#TRV-2048 · J. Lim</span><span class="stat st-confirmed"><span class="d"></span>Confirmed</span></div><div class="brow"><div class="route-dot-pickup"></div>Ayala → Mactan Airport · Jun 13</div><div class="bmeta"><div>Driver<b>Noel Abella</b></div><div>Fare<b>₱545</b></div></div></div>
+      <div class="bcard"><div class="top"><span class="ref">#TRV-2041 · M. Reyes</span><span class="stat st-pending"><span class="d"></span>Pending</span></div><div class="brow"><div class="route-dot-pickup"></div>IT Park → SM Seaside · Jun 16</div><div class="bmeta"><div>Driver<b>Unassigned</b></div><div>Fare<b>₱380</b></div></div></div>
+      <div class="bcard"><div class="top"><span class="ref">#TRV-2033 · G. Santos</span><span class="stat st-progress"><span class="d"></span>In progress</span></div><div class="brow"><div class="route-dot-pickup"></div>Mandaue → Mactan Airport</div><div class="bmeta"><div>Driver<b>Noel Abella</b></div><div>Fare<b>₱420</b></div></div></div>
+      <div class="bcard"><div class="top"><span class="ref">#TRV-2020 · A. Dizon</span><span class="stat st-completed"><span class="d"></span>Completed</span></div><div class="brow"><div class="route-dot-pickup"></div>SM City Cebu → Banawa</div><div class="bmeta"><div>Driver<b>Noel Abella</b></div><div>Fare<b>₱265</b></div></div></div>
+    </div>
+  </div></div>
+
+  <!-- 26 ADMIN MANAGE USERS -->
+  <div class="screen" id="s26"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(24)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Users</div></div>
+    <div class="page-body">
+      <div class="where-input" style="cursor:default"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BBBBCC" stroke-width="1.75"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><div class="where-text">Search users…</div></div>
+      <div class="filter-chips"><div class="fchip sel">All</div><div class="fchip">Customers</div><div class="fchip">Drivers</div><div class="fchip">Admins</div></div>
+      <div class="lrow"><div class="avatar-sm">MT</div><div class="who"><div class="nm">Marco Tan</div><div class="sub">marco@email.com</div></div><span class="role-badge rb-customer">Customer</span></div>
+      <div class="lrow"><div class="avatar-sm" style="background:var(--primary)">NA</div><div class="who"><div class="nm">Noel Abella</div><div class="sub">3 vehicles · 4.9★</div></div><span class="role-badge rb-driver">Driver</span></div>
+      <div class="lrow"><div class="avatar-sm" style="background:var(--blue)">MR</div><div class="who"><div class="nm">Maria Reyes</div><div class="sub">mreyes@email.com</div></div><span class="role-badge rb-customer">Customer</span></div>
+      <div class="lrow"><div class="avatar-sm" style="background:var(--navy)">AD</div><div class="who"><div class="nm">Admin Dela Peña</div><div class="sub">ops@tripreserve.ph</div></div><span class="role-badge rb-admin">Admin</span></div>
+      <div class="lrow"><div class="avatar-sm" style="background:var(--blue)">GS</div><div class="who"><div class="nm">Gabriel Santos</div><div class="sub">gsantos@email.com</div></div><span class="role-badge rb-customer">Customer</span></div>
+    </div>
+  </div></div>
+
+  <!-- 27 ADMIN PRICING CONFIG -->
+  <div class="screen" id="s27"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(24)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Pricing engine</div></div>
+    <div class="page-body">
+      <div class="section-title">Base &amp; distance</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--background);border:1.5px solid var(--border);border-radius:12px;margin-bottom:10px"><div><div style="font-size:14px;font-weight:600;color:var(--text)">Base rate</div><div style="font-size:12px;color:var(--muted)">Flat per booking</div></div><div style="font-size:16px;font-weight:800;color:var(--text)">₱350</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--background);border:1.5px solid var(--border);border-radius:12px"><div><div style="font-size:14px;font-weight:600;color:var(--text)">Distance fee</div><div style="font-size:12px;color:var(--muted)">Per kilometre</div></div><div style="font-size:16px;font-weight:800;color:var(--text)">₱14 / km</div></div>
+      <div class="section-title">Add-ons</div>
+      <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:4px 14px">
+        <div class="lrow"><div class="who"><div class="nm">Airport meet &amp; greet</div></div><span class="amt">₱150</span></div>
+        <div class="lrow"><div class="who"><div class="nm">Child seat</div></div><span class="amt">₱80</span></div>
+        <div class="lrow"><div class="who"><div class="nm">Extra waiting · per hr</div></div><span class="amt">₱120</span></div>
+      </div>
+      <div class="section-title">Live preview</div>
+      <div class="fare-break" style="background:var(--primary-light);border-color:var(--primary)"><div class="fb-row"><span>Sample · Ayala → Mactan (13.8 km)</span></div><div class="fb-total" style="border-color:rgba(255,107,53,.35)"><span class="l">Computed fare</span><span class="v">₱545</span></div></div>
+      <button class="btn-primary" style="margin-top:18px" onclick="show(24)">Save pricing rules</button>
+    </div>
+  </div></div>
+
+  <!-- 28 ADMIN REPORTS -->
+  <div class="screen" id="s28"><div class="page">
+    <div class="page-head"><div class="back-btn" onclick="show(24)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m15 18-6-6 6-6"/></svg></div><div class="page-title">Reports</div></div>
+    <div class="page-body">
+      <div style="background:var(--background);border:1.5px solid var(--border);border-radius:16px;padding:16px">
+        <div style="font-size:11px;color:var(--muted);font-weight:600">MONTHLY REVENUE · 2026</div>
+        <div style="font-size:26px;font-weight:800;color:var(--text);margin-top:4px">₱248,400</div>
+        <div class="bars"><div class="b" style="height:42%"><span>Feb</span></div><div class="b" style="height:55%"><span>Mar</span></div><div class="b" style="height:48%"><span>Apr</span></div><div class="b" style="height:70%"><span>May</span></div><div class="b hi" style="height:90%"><span>Jun</span></div></div>
+      </div>
+      <div class="kpi-grid" style="margin-top:16px"><div class="kpi"><div class="k">Daily trips · avg</div><div class="v">5.4</div></div><div class="kpi"><div class="k">Fleet utilisation</div><div class="v">71%</div></div></div>
+      <div class="section-title">Per vehicle</div>
+      <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:4px 14px">
+        <div class="lrow"><div class="who"><div class="nm">Toyota Innova</div><div class="sub">2022 · 7-seat</div></div><span class="amt">82%</span></div>
+        <div class="lrow"><div class="who"><div class="nm">Toyota Vios</div><div class="sub">2021 · 4-seat</div></div><span class="amt">64%</span></div>
+        <div class="lrow"><div class="who"><div class="nm">Hyundai Grand Starex</div><div class="sub">2020 · 10-seat</div></div><span class="amt">68%</span></div>
+      </div>
+    </div>
+  </div></div>
+
+</div>
+
+<div style="margin-top:24px;display:flex;gap:14px;align-items:center">
+  <button onclick="prev()" style="padding:10px 22px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#aaa;border-radius:12px;font-size:13px;cursor:pointer">← Prev</button>
+  <div id="screen-label" style="padding:10px 18px;background:rgba(255,107,53,0.12);border:1px solid rgba(255,107,53,0.25);color:var(--primary);border-radius:12px;font-size:13px;font-weight:600;text-align:center;min-width:240px">Screen 1 of 28</div>
+  <button onclick="next()" style="padding:10px 22px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#aaa;border-radius:12px;font-size:13px;cursor:pointer">Next →</button>
+</div>
+
+<script>
+const groups=[
+  {name:'Customer',screens:[
+    {id:'s1',label:'Splash',sbDark:true},
+    {id:'s2',label:'Login / Sign-up · Sprint 1',sbDark:false},
+    {id:'s3',label:'Email OTP · Sprint 1',sbDark:false},
+    {id:'s4',label:'Home (Map)',sbDark:true},
+    {id:'s5',label:'Address autocomplete · Sprint 3',sbDark:false},
+    {id:'s6',label:'Schedule date & time · Sprint 3',sbDark:false},
+    {id:'s7',label:'Pricing & availability check · Sprint 3',sbDark:true},
+    {id:'s8',label:'Payment (PayMongo) · Sprint 4',sbDark:false},
+    {id:'s9',label:'Booking confirmed · Sprint 4',sbDark:false},
+    {id:'s10',label:'Active trip · Sprint 5',sbDark:true},
+    {id:'s11',label:'Trip complete · Sprint 5',sbDark:false},
+    {id:'s12',label:'Rating · Phase 2',sbDark:false},
+    {id:'s13',label:'Booking history · Sprint 3',sbDark:false},
+    {id:'s14',label:'Booking detail / cancel · Sprint 4',sbDark:false},
+    {id:'s15',label:'Profile · Sprint 1',sbDark:false},
+    {id:'s16',label:'Notifications · Sprint 4',sbDark:false},
+  ]},
+  {name:'Driver',screens:[
+    {id:'s17',label:'Driver dashboard & earnings · Sprint 5',sbDark:true},
+    {id:'s18',label:'Accept / decline request · Sprint 5',sbDark:true},
+    {id:'s19',label:'Trip status lifecycle · Sprint 5',sbDark:false},
+    {id:'s20',label:'Manage vehicles · Sprint 2',sbDark:false},
+    {id:'s21',label:'Add / edit vehicle · Sprint 2',sbDark:false},
+    {id:'s22',label:'Availability calendar · Sprint 2',sbDark:false},
+    {id:'s23',label:'Day view & manual block · Sprint 2',sbDark:false},
+  ]},
+  {name:'Admin',screens:[
+    {id:'s24',label:'Admin dashboard · Sprint 5',sbDark:true},
+    {id:'s25',label:'Manage bookings · Sprint 5',sbDark:false},
+    {id:'s26',label:'Manage users · Sprint 1 & 5',sbDark:false},
+    {id:'s27',label:'Pricing config · Sprint 5',sbDark:false},
+    {id:'s28',label:'Reports · Sprint 5',sbDark:false},
+  ]},
+];
+const screens=[];
+groups.forEach(g=>g.screens.forEach(s=>screens.push(s)));
+
+// build nav
+const nav=document.getElementById('navPills');
+let idx=0;
+groups.forEach(g=>{
+  const gl=document.createElement('div');gl.className='nav-group';gl.textContent=g.name;nav.appendChild(gl);
+  g.screens.forEach(s=>{
+    const i=screens.indexOf(s)+1;
+    const p=document.createElement('div');p.className='pill';p.dataset.n=i;
+    p.textContent=i+' · '+s.label.split(' · ')[0];
+    p.onclick=()=>show(i);
+    nav.appendChild(p);
+  });
+});
+const pills=()=>document.querySelectorAll('.pill');
+
+let cur=0;
+function show(n){
+  cur=n-1;
+  screens.forEach((s,i)=>document.getElementById(s.id).classList.toggle('active',i===cur));
+  pills().forEach((p,i)=>p.classList.toggle('active',i===cur));
+  const sb=document.getElementById('sb');
+  sb.className='sbar '+(screens[cur].sbDark?'dark':'light');
+  document.getElementById('screen-label').textContent=`Screen ${cur+1} of ${screens.length} · ${screens[cur].label}`;
+  // reset scroll of any page in the active screen
+  const pg=document.getElementById(screens[cur].id).querySelector('.page');
+  if(pg) pg.scrollTop=0;
+}
+function next(){if(cur<screens.length-1)show(cur+2);}
+function prev(){if(cur>0)show(cur);}
+
+// June 2026 calendar (Jun 1 = Monday). booked=orange, blocked=grey, else available.
+function buildCal(el,selDay){
+  const booked={6:1,13:1,20:1,21:1}, block={16:1,17:1,18:1};
+  for(let d=1;d<=30;d++){
+    let cls='cal-day av',mk='A';
+    if(booked[d]){cls='cal-day bk';mk='B';}
+    else if(block[d]){cls='cal-day bl';mk='✕';}
+    const c=document.createElement('div');c.className=cls;
+    c.innerHTML='<span>'+d+'</span><span class="mk">'+mk+'</span>';
+    if(d===selDay)c.classList.add('sel');
+    c.onclick=function(){el.querySelectorAll('.cal-day.sel').forEach(n=>n.classList.remove('sel'));this.classList.add('sel');};
+    el.appendChild(c);
+  }
+}
+buildCal(document.getElementById('schedCal'),13);
+buildCal(document.getElementById('availCal'),13);
+
+show(1);
+</script>
+</body>
+</html>

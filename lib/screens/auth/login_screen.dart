@@ -36,10 +36,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
-      // Navigation handled by router redirect
-    } on AuthServiceException catch (e) {
+
+      // Check if there was an error in the provider state
+      final authState = ref.read(authActionsProvider);
+      if (authState.hasError && mounted) {
+        print('Auth error: ${authState.error}');
+        _showError(authState.error.toString());
+      }
+      // Navigation handled by router redirect on success
+    } catch (e) {
       if (mounted) {
-        _showError(e.message);
+        _showError(e.toString());
       }
     } finally {
       if (mounted) {

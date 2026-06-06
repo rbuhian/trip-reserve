@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Application configuration
 ///
 /// IMPORTANT: Do not hardcode sensitive values here.
@@ -5,23 +7,13 @@
 class AppConfig {
   AppConfig._();
 
-  // Supabase Configuration
-  // Replace with actual values from .env in production
-  static const String supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: '',
-  );
+  // Supabase Configuration - loaded from .env file
+  static String get supabaseUrl => dotenv.env['SUPABASE_URL'] ?? '';
 
-  static const String supabaseAnonKey = String.fromEnvironment(
-    'SUPABASE_ANON_KEY',
-    defaultValue: '',
-  );
+  static String get supabaseAnonKey => dotenv.env['SUPABASE_ANON_KEY'] ?? '';
 
   // Google Maps API Key
-  static const String googleMapsApiKey = String.fromEnvironment(
-    'GOOGLE_MAPS_API_KEY',
-    defaultValue: '',
-  );
+  static String get googleMapsApiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
   // App Settings
   static const String appName = 'Trip Reserve';

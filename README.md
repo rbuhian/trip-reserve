@@ -45,15 +45,29 @@ dart run build_runner build --delete-conflicting-outputs
 
 ### 4. Environment Setup
 
-Create a `.env` file in the project root (copy from `.env.example` if available):
+Create a `.env` file in the project root:
 
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your credentials:
+
+**For Local Supabase (Docker):**
 ```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 ```
 
-Update `lib/core/app_config.dart` with your configuration values.
+**For Supabase Cloud:**
+```env
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your_cloud_anon_key_from_dashboard
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
+
+> **Note:** The app uses `flutter_dotenv` to load credentials at runtime from the `.env` file. Make sure the `.env` file exists before running the app.
 
 ## Supabase Setup
 
@@ -88,7 +102,7 @@ scoop install supabase
 npm install -g supabase
 ```
 
-2. Start Supabase locally:
+2. Make sure Docker is running, then start Supabase locally:
 
 ```bash
 supabase init  # if not already initialized
@@ -107,7 +121,39 @@ supabase db reset  # Applies all migrations and seed data
 supabase status
 ```
 
-Use the `API URL` and `anon key` from the output.
+You'll see output like:
+```
+         API URL: http://127.0.0.1:54321
+     GraphQL URL: http://127.0.0.1:54321/graphql/v1
+          DB URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      Studio URL: http://127.0.0.1:54323
+    Inbucket URL: http://127.0.0.1:54324
+        anon key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+service_role key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+5. Update your `.env` file with the local credentials:
+
+```env
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_ANON_KEY=<anon key from supabase status>
+```
+
+6. Access Supabase Studio at `http://127.0.0.1:54323` to manage your local database.
+
+### Quick Start (Local Development)
+
+```bash
+# 1. Start Docker
+# 2. Start Supabase
+supabase start
+
+# 3. Apply migrations and seed data
+supabase db reset
+
+# 4. Run Flutter app
+flutter run
+```
 
 ## Running the App
 
@@ -339,10 +385,26 @@ dart run build_runner build --delete-conflicting-outputs
 
 ### Supabase Connection Issues
 
-1. Verify your Supabase URL and anon key
-2. Check if RLS policies are correctly applied
-3. Verify your network connection
-4. Check Supabase project status
+1. Verify your `.env` file exists and has correct credentials
+2. Check if Supabase is running: `supabase status`
+3. Verify your Supabase URL format:
+   - Local: `http://127.0.0.1:54321` (not `localhost`)
+   - Cloud: `https://your-project.supabase.co`
+4. Check if RLS policies are correctly applied
+5. For local development, ensure Docker is running
+
+**Common Errors:**
+
+- `Supabase URL:` empty → `.env` file missing or not loaded
+- `SocketException` → Supabase not running or wrong URL
+- `Invalid API key` → Wrong anon key in `.env`
+
+**Reset Local Supabase:**
+```bash
+supabase stop
+supabase start
+supabase db reset
+```
 
 ### iOS Simulator Issues
 

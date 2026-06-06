@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide User;
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../models/enums.dart';
 import '../models/user.dart' as app;
@@ -12,7 +12,7 @@ import 'supabase_provider.dart';
 ///
 /// Returns null if not authenticated
 final authUserProvider = StreamProvider<app.User?>((ref) {
-  final client = ref.watch(supabaseClientProvider);
+  final client = ref.watch(supabaseClientProvider) as supabase.SupabaseClient;
   final authService = ref.watch(authServiceProvider);
 
   // Create a stream controller to emit user changes
@@ -38,7 +38,7 @@ final authUserProvider = StreamProvider<app.User?>((ref) {
 });
 
 /// Map Supabase auth user to app User model
-app.User? _mapAuthUser(User? authUser, AuthService authService) {
+app.User? _mapAuthUser(supabase.User? authUser, AuthService authService) {
   if (authUser == null) return null;
 
   final metadata = authUser.userMetadata ?? {};

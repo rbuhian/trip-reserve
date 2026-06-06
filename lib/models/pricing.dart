@@ -7,7 +7,7 @@ part 'pricing.g.dart';
 
 /// Global pricing configuration
 @freezed
-class PricingConfig with _$PricingConfig {
+abstract class PricingConfig with _$PricingConfig {
   const factory PricingConfig({
     required String id,
     @JsonKey(name: 'base_rate') required double baseRate,
@@ -44,7 +44,7 @@ class PricingConfig with _$PricingConfig {
 
 /// Optional add-on services
 @freezed
-class PricingAddon with _$PricingAddon {
+abstract class PricingAddon with _$PricingAddon {
   const factory PricingAddon({
     required String id,
     required String name,
@@ -83,7 +83,7 @@ class PricingAddon with _$PricingAddon {
 
 /// Selected add-on for a booking
 @freezed
-class BookingAddon with _$BookingAddon {
+abstract class BookingAddon with _$BookingAddon {
   const factory BookingAddon({
     required String id,
     @JsonKey(name: 'booking_id') required String bookingId,
@@ -103,7 +103,7 @@ class BookingAddon with _$BookingAddon {
 
 /// Data for adding an addon to a booking
 @freezed
-class BookingAddonCreate with _$BookingAddonCreate {
+abstract class BookingAddonCreate with _$BookingAddonCreate {
   const factory BookingAddonCreate({
     @JsonKey(name: 'addon_id') required String addonId,
     @Default(1) int quantity,

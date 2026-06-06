@@ -7,7 +7,7 @@ part 'payment.g.dart';
 
 /// Payment model
 @freezed
-class Payment with _$Payment {
+abstract class Payment with _$Payment {
   const factory Payment({
     required String id,
     @JsonKey(name: 'booking_id') required String bookingId,
@@ -48,7 +48,7 @@ class Payment with _$Payment {
 
 /// Data for creating a payment
 @freezed
-class PaymentCreate with _$PaymentCreate {
+abstract class PaymentCreate with _$PaymentCreate {
   const factory PaymentCreate({
     @JsonKey(name: 'booking_id') required String bookingId,
     required double amount,
@@ -61,7 +61,7 @@ class PaymentCreate with _$PaymentCreate {
 
 /// Price breakdown for display
 @freezed
-class PriceBreakdown with _$PriceBreakdown {
+abstract class PriceBreakdown with _$PriceBreakdown {
   const factory PriceBreakdown({
     @JsonKey(name: 'base_fare') required double baseFare,
     @JsonKey(name: 'distance_km') required double distanceKm,
@@ -78,7 +78,7 @@ class PriceBreakdown with _$PriceBreakdown {
 
 /// Line item for add-on in price breakdown
 @freezed
-class AddonLineItem with _$AddonLineItem {
+abstract class AddonLineItem with _$AddonLineItem {
   const factory AddonLineItem({
     required String name,
     required int quantity,

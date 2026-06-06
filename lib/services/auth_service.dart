@@ -163,16 +163,21 @@ class AuthServiceException implements Exception {
     if (lowerMessage.contains('user already registered')) {
       return 'An account with this email already exists';
     }
-    if (lowerMessage.contains('password')) {
+    if (lowerMessage.contains('password should be at least') ||
+        lowerMessage.contains('password must be at least')) {
       return 'Password must be at least 6 characters';
     }
-    if (lowerMessage.contains('email')) {
+    if (lowerMessage.contains('invalid email')) {
       return 'Please enter a valid email address';
     }
-    if (lowerMessage.contains('network')) {
+    if (lowerMessage.contains('network') || lowerMessage.contains('socket')) {
       return 'Network error. Please check your connection';
     }
+    if (lowerMessage.contains('user not found')) {
+      return 'No account found with this email';
+    }
 
+    // Return original message if no mapping found
     return message;
   }
 

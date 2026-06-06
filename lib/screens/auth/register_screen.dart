@@ -52,13 +52,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             role: _selectedRole,
           );
 
+      // Check if there was an error in the provider state
+      final authState = ref.read(authActionsProvider);
+      if (authState.hasError && mounted) {
+        print('Signup error: ${authState.error}');
+        _showError(authState.error.toString());
+        return;
+      }
+
       if (mounted) {
-        _showSuccess('Account created! Please check your email to verify.');
+        _showSuccess('Account created successfully!');
+        // Small delay to show message before navigating
+        await Future.delayed(const Duration(milliseconds: 500));
         context.go('/login');
       }
-    } on AuthServiceException catch (e) {
+    } catch (e) {
+      print('Signup exception: $e');
       if (mounted) {
-        _showError(e.message);
+        _showError(e.toString());
       }
     } finally {
       if (mounted) {

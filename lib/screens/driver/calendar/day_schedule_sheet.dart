@@ -394,7 +394,7 @@ class _BlockItem extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          _formatReason(block.reason!),
+                          _formatReason(block.reason.name),
                           style: TextStyle(
                             fontSize: 11,
                             color: colorScheme.onSurfaceVariant,

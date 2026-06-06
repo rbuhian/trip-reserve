@@ -57,7 +57,7 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
             : _descriptionController.text.trim(),
       );
 
-      await ref.read(myVehiclesProvider.notifier).update(vehicle.id, update);
+      await ref.read(myVehiclesProvider.notifier).updateVehicle(vehicle.id, update);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

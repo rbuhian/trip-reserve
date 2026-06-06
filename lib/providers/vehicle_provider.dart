@@ -38,7 +38,7 @@ class MyVehiclesNotifier extends AsyncNotifier<List<Vehicle>> {
   }
 
   /// Update a vehicle
-  Future<Vehicle> update(String id, VehicleUpdate data) async {
+  Future<Vehicle> updateVehicle(String id, VehicleUpdate data) async {
     final repository = ref.read(vehicleRepositoryProvider);
     final updated = await repository.update(id, data);
 

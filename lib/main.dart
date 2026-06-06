@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -9,7 +10,18 @@ import 'core/theme.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Load environment variables from .env file
+  await dotenv.load(fileName: '.env');
+
   // Initialize Supabase
+  print('Supabase URL: ${AppConfig.supabaseUrl}');
+  print('Supabase Key length: ${AppConfig.supabaseAnonKey.length}');
+
+  if (AppConfig.supabaseUrl.isEmpty || AppConfig.supabaseAnonKey.isEmpty) {
+    print('ERROR: Supabase credentials not configured!');
+    print('Make sure .env file exists with SUPABASE_URL and SUPABASE_ANON_KEY');
+  }
+
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.supabaseAnonKey,

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/availability_block.dart';
+import '../models/enums.dart';
 import '../providers/supabase_provider.dart';
 
 /// Provider for AvailabilityRepository

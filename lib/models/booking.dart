@@ -9,7 +9,7 @@ part 'booking.g.dart';
 
 /// Full booking model with all details
 @freezed
-class Booking with _$Booking {
+abstract class Booking with _$Booking {
   const factory Booking({
     required String id,
     @JsonKey(name: 'reference_number') required String referenceNumber,
@@ -87,7 +87,7 @@ class Booking with _$Booking {
 
 /// Lightweight booking for list views
 @freezed
-class BookingListItem with _$BookingListItem {
+abstract class BookingListItem with _$BookingListItem {
   const factory BookingListItem({
     required String id,
     @JsonKey(name: 'reference_number') required String referenceNumber,
@@ -110,7 +110,7 @@ class BookingListItem with _$BookingListItem {
 
 /// Data for creating a new booking
 @freezed
-class BookingCreate with _$BookingCreate {
+abstract class BookingCreate with _$BookingCreate {
   const factory BookingCreate({
     // Locations
     @JsonKey(name: 'pickup_address') required String pickupAddress,
@@ -142,7 +142,7 @@ class BookingCreate with _$BookingCreate {
 
 /// Location data with coordinates
 @freezed
-class LocationData with _$LocationData {
+abstract class LocationData with _$LocationData {
   const factory LocationData({
     required String address,
     required double lat,

@@ -7,7 +7,7 @@ part 'availability_block.g.dart';
 
 /// Availability block when driver is unavailable
 @freezed
-class AvailabilityBlock with _$AvailabilityBlock {
+abstract class AvailabilityBlock with _$AvailabilityBlock {
   const factory AvailabilityBlock({
     required String id,
     @JsonKey(name: 'driver_id') required String driverId,
@@ -68,7 +68,7 @@ class AvailabilityBlock with _$AvailabilityBlock {
 
 /// Data for creating an availability block
 @freezed
-class AvailabilityBlockCreate with _$AvailabilityBlockCreate {
+abstract class AvailabilityBlockCreate with _$AvailabilityBlockCreate {
   const factory AvailabilityBlockCreate({
     @JsonKey(name: 'vehicle_id') String? vehicleId,
     @JsonKey(name: 'block_date') required DateTime blockDate,
@@ -85,7 +85,7 @@ class AvailabilityBlockCreate with _$AvailabilityBlockCreate {
 
 /// Day availability status for calendar display
 @freezed
-class DayAvailability with _$DayAvailability {
+abstract class DayAvailability with _$DayAvailability {
   const factory DayAvailability({
     required DateTime date,
     @Default(false) bool hasBooking,

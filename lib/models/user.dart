@@ -7,7 +7,7 @@ part 'user.g.dart';
 
 /// User profile model
 @freezed
-class User with _$User {
+abstract class User with _$User {
   const factory User({
     required String id,
     required String email,
@@ -51,7 +51,7 @@ class User with _$User {
 
 /// Lightweight user reference for embedding in other models
 @freezed
-class UserRef with _$UserRef {
+abstract class UserRef with _$UserRef {
   const factory UserRef({
     required String id,
     @JsonKey(name: 'full_name') required String fullName,
@@ -64,7 +64,7 @@ class UserRef with _$UserRef {
 
 /// Data for creating a new user (registration)
 @freezed
-class UserCreate with _$UserCreate {
+abstract class UserCreate with _$UserCreate {
   const factory UserCreate({
     required String email,
     required String password,
@@ -79,7 +79,7 @@ class UserCreate with _$UserCreate {
 
 /// Data for updating a user profile
 @freezed
-class UserUpdate with _$UserUpdate {
+abstract class UserUpdate with _$UserUpdate {
   const factory UserUpdate({
     @JsonKey(name: 'full_name') String? fullName,
     String? phone,

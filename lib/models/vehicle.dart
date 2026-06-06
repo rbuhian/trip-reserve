@@ -7,7 +7,7 @@ part 'vehicle.g.dart';
 
 /// Vehicle model
 @freezed
-class Vehicle with _$Vehicle {
+abstract class Vehicle with _$Vehicle {
   const factory Vehicle({
     required String id,
     @JsonKey(name: 'driver_id') required String driverId,
@@ -38,7 +38,7 @@ class Vehicle with _$Vehicle {
 
 /// Lightweight vehicle reference for lists
 @freezed
-class VehicleRef with _$VehicleRef {
+abstract class VehicleRef with _$VehicleRef {
   const factory VehicleRef({
     required String id,
     required String name,
@@ -53,7 +53,7 @@ class VehicleRef with _$VehicleRef {
 
 /// Data for creating a new vehicle
 @freezed
-class VehicleCreate with _$VehicleCreate {
+abstract class VehicleCreate with _$VehicleCreate {
   const factory VehicleCreate({
     required String name,
     @JsonKey(name: 'plate_number') required String plateNumber,
@@ -68,7 +68,7 @@ class VehicleCreate with _$VehicleCreate {
 
 /// Data for updating a vehicle
 @freezed
-class VehicleUpdate with _$VehicleUpdate {
+abstract class VehicleUpdate with _$VehicleUpdate {
   const factory VehicleUpdate({
     String? name,
     @JsonKey(name: 'plate_number') String? plateNumber,

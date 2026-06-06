@@ -1,113 +1,113 @@
 import 'package:flutter/material.dart';
 
-/// Midnight & Amber color palette for Trip Reserve
+/// App color palette
 class AppColors {
   AppColors._();
 
   // ============================================
-  // PRIMARY COLORS (Midnight Navy)
+  // PRIMARY COLORS (Blue)
   // ============================================
 
-  /// Deep navy - main brand color
-  static const Color primary = Color(0xFF0C2340);
+  /// Primary blue - main brand color
+  static const Color primary = Color(0xFF2563EB);
 
-  /// Darker navy - AppBar, headers
-  static const Color primaryDark = Color(0xFF1A3A5C);
+  /// Darker blue
+  static const Color primaryDark = Color(0xFF1D4ED8);
 
-  /// Light navy variant
-  static const Color primaryLight = Color(0xFF2D5A87);
+  /// Light blue variant
+  static const Color primaryLight = Color(0xFF3B82F6);
 
   // ============================================
-  // ACCENT COLORS (Amber)
+  // ACCENT/SECONDARY COLORS (Green)
   // ============================================
 
-  /// Amber - CTAs, active states, highlights
-  static const Color accent = Color(0xFFF5A623);
+  /// Secondary green
+  static const Color accent = Color(0xFF10B981);
 
-  /// Light amber - hover, secondary actions
-  static const Color accentLight = Color(0xFFFFC85A);
+  /// Light green
+  static const Color accentLight = Color(0xFF34D399);
 
-  /// Dark amber - pressed states
-  static const Color accentDark = Color(0xFFD4891A);
+  /// Dark green
+  static const Color accentDark = Color(0xFF059669);
 
   // ============================================
   // SURFACE & BACKGROUND
   // ============================================
 
-  /// Light blue-gray - card backgrounds
-  static const Color surface = Color(0xFFE8F0F8);
+  /// Light gray - card backgrounds
+  static const Color surface = Color(0xFFF3F4F6);
 
   /// Near-white - scaffold background
-  static const Color background = Color(0xFFF8FBFF);
+  static const Color background = Color(0xFFFAFAFA);
 
-  /// White - pure white for contrast
+  /// White
   static const Color white = Color(0xFFFFFFFF);
 
   /// Dark text color
-  static const Color textDark = Color(0xFF1A1A1A);
+  static const Color textDark = Color(0xFF1F2937);
 
   /// Medium text color
-  static const Color textMedium = Color(0xFF666666);
+  static const Color textMedium = Color(0xFF6B7280);
 
   /// Light text color
-  static const Color textLight = Color(0xFF999999);
+  static const Color textLight = Color(0xFF9CA3AF);
 
   // ============================================
   // STATUS COLORS
   // ============================================
 
   /// Confirmed status
-  static const Color statusConfirmedBg = Color(0xFFE8F4EC);
-  static const Color statusConfirmedText = Color(0xFF1A6B35);
+  static const Color statusConfirmedBg = Color(0xFFD1FAE5);
+  static const Color statusConfirmedText = Color(0xFF065F46);
 
-  /// Pending / Awaiting Payment status
-  static const Color statusPendingBg = Color(0xFFFFF3CD);
-  static const Color statusPendingText = Color(0xFF856404);
+  /// Pending status
+  static const Color statusPendingBg = Color(0xFFFEF3C7);
+  static const Color statusPendingText = Color(0xFF92400E);
 
   /// In Progress status
-  static const Color statusInProgressBg = Color(0xFFE8F0F8);
-  static const Color statusInProgressText = Color(0xFF0C2340);
+  static const Color statusInProgressBg = Color(0xFFDBEAFE);
+  static const Color statusInProgressText = Color(0xFF1E40AF);
 
   /// Completed status
-  static const Color statusCompletedBg = Color(0xFFEFEFEF);
-  static const Color statusCompletedText = Color(0xFF444444);
+  static const Color statusCompletedBg = Color(0xFFE5E7EB);
+  static const Color statusCompletedText = Color(0xFF374151);
 
   /// Cancelled status
-  static const Color statusCancelledBg = Color(0xFFFAECEA);
-  static const Color statusCancelledText = Color(0xFF993C1D);
+  static const Color statusCancelledBg = Color(0xFFFEE2E2);
+  static const Color statusCancelledText = Color(0xFF991B1B);
 
   // ============================================
   // SEMANTIC COLORS
   // ============================================
 
   /// Success green
-  static const Color success = Color(0xFF1A6B35);
-  static const Color successLight = Color(0xFFE8F4EC);
+  static const Color success = Color(0xFF10B981);
+  static const Color successLight = Color(0xFFD1FAE5);
 
-  /// Warning amber (uses accent)
-  static const Color warning = Color(0xFFF5A623);
-  static const Color warningLight = Color(0xFFFFF3CD);
+  /// Warning amber
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color warningLight = Color(0xFFFEF3C7);
 
   /// Error red
-  static const Color error = Color(0xFF993C1D);
-  static const Color errorLight = Color(0xFFFAECEA);
+  static const Color error = Color(0xFFEF4444);
+  static const Color errorLight = Color(0xFFFEE2E2);
 
   /// Info blue
-  static const Color info = Color(0xFF0C2340);
-  static const Color infoLight = Color(0xFFE8F0F8);
+  static const Color info = Color(0xFF3B82F6);
+  static const Color infoLight = Color(0xFFDBEAFE);
 
   // ============================================
   // UI ELEMENT COLORS
   // ============================================
 
   /// Divider color
-  static const Color divider = Color(0xFFE0E0E0);
+  static const Color divider = Color(0xFFE5E7EB);
 
   /// Border color
-  static const Color border = Color(0xFFD0D0D0);
+  static const Color border = Color(0xFFD1D5DB);
 
   /// Disabled state
-  static const Color disabled = Color(0xFFBDBDBD);
+  static const Color disabled = Color(0xFF9CA3AF);
 
   /// Shadow color
   static const Color shadow = Color(0x1A000000);
@@ -117,11 +117,11 @@ class AppColors {
   // ============================================
 
   /// Pickup marker (green)
-  static const Color markerPickup = Color(0xFF1A6B35);
+  static const Color markerPickup = Color(0xFF10B981);
 
-  /// Dropoff marker (red/amber accent)
-  static const Color markerDropoff = Color(0xFFF5A623);
+  /// Dropoff marker (red)
+  static const Color markerDropoff = Color(0xFFEF4444);
 
   /// Current location marker
-  static const Color markerCurrent = Color(0xFF0C2340);
+  static const Color markerCurrent = Color(0xFF2563EB);
 }

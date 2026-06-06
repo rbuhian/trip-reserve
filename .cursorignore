@@ -1,0 +1,23 @@
+# Cursor AI Exclusions
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+secrets/
+credentials/
+
+# API keys
+**/api_keys.dart
+**/secrets.dart
+**/config.local.dart
+
+# Build
+build/
+.dart_tool/
+
+# Platform secrets
+android/key.properties
+android/*.keystore
+ios/Runner/GoogleService-Info.plist

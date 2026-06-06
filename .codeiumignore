@@ -1,0 +1,16 @@
+# Codeium AI Exclusions
+
+.env
+.env.*
+*.pem
+*.key
+secrets/
+credentials/
+**/api_keys.dart
+**/secrets.dart
+**/config.local.dart
+android/key.properties
+android/*.keystore
+ios/Runner/GoogleService-Info.plist
+build/
+.dart_tool/

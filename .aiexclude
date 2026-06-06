@@ -1,0 +1,40 @@
+# AI Exclusion Configuration
+# Prevents AI tools from indexing sensitive files
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+
+# API keys and config
+**/api_keys.dart
+**/secrets.dart
+**/config.local.dart
+
+# Build outputs
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Platform-specific
+android/.gradle/
+android/local.properties
+android/key.properties
+android/*.keystore
+ios/Pods/
+ios/*.xcworkspace
+ios/Runner/GoogleService-Info.plist
+
+# Sensitive data
+*.sqlite
+*.db
+**/user_data/
+
+# Logs
+*.log
+logs/

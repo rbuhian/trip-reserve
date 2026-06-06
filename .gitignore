@@ -1,0 +1,152 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Android
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+**/android/*.keystore
+**/android/*.jks
+
+# iOS/XCode
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Icon?
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS
+**/macos/Flutter/ephemeral
+
+# Windows
+**/windows/flutter/ephemeral
+
+# Linux
+**/linux/flutter/ephemeral
+
+# Web
+**/web/favicon.png
+**/web/icons/Icon-192.png
+**/web/icons/Icon-512.png
+**/web/icons/Icon-maskable-192.png
+**/web/icons/Icon-maskable-512.png
+
+# Coverage
+coverage/
+
+# Exceptions to above rules.
+!**/ios/**/default.mode1v3
+!**/ios/**/default.mode2v3
+!**/ios/**/default.pbxuser
+!**/ios/**/default.perspectivev3
+!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+!**/ios/googl_maps_flutter.podspec
+
+# Environment files - NEVER COMMIT
+.env
+.env.*
+!.env.example
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Secrets
+secrets/
+credentials/
+**/api_keys.dart
+**/secrets.dart
+
+# Firebase
+**/GoogleService-Info.plist
+**/google-services.json
+**/firebase_app_id_file.json
+
+# Sensitive data
+*.sqlite
+*.db
+
+# Supabase local
+.supabase/
+supabase/.temp/
+
+# Claude Code sessions
+.claude/sessions/
+.claude/*.jsonl
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Test outputs
+test-results/
+*.lcov

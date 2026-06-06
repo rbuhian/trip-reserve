@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../models/vehicle.dart';
 import '../../../providers/vehicle_provider.dart';
 
@@ -376,7 +377,7 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.white,
                           ),
                         )
                       : const Text(
@@ -457,7 +458,7 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
-                              Colors.black.withOpacity(0.6),
+                              AppColors.textDark.withOpacity(0.6),
                               Colors.transparent,
                             ],
                           ),
@@ -468,14 +469,14 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
                             Icon(
                               Icons.edit,
                               size: 16,
-                              color: Colors.white.withOpacity(0.9),
+                              color: AppColors.white.withOpacity(0.9),
                             ),
                             const SizedBox(width: 6),
                             Text(
                               'Change photo',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.white.withOpacity(0.9),
+                                color: AppColors.white.withOpacity(0.9),
                               ),
                             ),
                           ],

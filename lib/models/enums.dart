@@ -1,4 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../core/theme/app_colors.dart';
 
 /// User roles in the system
 @JsonEnum(valueField: 'value')
@@ -58,6 +61,38 @@ enum BookingStatus {
       this == BookingStatus.pending ||
       this == BookingStatus.confirmed ||
       this == BookingStatus.inProgress;
+
+  /// Background color for status pill
+  Color get backgroundColor {
+    switch (this) {
+      case BookingStatus.pending:
+        return AppColors.statusPendingBg;
+      case BookingStatus.confirmed:
+        return AppColors.statusConfirmedBg;
+      case BookingStatus.inProgress:
+        return AppColors.statusInProgressBg;
+      case BookingStatus.completed:
+        return AppColors.statusCompletedBg;
+      case BookingStatus.cancelled:
+        return AppColors.statusCancelledBg;
+    }
+  }
+
+  /// Text color for status pill
+  Color get textColor {
+    switch (this) {
+      case BookingStatus.pending:
+        return AppColors.statusPendingText;
+      case BookingStatus.confirmed:
+        return AppColors.statusConfirmedText;
+      case BookingStatus.inProgress:
+        return AppColors.statusInProgressText;
+      case BookingStatus.completed:
+        return AppColors.statusCompletedText;
+      case BookingStatus.cancelled:
+        return AppColors.statusCancelledText;
+    }
+  }
 }
 
 /// Payment statuses

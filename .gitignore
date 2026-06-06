@@ -124,6 +124,7 @@ secrets/
 credentials/
 **/api_keys.dart
 **/secrets.dart
+**/Secrets.xcconfig
 
 # Firebase
 **/GoogleService-Info.plist

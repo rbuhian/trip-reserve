@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../models/availability_block.dart';
 import '../../../providers/availability_provider.dart';
 import 'day_schedule_sheet.dart';
@@ -132,19 +133,19 @@ class CalendarScreen extends ConsumerWidget {
       child: Row(
         children: [
           _buildLegendItem(
-            color: Colors.green,
+            color: AppColors.success,
             label: 'Booking',
             colorScheme: colorScheme,
           ),
           const SizedBox(width: 16),
           _buildLegendItem(
-            color: Colors.red.shade400,
+            color: AppColors.error,
             label: 'Blocked',
             colorScheme: colorScheme,
           ),
           const SizedBox(width: 16),
           _buildLegendItem(
-            color: Colors.orange,
+            color: AppColors.accent,
             label: 'Partial',
             colorScheme: colorScheme,
           ),
@@ -306,11 +307,11 @@ class _DayCell extends ConsumerWidget {
 
     Color? indicatorColor;
     if (availability.hasBooking) {
-      indicatorColor = Colors.green;
+      indicatorColor = AppColors.success;
     } else if (availability.isBlocked) {
-      indicatorColor = Colors.red.shade400;
+      indicatorColor = AppColors.error;
     } else if (availability.isPartiallyBlocked) {
-      indicatorColor = Colors.orange;
+      indicatorColor = AppColors.accent;
     }
 
     return GestureDetector(
@@ -419,17 +420,17 @@ class _SelectedDatePanel extends StatelessWidget {
                   builder: (context, ref, _) {
                     final availability = ref.watch(dayAvailabilityProvider(date));
                     String status = 'Available';
-                    Color statusColor = Colors.green;
+                    Color statusColor = AppColors.success;
 
                     if (availability.isBlocked) {
                       status = 'Fully Blocked';
-                      statusColor = Colors.red;
+                      statusColor = AppColors.error;
                     } else if (availability.hasBooking) {
                       status = 'Has Booking';
-                      statusColor = Colors.green;
+                      statusColor = AppColors.success;
                     } else if (availability.isPartiallyBlocked) {
                       status = 'Partially Blocked';
-                      statusColor = Colors.orange;
+                      statusColor = AppColors.accent;
                     }
 
                     return Text(
@@ -763,7 +764,7 @@ class _BlockTimeSheetState extends ConsumerState<BlockTimeSheet> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: AppColors.white,
                         ),
                       )
                     : const Text(

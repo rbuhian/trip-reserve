@@ -14,7 +14,7 @@ Status Legend:
 | INF-01 | Supabase project setup | [x] | High |
 | INF-02 | Database schema creation | [x] | High |
 | INF-03 | Flutter project initialization | [x] | High |
-| INF-04 | Google Maps API integration | [ ] | High |
+| INF-04 | Google Maps API integration | [x] | High |
 | INF-05 | PayMongo/Xendit integration | [ ] | High |
 | INF-06 | Resend email setup | [ ] | Medium |
 | INF-07 | Authentication flow (Supabase Auth) | [x] | High |
@@ -50,8 +50,8 @@ Status Legend:
 ### Booking Creation
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| CUST-10 | Select pickup location (autocomplete) | [ ] | High |
-| CUST-11 | Select dropoff location (autocomplete) | [ ] | High |
+| CUST-10 | Select pickup location (autocomplete) | [x] | High |
+| CUST-11 | Select dropoff location (autocomplete) | [x] | High |
 | CUST-12 | Swap pickup/dropoff button | [ ] | Low |
 | CUST-13 | View route on mini map | [ ] | Medium |
 | CUST-14 | Display estimated distance | [ ] | High |
@@ -202,7 +202,7 @@ Status Legend:
 | UI-05 | KPI card component | [x] | High |
 | UI-06 | Price breakdown component | [ ] | High |
 | UI-07 | Trip lifecycle stepper component | [ ] | High |
-| UI-08 | Route mini map component | [ ] | Medium |
+| UI-08 | Route mini map component | [x] | Medium |
 
 ---
 
@@ -226,10 +226,10 @@ Status Legend:
 
 | Category | Total | Not Started | In Progress | Done |
 |----------|-------|-------------|-------------|------|
-| Infrastructure | 7 | 3 | 0 | 4 |
+| Infrastructure | 7 | 2 | 0 | 5 |
 | Database | 10 | 0 | 0 | 10 |
-| Customer | 22 | 20 | 0 | 2 |
+| Customer | 22 | 18 | 0 | 4 |
 | Driver | 23 | 9 | 0 | 14 |
 | Admin | 21 | 21 | 0 | 0 |
-| UI Components | 8 | 4 | 0 | 4 |
-| **Total MVP** | **91** | **57** | **0** | **34** |
+| UI Components | 8 | 3 | 0 | 5 |
+| **Total MVP** | **91** | **53** | **0** | **38** |

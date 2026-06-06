@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../models/availability_block.dart';
 import '../../../providers/availability_provider.dart';
 
@@ -321,15 +322,15 @@ class _BlockItem extends StatelessWidget {
     String typeLabel;
 
     if (isBooking) {
-      blockColor = Colors.green;
+      blockColor = AppColors.success;
       blockIcon = Icons.directions_car;
       typeLabel = 'Booking';
     } else if (block.isFullDay) {
-      blockColor = Colors.red.shade400;
+      blockColor = AppColors.error;
       blockIcon = Icons.block;
       typeLabel = 'Full Day Block';
     } else {
-      blockColor = Colors.orange;
+      blockColor = AppColors.accent;
       blockIcon = Icons.access_time;
       typeLabel = 'Time Block';
     }
@@ -344,7 +345,7 @@ class _BlockItem extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: AppColors.textDark.withOpacity(0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

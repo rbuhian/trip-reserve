@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/vehicle_provider.dart';
 
@@ -106,7 +107,7 @@ class DriverDashboardScreen extends ConsumerWidget {
                         child: _buildStatCard(
                           context,
                           icon: Icons.pending_actions,
-                          iconColor: Colors.orange,
+                          iconColor: AppColors.accent,
                           label: 'Pending',
                           value: '0',
                           onTap: () => context.go('/driver/bookings'),
@@ -123,7 +124,7 @@ class DriverDashboardScreen extends ConsumerWidget {
                         child: _buildStatCard(
                           context,
                           icon: Icons.check_circle_outline,
-                          iconColor: Colors.green,
+                          iconColor: AppColors.success,
                           label: 'Completed',
                           value: '0',
                           subtitle: 'This week',
@@ -134,7 +135,7 @@ class DriverDashboardScreen extends ConsumerWidget {
                         child: _buildStatCard(
                           context,
                           icon: Icons.account_balance_wallet_outlined,
-                          iconColor: Colors.purple,
+                          iconColor: AppColors.primaryLight,
                           label: 'Earnings',
                           value: '₱0',
                           subtitle: 'This week',
@@ -169,7 +170,7 @@ class DriverDashboardScreen extends ConsumerWidget {
                   _buildQuickAction(
                     context,
                     icon: Icons.event_busy,
-                    iconColor: Colors.orange,
+                    iconColor: AppColors.accent,
                     title: 'Block Time',
                     subtitle: 'Set unavailable hours',
                     onTap: () => context.go('/driver/calendar'),
@@ -180,7 +181,7 @@ class DriverDashboardScreen extends ConsumerWidget {
                   _buildQuickAction(
                     context,
                     icon: Icons.calendar_today,
-                    iconColor: Colors.teal,
+                    iconColor: AppColors.primary,
                     title: 'View Schedule',
                     subtitle: 'Check your bookings',
                     onTap: () => context.go('/driver/calendar'),
@@ -296,7 +297,7 @@ class DriverDashboardScreen extends ConsumerWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: AppColors.textDark.withOpacity(0.03),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),

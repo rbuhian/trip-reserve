@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../providers/vehicle_provider.dart';
 
 class AddVehicleScreen extends ConsumerStatefulWidget {
@@ -169,7 +170,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: AppColors.white,
                       ),
                     )
                   : const Text(

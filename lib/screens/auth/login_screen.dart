@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
 
@@ -318,8 +319,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       height: 56,
       decoration: BoxDecoration(
         gradient: onPressed != null
-            ? LinearGradient(
-                colors: [colorScheme.primary, colorScheme.primary.withBlue(200)],
+            ? const LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryDark],
               )
             : null,
         color: onPressed == null ? colorScheme.surfaceContainerHighest : null,
@@ -327,7 +328,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         boxShadow: onPressed != null
             ? [
                 BoxShadow(
-                  color: colorScheme.primary.withOpacity(0.3),
+                  color: AppColors.primary.withOpacity(0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -341,19 +342,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           borderRadius: BorderRadius.circular(12),
           child: Center(
             child: isLoading
-                ? SizedBox(
+                ? const SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: colorScheme.onPrimary,
+                      color: AppColors.accent,
                     ),
                   )
                 : Text(
                     label,
                     style: TextStyle(
                       color: onPressed != null
-                          ? colorScheme.onPrimary
+                          ? AppColors.accent
                           : colorScheme.onSurfaceVariant,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

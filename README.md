@@ -69,6 +69,52 @@ GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
 > **Note:** The app uses `flutter_dotenv` to load credentials at runtime from the `.env` file. Make sure the `.env` file exists before running the app.
 
+### 5. Google Maps API Setup
+
+The app uses Google Maps for location picking and route display. You need to configure API keys for each platform.
+
+#### Getting a Google Maps API Key
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the following APIs:
+   - Maps SDK for Android
+   - Maps SDK for iOS
+   - Geocoding API
+   - Places API (optional, for autocomplete)
+4. Go to **Credentials** > **Create Credentials** > **API Key**
+5. (Recommended) Restrict your API keys:
+   - **Android key**: Application restrictions > Android apps > Add package name + SHA-1 fingerprint
+   - **iOS key**: Application restrictions > iOS apps > Add bundle identifier
+
+#### Android Configuration
+
+Add your API key to `android/local.properties`:
+
+```properties
+GOOGLE_MAPS_API_KEY=your_android_api_key_here
+```
+
+The key is automatically read by `build.gradle.kts` and injected into `AndroidManifest.xml`.
+
+#### iOS Configuration
+
+Add your API key to `ios/Flutter/Secrets.xcconfig`:
+
+```
+GOOGLE_MAPS_API_KEY=your_ios_api_key_here
+```
+
+> **Note:** You can use the same API key for both platforms during development. For production, it's recommended to use separate keys with platform-specific restrictions for better security.
+
+#### Using the Same Key for Both Platforms
+
+| Platform | File | Content |
+|----------|------|---------|
+| Android | `android/local.properties` | `GOOGLE_MAPS_API_KEY=your_key` |
+| iOS | `ios/Flutter/Secrets.xcconfig` | `GOOGLE_MAPS_API_KEY=your_key` |
+| Flutter | `.env` | `GOOGLE_MAPS_API_KEY=your_key` |
+
 ## Supabase Setup
 
 ### Option A: Supabase Cloud
@@ -418,6 +464,29 @@ xcrun simctl erase all
 ```bash
 # Cold boot
 flutter emulators --launch <emulator_id> --cold-boot
+```
+
+### Google Maps Issues
+
+**Map shows blank/gray screen:**
+- Verify API key is set in `android/local.properties` (Android) or `ios/Flutter/Secrets.xcconfig` (iOS)
+- Check that Maps SDK is enabled in Google Cloud Console
+- For Android, ensure the key has the correct SHA-1 fingerprint
+
+**"API key not found" or similar errors:**
+- Android: Check `android/local.properties` has `GOOGLE_MAPS_API_KEY=your_key`
+- iOS: Check `ios/Flutter/Secrets.xcconfig` has `GOOGLE_MAPS_API_KEY=your_key`
+- Rebuild the app after adding keys: `flutter clean && flutter run`
+
+**Location permission denied:**
+- The app will prompt for permission on first use
+- If denied, go to device Settings > Apps > Trip Reserve > Permissions > Location
+
+**Get SHA-1 fingerprint for Android:**
+```bash
+# Debug key
+cd android && ./gradlew signingReport
+# Look for "SHA1:" under "Variant: debug"
 ```
 
 ## Contributing

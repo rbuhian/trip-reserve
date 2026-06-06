@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../models/vehicle.dart';
 import '../../../providers/vehicle_provider.dart';
 
@@ -177,7 +178,7 @@ class _VehicleCard extends ConsumerWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
+              color: AppColors.textDark.withOpacity(0.03),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -285,7 +286,7 @@ class _VehicleCard extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: vehicle.isActive
-            ? Colors.green.withOpacity(0.1)
+            ? AppColors.success.withOpacity(0.1)
             : colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(6),
       ),
@@ -294,7 +295,7 @@ class _VehicleCard extends ConsumerWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: vehicle.isActive ? Colors.green : colorScheme.onSurfaceVariant,
+          color: vehicle.isActive ? AppColors.success : colorScheme.onSurfaceVariant,
         ),
       ),
     );

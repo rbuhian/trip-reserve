@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/theme/app_colors.dart';
 import '../models/enums.dart';
 import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/customer/home_screen.dart';
+import '../screens/customer/map_test_screen.dart';
+import '../screens/customer/booking/booking_location_screen.dart';
 import '../screens/driver/driver_shell.dart';
 import '../screens/driver/dashboard_screen.dart';
 import '../screens/driver/vehicles/vehicle_list_screen.dart';
@@ -72,6 +75,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/home',
         builder: (context, state) => const HomeScreen(),
       ),
+      GoRoute(
+        path: '/map-test',
+        builder: (context, state) => const MapTestScreen(),
+      ),
+      GoRoute(
+        path: '/book',
+        builder: (context, state) => const BookingLocationScreen(),
+      ),
 
       // TODO: Add more customer routes as screens are implemented
       // /book - Booking flow
@@ -126,7 +137,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
               'Page not found',
@@ -136,7 +147,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             Text(
               state.matchedLocation,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
+                    color: AppColors.textMedium,
                   ),
             ),
             const SizedBox(height: 24),

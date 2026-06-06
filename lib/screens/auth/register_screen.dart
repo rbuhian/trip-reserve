@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../models/enums.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/auth_service.dart';
@@ -94,7 +95,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -475,8 +476,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       height: 56,
       decoration: BoxDecoration(
         gradient: onPressed != null
-            ? LinearGradient(
-                colors: [colorScheme.primary, colorScheme.primary.withBlue(200)],
+            ? const LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryDark],
               )
             : null,
         color: onPressed == null ? colorScheme.surfaceContainerHighest : null,
@@ -484,7 +485,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         boxShadow: onPressed != null
             ? [
                 BoxShadow(
-                  color: colorScheme.primary.withOpacity(0.3),
+                  color: AppColors.primary.withOpacity(0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -498,19 +499,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           borderRadius: BorderRadius.circular(12),
           child: Center(
             child: isLoading
-                ? SizedBox(
+                ? const SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: colorScheme.onPrimary,
+                      color: AppColors.accent,
                     ),
                   )
                 : Text(
                     label,
                     style: TextStyle(
                       color: onPressed != null
-                          ? colorScheme.onPrimary
+                          ? AppColors.accent
                           : colorScheme.onSurfaceVariant,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

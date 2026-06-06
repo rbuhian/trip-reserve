@@ -203,25 +203,95 @@ flutter run
 
 ## Running the App
 
-### Android
+### List Available Devices
 
 ```bash
-flutter run -d android
+flutter devices
 ```
 
-### iOS
+### Run on Android Emulator
+
+1. **Create an emulator** (if you don't have one):
+   - Open Android Studio → Tools → Device Manager
+   - Click "Create Device" → Select a phone (e.g., Pixel 6) → Next
+   - Select a system image (e.g., API 34) → Download if needed → Next → Finish
+
+2. **Start the emulator**:
+   ```bash
+   # List available emulators
+   flutter emulators
+
+   # Launch emulator
+   flutter emulators --launch <emulator_id>
+   # Example: flutter emulators --launch Pixel_6_API_34
+   ```
+
+3. **Run the app**:
+   ```bash
+   flutter run
+   ```
+
+   Or specify the device:
+   ```bash
+   flutter run -d emulator-5554
+   ```
+
+### Run on Physical Android Device
+
+1. Enable **Developer Options** on your phone:
+   - Settings → About Phone → Tap "Build Number" 7 times
+
+2. Enable **USB Debugging**:
+   - Settings → Developer Options → USB Debugging → ON
+
+3. Connect via USB and authorize the computer
+
+4. Run the app:
+   ```bash
+   flutter run
+   ```
+
+### Build and Install APK on Physical Device
+
+```bash
+# Build debug APK
+flutter build apk --debug
+
+# Install directly (device connected via USB)
+flutter install
+
+# Or manually copy APK to device
+# APK location: build/app/outputs/flutter-apk/app-debug.apk
+```
+
+### Run on iOS Simulator
+
+```bash
+# List simulators
+xcrun simctl list devices
+
+# Boot a simulator
+open -a Simulator
+
+# Run the app
+flutter run -d ios
+```
+
+### Run on iOS Physical Device
+
+Requires Xcode and Apple Developer account for signing.
 
 ```bash
 flutter run -d ios
 ```
 
-### Web (for testing)
+### Run on Web (for testing)
 
 ```bash
 flutter run -d chrome
 ```
 
-### All Devices
+### Run on Specific Device
 
 ```bash
 flutter devices  # List available devices

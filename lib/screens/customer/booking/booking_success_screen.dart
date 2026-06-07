@@ -26,13 +26,21 @@ class BookingSuccessScreen extends ConsumerWidget {
       },
       child: Scaffold(
         body: SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                const Spacer(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    MediaQuery.of(context).padding.bottom -
+                    48, // padding
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 24),
 
-                // Success icon
+                  // Success icon
                 Container(
                   width: 120,
                   height: 120,
@@ -91,20 +99,25 @@ class BookingSuccessScreen extends ConsumerWidget {
                           color: AppColors.textMedium,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            referenceNumber,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                              letterSpacing: 1.5,
+                          Flexible(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                referenceNumber,
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                  letterSpacing: 1,
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 8),
                           IconButton(
                             onPressed: () {
                               Clipboard.setData(
@@ -123,6 +136,11 @@ class BookingSuccessScreen extends ConsumerWidget {
                               color: AppColors.primary,
                             ),
                             tooltip: 'Copy',
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 36,
+                            ),
                           ),
                         ],
                       ),
@@ -186,7 +204,7 @@ class BookingSuccessScreen extends ConsumerWidget {
                   ),
                 ),
 
-                const Spacer(),
+                const SizedBox(height: 32),
 
                 // Buttons
                 SizedBox(
@@ -215,7 +233,10 @@ class BookingSuccessScreen extends ConsumerWidget {
                   },
                   child: const Text('View Booking Details'),
                 ),
-              ],
+
+                const SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         ),

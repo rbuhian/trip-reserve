@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../models/document.dart';
+import '../../../models/user.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../providers/supabase_provider.dart';
 import '../../../repositories/document_repository.dart';
@@ -28,6 +29,7 @@ class DriverProfileScreen extends ConsumerStatefulWidget {
 class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
   XFile? _pendingLicense;
   bool _isUploadingLicense = false;
+  bool _isUploadingAvatar = false;
 
   Future<void> _pickLicense() async {
     final file = await ImagePickerHelper.pickDocument();
@@ -150,6 +152,180 @@ class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
     }
   }
 
+  Future<void> _pickAvatar() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () => Navigator.pop(context, ImageSource.gallery),
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take a Photo'),
+                onTap: () => Navigator.pop(context, ImageSource.camera),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final file = await ImagePickerHelper.pickAvatar(source: source);
+    if (file != null) {
+      await _uploadAvatar(file);
+    }
+  }
+
+  Future<void> _uploadAvatar(XFile file) async {
+    setState(() => _isUploadingAvatar = true);
+
+    try {
+      final user = ref.read(authUserProvider).value;
+      if (user == null) throw Exception('Not authenticated');
+
+      final storageService = ref.read(storageServiceProvider);
+
+      final result = await storageService.uploadAvatar(
+        userId: user.id,
+        file: file,
+      );
+
+      await ref.read(authActionsProvider.notifier).updateProfile(
+        avatarUrl: result.url,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile photo updated'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingAvatar = false);
+      }
+    }
+  }
+
+  Future<void> _showEditProfileDialog(User user) async {
+    final nameController = TextEditingController(text: user.fullName);
+    final phoneController = TextEditingController(text: user.phone ?? '');
+    final formKey = GlobalKey<FormState>();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Profile'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Full Name',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Name is required';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                  prefixIcon: Icon(Icons.phone_outlined),
+                  hintText: '+63 9XX XXX XXXX',
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context, true);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      await _updateProfile(
+        fullName: nameController.text.trim(),
+        phone: phoneController.text.trim().isEmpty
+            ? null
+            : phoneController.text.trim(),
+      );
+    }
+
+    nameController.dispose();
+    phoneController.dispose();
+  }
+
+  Future<void> _updateProfile({String? fullName, String? phone}) async {
+    try {
+      await ref.read(authActionsProvider.notifier).updateProfile(
+        fullName: fullName,
+        phone: phone,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile updated'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -167,7 +343,9 @@ class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
         children: [
           // Profile header
           user.when(
-            data: (userData) => _buildProfileHeader(userData, colorScheme),
+            data: (userData) => userData != null
+                ? _buildProfileHeader(userData, colorScheme)
+                : const SizedBox.shrink(),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => const Text('Error loading profile'),
           ),
@@ -256,9 +434,7 @@ class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader(dynamic user, ColorScheme colorScheme) {
-    if (user == null) return const SizedBox.shrink();
-
+  Widget _buildProfileHeader(User user, ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -267,25 +443,68 @@ class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
       ),
       child: Row(
         children: [
-          // Avatar
-          CircleAvatar(
-            radius: 36,
-            backgroundColor: colorScheme.primary.withOpacity(0.1),
-            backgroundImage: user.avatarUrl != null
-                ? NetworkImage(user.avatarUrl!)
-                : null,
-            child: user.avatarUrl == null
-                ? Text(
-                    user.fullName.isNotEmpty
-                        ? user.fullName[0].toUpperCase()
-                        : '?',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
+          // Avatar (tappable for upload)
+          GestureDetector(
+            onTap: _isUploadingAvatar ? null : _pickAvatar,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 36,
+                  backgroundColor: colorScheme.primary.withOpacity(0.1),
+                  backgroundImage: user.avatarUrl != null
+                      ? NetworkImage(user.avatarUrl!)
+                      : null,
+                  child: user.avatarUrl == null
+                      ? Text(
+                          user.fullName.isNotEmpty
+                              ? user.fullName[0].toUpperCase()
+                              : '?',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
+                          ),
+                        )
+                      : null,
+                ),
+                if (_isUploadingAvatar)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black45,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                   )
-                : null,
+                else
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.camera_alt,
+                        size: 14,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(width: 16),
           // Info
@@ -309,7 +528,7 @@ class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                if (user.phone != null) ...[
+                if (user.phone != null && user.phone!.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     user.phone!,
@@ -324,15 +543,7 @@ class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
           ),
           // Edit button
           IconButton(
-            onPressed: () {
-              // TODO: Navigate to edit profile
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Edit profile coming soon'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
+            onPressed: () => _showEditProfileDialog(user),
             icon: Icon(
               Icons.edit_outlined,
               color: colorScheme.primary,

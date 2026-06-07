@@ -15,6 +15,7 @@ import '../providers/supabase_provider.dart';
 class StorageBuckets {
   static const String vehiclePhotos = 'vehicle-photos';
   static const String documents = 'documents';
+  static const String avatars = 'avatars';
 }
 
 /// File size limits
@@ -24,6 +25,9 @@ class FileSizeLimits {
 
   /// Max size for documents: 10 MB
   static const int document = 10 * 1024 * 1024;
+
+  /// Max size for avatars: 2 MB
+  static const int avatar = 2 * 1024 * 1024;
 
   /// Human-readable size text
   static String formatSize(int bytes) {
@@ -150,6 +154,53 @@ class StorageService {
       fileSize: bytes.length,
       mimeType: _getMimeType(ext),
     );
+  }
+
+  /// Upload a user avatar
+  ///
+  /// Throws [FileSizeExceededException] if file exceeds 2 MB limit.
+  Future<UploadResult> uploadAvatar({
+    required String userId,
+    required XFile file,
+  }) async {
+    final bytes = await file.readAsBytes();
+
+    // Check file size limit
+    if (bytes.length > FileSizeLimits.avatar) {
+      throw FileSizeExceededException(
+        fileSize: bytes.length,
+        maxSize: FileSizeLimits.avatar,
+        fileType: 'Avatar image',
+      );
+    }
+
+    final ext = path.extension(file.name).toLowerCase();
+    final fileName = '${_uuid.v4()}$ext';
+    final storagePath = '$userId/$fileName';
+
+    await _client.storage
+        .from(StorageBuckets.avatars)
+        .uploadBinary(storagePath, bytes, fileOptions: FileOptions(
+          contentType: _getMimeType(ext),
+          upsert: true,
+        ));
+
+    final url = _client.storage
+        .from(StorageBuckets.avatars)
+        .getPublicUrl(storagePath);
+
+    return UploadResult(
+      storagePath: storagePath,
+      url: url,
+      fileName: file.name,
+      fileSize: bytes.length,
+      mimeType: _getMimeType(ext),
+    );
+  }
+
+  /// Delete avatar
+  Future<void> deleteAvatar(String storagePath) async {
+    await deleteFile(StorageBuckets.avatars, storagePath);
   }
 
   /// Upload from bytes (for web/cross-platform)
@@ -315,6 +366,21 @@ class ImagePickerHelper {
       maxWidth: 2400,
       maxHeight: 2400,
       imageQuality: 95,
+    );
+  }
+
+  /// Pick an avatar image
+  ///
+  /// Square aspect ratio optimized, compressed to ~80% quality.
+  /// Target size: under 2 MB.
+  static Future<XFile?> pickAvatar({
+    ImageSource source = ImageSource.gallery,
+  }) async {
+    return await _picker.pickImage(
+      source: source,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 80,
     );
   }
 

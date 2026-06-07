@@ -131,6 +131,28 @@ class AuthActionsNotifier extends AsyncNotifier<void> {
       await _authService.resetPassword(email);
     });
   }
+
+  /// Update user profile
+  Future<void> updateProfile({
+    String? fullName,
+    String? phone,
+    String? avatarUrl,
+  }) async {
+    state = const AsyncLoading();
+
+    state = await AsyncValue.guard(() async {
+      final updates = <String, dynamic>{};
+      if (fullName != null) updates['full_name'] = fullName;
+      if (phone != null) updates['phone'] = phone;
+      if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
+
+      if (updates.isNotEmpty) {
+        await _authService.updateUserMetadata(updates);
+        // Refresh session to get updated user data
+        await _authService.refreshSession();
+      }
+    });
+  }
 }
 
 /// Loading state for auth actions

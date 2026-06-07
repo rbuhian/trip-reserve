@@ -94,7 +94,7 @@ Status Legend:
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
 | DRV-01 | Driver login | [x] | High |
-| DRV-02 | Manage profile | [ ] | Medium |
+| DRV-02 | Manage profile | [x] | Medium |
 
 ### Vehicle Management
 | ID | Feature | Status | Priority |
@@ -239,7 +239,7 @@ Status Legend:
 | Infrastructure | 7 | 2 | 0 | 5 |
 | Database | 10 | 0 | 0 | 10 |
 | Customer | 30 | 6 | 1 | 23 |
-| Driver | 32 | 1 | 0 | 31 |
+| Driver | 32 | 0 | 0 | 32 |
 | Admin | 25 | 0 | 0 | 25 |
 | UI Components | 8 | 0 | 0 | 8 |
-| **Total MVP** | **112** | **9** | **1** | **102** |
+| **Total MVP** | **112** | **8** | **1** | **103** |

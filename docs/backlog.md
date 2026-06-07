@@ -130,18 +130,18 @@ Status Legend:
 ### Booking Management
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| DRV-30 | View incoming booking requests | [ ] | High |
-| DRV-31 | Accept booking | [ ] | High |
-| DRV-32 | Decline booking | [ ] | High |
-| DRV-33 | View booking details | [ ] | High |
+| DRV-30 | View incoming booking requests | [x] | High |
+| DRV-31 | Accept booking | [x] | High |
+| DRV-32 | Decline booking | [x] | High |
+| DRV-33 | View booking details | [x] | High |
 
 ### Trip Lifecycle
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| DRV-40 | Trip lifecycle stepper UI | [ ] | High |
-| DRV-41 | Mark trip as started | [ ] | High |
-| DRV-42 | Mark trip as completed | [ ] | High |
-| DRV-43 | Trip status history | [ ] | Medium |
+| DRV-40 | Trip lifecycle stepper UI | [x] | High |
+| DRV-41 | Mark trip as started | [x] | High |
+| DRV-42 | Mark trip as completed | [x] | High |
+| DRV-43 | Trip status history | [x] | Medium |
 
 ### Earnings
 | ID | Feature | Status | Priority |
@@ -211,7 +211,7 @@ Status Legend:
 | UI-04 | Daily schedule component | [x] | High |
 | UI-05 | KPI card component | [x] | High |
 | UI-06 | Price breakdown component | [x] | High |
-| UI-07 | Trip lifecycle stepper component | [ ] | High |
+| UI-07 | Trip lifecycle stepper component | [x] | High |
 | UI-08 | Route mini map component | [x] | Medium |
 
 ---
@@ -239,7 +239,7 @@ Status Legend:
 | Infrastructure | 7 | 2 | 0 | 5 |
 | Database | 10 | 0 | 0 | 10 |
 | Customer | 30 | 6 | 1 | 23 |
-| Driver | 29 | 9 | 0 | 20 |
+| Driver | 29 | 1 | 0 | 28 |
 | Admin | 21 | 21 | 0 | 0 |
-| UI Components | 8 | 1 | 0 | 7 |
-| **Total MVP** | **105** | **39** | **1** | **65** |
+| UI Components | 8 | 0 | 0 | 8 |
+| **Total MVP** | **105** | **30** | **1** | **74** |

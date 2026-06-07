@@ -24,6 +24,7 @@ import '../screens/driver/vehicles/add_vehicle_screen.dart';
 import '../screens/driver/vehicles/edit_vehicle_screen.dart';
 import '../screens/driver/calendar/calendar_screen.dart';
 import '../screens/driver/bookings/bookings_list_screen.dart';
+import '../screens/driver/bookings/booking_details_screen.dart';
 import '../screens/driver/profile/driver_profile_screen.dart';
 
 /// Router provider with auth-aware redirects
@@ -168,6 +169,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return EditVehicleScreen(vehicleId: id);
+        },
+      ),
+      GoRoute(
+        path: '/driver/bookings/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return DriverBookingDetailsScreen(bookingId: id);
         },
       ),
 

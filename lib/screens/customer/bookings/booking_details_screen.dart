@@ -9,6 +9,7 @@ import '../../../models/booking.dart';
 import '../../../models/enums.dart';
 import '../../../repositories/booking_repository.dart';
 import '../../../widgets/status_pill.dart';
+import '../../../widgets/trip_lifecycle_stepper.dart';
 import 'customer_bookings_screen.dart';
 
 /// Provider for a single booking by ID
@@ -157,7 +158,12 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
         // Reference and Status
         _buildHeader(booking, colorScheme),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
+
+        // Trip lifecycle stepper
+        TripLifecycleStepper(booking: booking),
+
+        const SizedBox(height: 20),
 
         // Date and Time
         _buildSection(

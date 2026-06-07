@@ -288,6 +288,57 @@ class BookingRepository {
         .toList();
   }
 
+  /// Get driver's upcoming confirmed/in-progress bookings
+  Future<List<BookingListItem>> getDriverUpcomingBookings() async {
+    if (_currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final today = DateTime.now().toIso8601String().split('T')[0];
+
+    final response = await _table
+        .select('''
+          id, reference_number, status,
+          pickup_address, dropoff_address,
+          scheduled_date, pickup_time, total_amount, created_at,
+          customer:users!customer_id(id, full_name, phone, avatar_url),
+          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+        ''')
+        .eq('driver_id', _currentUserId!)
+        .gte('scheduled_date', today)
+        .inFilter('status', ['confirmed', 'in_progress'])
+        .order('scheduled_date')
+        .order('pickup_time');
+
+    return (response as List)
+        .map((json) => BookingListItem.fromJson(json))
+        .toList();
+  }
+
+  /// Get driver's completed bookings
+  Future<List<BookingListItem>> getDriverCompletedBookings({int limit = 50}) async {
+    if (_currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final response = await _table
+        .select('''
+          id, reference_number, status,
+          pickup_address, dropoff_address,
+          scheduled_date, pickup_time, total_amount, created_at,
+          customer:users!customer_id(id, full_name, phone, avatar_url),
+          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+        ''')
+        .eq('driver_id', _currentUserId!)
+        .eq('status', BookingStatus.completed.name)
+        .order('completed_at', ascending: false)
+        .limit(limit);
+
+    return (response as List)
+        .map((json) => BookingListItem.fromJson(json))
+        .toList();
+  }
+
   /// Accept a booking (driver)
   Future<Booking> accept(String id, {required String vehicleId}) async {
     if (_currentUserId == null) {

@@ -100,12 +100,24 @@ abstract class BookingListItem with _$BookingListItem {
     @JsonKey(name: 'created_at') DateTime? createdAt,
 
     // Joined data
+    UserRef? customer,
     UserRef? driver,
     VehicleRef? vehicle,
   }) = _BookingListItem;
 
+  const BookingListItem._();
+
   factory BookingListItem.fromJson(Map<String, dynamic> json) =>
       _$BookingListItemFromJson(json);
+
+  /// Check if booking can be accepted by driver
+  bool get canAccept => status == BookingStatus.pending;
+
+  /// Check if driver can start the trip
+  bool get canStart => status == BookingStatus.confirmed;
+
+  /// Check if driver can complete the trip
+  bool get canComplete => status == BookingStatus.inProgress;
 }
 
 /// Data for creating a new booking

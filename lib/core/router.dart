@@ -10,6 +10,13 @@ import '../screens/auth/register_screen.dart';
 import '../screens/customer/home_screen.dart';
 import '../screens/customer/map_test_screen.dart';
 import '../screens/customer/booking/booking_location_screen.dart';
+import '../screens/customer/booking/booking_datetime_screen.dart';
+import '../screens/customer/booking/booking_vehicle_screen.dart';
+import '../screens/customer/booking/booking_addons_screen.dart';
+import '../screens/customer/booking/booking_confirmation_screen.dart';
+import '../screens/customer/booking/booking_success_screen.dart';
+import '../screens/customer/bookings/customer_bookings_screen.dart';
+import '../screens/customer/bookings/booking_details_screen.dart';
 import '../screens/driver/driver_shell.dart';
 import '../screens/driver/dashboard_screen.dart';
 import '../screens/driver/vehicles/vehicle_list_screen.dart';
@@ -17,6 +24,7 @@ import '../screens/driver/vehicles/add_vehicle_screen.dart';
 import '../screens/driver/vehicles/edit_vehicle_screen.dart';
 import '../screens/driver/calendar/calendar_screen.dart';
 import '../screens/driver/bookings/bookings_list_screen.dart';
+import '../screens/driver/profile/driver_profile_screen.dart';
 
 /// Router provider with auth-aware redirects
 final routerProvider = Provider<GoRouter>((ref) {
@@ -83,11 +91,44 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/book',
         builder: (context, state) => const BookingLocationScreen(),
       ),
+      GoRoute(
+        path: '/book/datetime',
+        builder: (context, state) => const BookingDateTimeScreen(),
+      ),
+      GoRoute(
+        path: '/book/vehicle',
+        builder: (context, state) => const BookingVehicleScreen(),
+      ),
+      GoRoute(
+        path: '/book/addons',
+        builder: (context, state) => const BookingAddonsScreen(),
+      ),
+      GoRoute(
+        path: '/book/confirm',
+        builder: (context, state) => const BookingConfirmationScreen(),
+      ),
+      GoRoute(
+        path: '/book/success/:ref',
+        builder: (context, state) {
+          final ref = state.pathParameters['ref']!;
+          return BookingSuccessScreen(referenceNumber: ref);
+        },
+      ),
+
+      // Customer bookings
+      GoRoute(
+        path: '/bookings',
+        builder: (context, state) => const CustomerBookingsScreen(),
+      ),
+      GoRoute(
+        path: '/bookings/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return BookingDetailsScreen(bookingId: id);
+        },
+      ),
 
       // TODO: Add more customer routes as screens are implemented
-      // /book - Booking flow
-      // /bookings - Booking history
-      // /bookings/:id - Booking details
       // /profile - User profile
 
       // Driver routes with shell for bottom navigation
@@ -109,6 +150,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/driver/bookings',
             builder: (context, state) => const DriverBookingsListScreen(),
+          ),
+          GoRoute(
+            path: '/driver/profile',
+            builder: (context, state) => const DriverProfileScreen(),
           ),
         ],
       ),

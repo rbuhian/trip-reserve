@@ -300,12 +300,7 @@ class _BookingLocationScreenState
           child: ElevatedButton(
             onPressed: state.isComplete
                 ? () {
-                    // TODO: Navigate to date/time selection
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Next step: Select date and time'),
-                      ),
-                    );
+                    context.push('/book/datetime');
                   }
                 : null,
             style: ElevatedButton.styleFrom(

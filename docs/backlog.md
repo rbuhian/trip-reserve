@@ -52,32 +52,32 @@ Status Legend:
 |----|---------|--------|----------|
 | CUST-10 | Select pickup location (autocomplete) | [x] | High |
 | CUST-11 | Select dropoff location (autocomplete) | [x] | High |
-| CUST-12 | Swap pickup/dropoff button | [ ] | Low |
-| CUST-13 | View route on mini map | [ ] | Medium |
-| CUST-14 | Display estimated distance | [ ] | High |
-| CUST-15 | Display estimated duration | [ ] | High |
-| CUST-16 | Select booking date | [ ] | High |
-| CUST-17 | Select pickup time | [ ] | High |
-| CUST-18 | Select vehicle | [ ] | High |
-| CUST-19 | Check availability | [ ] | High |
-| CUST-20 | View price breakdown | [ ] | High |
-| CUST-21 | Select add-ons | [ ] | Medium |
+| CUST-12 | Swap pickup/dropoff button | [x] | Low |
+| CUST-13 | View route on mini map | [x] | Medium |
+| CUST-14 | Display estimated distance | [x] | High |
+| CUST-15 | Display estimated duration | [x] | High |
+| CUST-16 | Select booking date | [x] | High |
+| CUST-17 | Select pickup time | [x] | High |
+| CUST-18 | Select vehicle | [x] | High |
+| CUST-19 | Check availability | [~] | High |
+| CUST-20 | View price breakdown | [x] | High |
+| CUST-21 | Select add-ons | [x] | Medium |
 | CUST-22 | Select payment method (GCash/Card) | [ ] | High |
 | CUST-23 | Process payment | [ ] | High |
-| CUST-24 | Generate booking reference number | [ ] | High |
-| CUST-25 | Booking confirmation screen | [ ] | High |
+| CUST-24 | Generate booking reference number | [x] | High |
+| CUST-25 | Booking confirmation screen | [x] | High |
 
 ### Booking History
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| CUST-30 | View booking list | [ ] | High |
-| CUST-31 | Booking card with reference number | [ ] | High |
-| CUST-32 | Display booking status pill | [ ] | High |
-| CUST-33 | Show driver name | [ ] | High |
-| CUST-34 | Show vehicle + plate number | [ ] | High |
-| CUST-35 | View booking details | [ ] | High |
-| CUST-36 | Cancel booking | [ ] | High |
-| CUST-37 | Show cancellation deadline | [ ] | Medium |
+| CUST-30 | View booking list | [x] | High |
+| CUST-31 | Booking card with reference number | [x] | High |
+| CUST-32 | Display booking status pill | [x] | High |
+| CUST-33 | Show driver name | [x] | High |
+| CUST-34 | Show vehicle + plate number | [x] | High |
+| CUST-35 | View booking details | [x] | High |
+| CUST-36 | Cancel booking | [x] | High |
+| CUST-37 | Show cancellation deadline | [x] | Medium |
 
 ### Notifications
 | ID | Feature | Status | Priority |
@@ -104,6 +104,16 @@ Status Legend:
 | DRV-12 | Set vehicle plate number | [x] | High |
 | DRV-13 | Set vehicle capacity | [x] | High |
 | DRV-14 | Delete/deactivate vehicle | [x] | Low |
+| DRV-15 | Add vehicle year, model, color | [x] | High |
+| DRV-16 | Upload vehicle photos (front, back, left, right, interior) | [x] | High |
+| DRV-17 | Upload vehicle OR/CR documents | [x] | High |
+
+### Driver Documents
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| DRV-60 | Upload driver's license | [x] | High |
+| DRV-61 | View uploaded documents | [x] | Medium |
+| DRV-62 | Document expiry tracking | [x] | Low |
 
 ### Availability Calendar
 | ID | Feature | Status | Priority |
@@ -196,11 +206,11 @@ Status Legend:
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
 | UI-01 | Status pill component | [x] | High |
-| UI-02 | Booking card component | [ ] | High |
+| UI-02 | Booking card component | [x] | High |
 | UI-03 | Monthly calendar component | [x] | High |
 | UI-04 | Daily schedule component | [x] | High |
 | UI-05 | KPI card component | [x] | High |
-| UI-06 | Price breakdown component | [ ] | High |
+| UI-06 | Price breakdown component | [x] | High |
 | UI-07 | Trip lifecycle stepper component | [ ] | High |
 | UI-08 | Route mini map component | [x] | Medium |
 
@@ -228,8 +238,8 @@ Status Legend:
 |----------|-------|-------------|-------------|------|
 | Infrastructure | 7 | 2 | 0 | 5 |
 | Database | 10 | 0 | 0 | 10 |
-| Customer | 22 | 18 | 0 | 4 |
-| Driver | 23 | 9 | 0 | 14 |
+| Customer | 30 | 6 | 1 | 23 |
+| Driver | 29 | 9 | 0 | 20 |
 | Admin | 21 | 21 | 0 | 0 |
-| UI Components | 8 | 3 | 0 | 5 |
-| **Total MVP** | **91** | **53** | **0** | **38** |
+| UI Components | 8 | 1 | 0 | 7 |
+| **Total MVP** | **105** | **39** | **1** | **65** |

@@ -54,6 +54,10 @@ dependencies:
   uuid: ^4.3.3
   url_launcher: ^6.2.4
   package_info_plus: ^9.0.1
+  path: ^1.9.0
+
+  # Image/File Picker
+  image_picker: ^1.0.7
 
   # Code Generation
   freezed_annotation: ^3.0.0

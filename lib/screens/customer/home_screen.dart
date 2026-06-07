@@ -3,7 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../models/booking.dart';
 import '../../providers/auth_provider.dart';
+import '../../repositories/booking_repository.dart';
+import '../../widgets/booking_card.dart';
+
+/// Provider for recent upcoming bookings on home screen
+final _recentBookingsProvider = FutureProvider<List<BookingListItem>>((ref) async {
+  final repo = ref.watch(bookingRepositoryProvider);
+  final bookings = await repo.getUpcomingBookings();
+  // Show max 3 on home screen
+  return bookings.take(3).toList();
+});
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -81,18 +92,27 @@ class HomeScreen extends ConsumerWidget {
 
                       const SizedBox(height: 32),
 
-                      // Section title
-                      Text(
-                        'Recent Trips',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      // Section title with View All
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Upcoming Trips',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => context.push('/bookings'),
+                            child: const Text('View All'),
+                          ),
+                        ],
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
 
-                      // Empty state
-                      _buildEmptyState(context),
+                      // Bookings list
+                      _buildRecentBookings(context, ref),
                     ]),
                   ),
                 ),
@@ -178,7 +198,7 @@ class HomeScreen extends ConsumerWidget {
               title: const Text('Trip History'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Navigate to history
+                context.push('/bookings');
               },
             ),
 
@@ -315,6 +335,37 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRecentBookings(BuildContext context, WidgetRef ref) {
+    final bookingsAsync = ref.watch(_recentBookingsProvider);
+
+    return bookingsAsync.when(
+      data: (bookings) {
+        if (bookings.isEmpty) {
+          return _buildEmptyState(context);
+        }
+
+        return Column(
+          children: bookings
+              .map((booking) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: BookingCardCompact(
+                      booking: booking,
+                      onTap: () => context.push('/bookings/${booking.id}'),
+                    ),
+                  ))
+              .toList(),
+        );
+      },
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32),
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (_, __) => _buildEmptyState(context),
     );
   }
 

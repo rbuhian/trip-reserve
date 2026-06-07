@@ -156,3 +156,217 @@ class AddonLineItem {
   String get quantityText => quantity > 1 ? 'x$quantity' : '';
   String get priceText => '₱${totalPrice.toStringAsFixed(0)}';
 }
+
+// ============================================================
+// ADMIN PRICING REPOSITORY
+// ============================================================
+
+/// Provider for AdminPricingRepository
+final adminPricingRepositoryProvider = Provider<AdminPricingRepository>((ref) {
+  final client = ref.watch(supabaseClientProvider);
+  return AdminPricingRepository(client);
+});
+
+/// Repository for admin pricing management
+class AdminPricingRepository {
+  final SupabaseClient _client;
+
+  AdminPricingRepository(this._client);
+
+  SupabaseQueryBuilder get _configTable => _client.from('pricing_config');
+  SupabaseQueryBuilder get _addonsTable => _client.from('pricing_addons');
+
+  // ============================================================
+  // PRICING CONFIG METHODS
+  // ============================================================
+
+  /// Get all pricing configurations
+  Future<List<PricingConfig>> getAllPricingConfigs() async {
+    final response = await _configTable
+        .select()
+        .order('created_at', ascending: false);
+
+    return (response as List)
+        .map((json) => PricingConfig.fromJson(json))
+        .toList();
+  }
+
+  /// Get the active pricing configuration
+  Future<PricingConfig?> getActivePricingConfig() async {
+    final response = await _configTable
+        .select()
+        .eq('is_active', true)
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    return response != null ? PricingConfig.fromJson(response) : null;
+  }
+
+  /// Create new pricing configuration
+  Future<PricingConfig> createPricingConfig({
+    required double baseRate,
+    required double perKmRate,
+    required double minimumFare,
+    required int cancellationHours,
+    required double cancellationFeePercent,
+    bool isActive = true,
+  }) async {
+    // If this is set as active, deactivate all others first
+    if (isActive) {
+      await _configTable.update({'is_active': false}).eq('is_active', true);
+    }
+
+    final response = await _configTable
+        .insert({
+          'base_rate': baseRate,
+          'per_km_rate': perKmRate,
+          'minimum_fare': minimumFare,
+          'cancellation_hours': cancellationHours,
+          'cancellation_fee_percent': cancellationFeePercent,
+          'is_active': isActive,
+        })
+        .select()
+        .single();
+
+    return PricingConfig.fromJson(response);
+  }
+
+  /// Update pricing configuration
+  Future<PricingConfig> updatePricingConfig(
+    String id, {
+    double? baseRate,
+    double? perKmRate,
+    double? minimumFare,
+    int? cancellationHours,
+    double? cancellationFeePercent,
+    bool? isActive,
+  }) async {
+    final updates = <String, dynamic>{
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    if (baseRate != null) updates['base_rate'] = baseRate;
+    if (perKmRate != null) updates['per_km_rate'] = perKmRate;
+    if (minimumFare != null) updates['minimum_fare'] = minimumFare;
+    if (cancellationHours != null) updates['cancellation_hours'] = cancellationHours;
+    if (cancellationFeePercent != null) updates['cancellation_fee_percent'] = cancellationFeePercent;
+    if (isActive != null) {
+      // If setting as active, deactivate all others first
+      if (isActive) {
+        await _configTable.update({'is_active': false}).eq('is_active', true);
+      }
+      updates['is_active'] = isActive;
+    }
+
+    final response = await _configTable
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+    return PricingConfig.fromJson(response);
+  }
+
+  /// Delete pricing configuration
+  Future<void> deletePricingConfig(String id) async {
+    await _configTable.delete().eq('id', id);
+  }
+
+  // ============================================================
+  // PRICING ADDONS METHODS
+  // ============================================================
+
+  /// Get all add-ons (including inactive)
+  Future<List<PricingAddon>> getAllAddons() async {
+    final response = await _addonsTable
+        .select()
+        .order('display_order');
+
+    return (response as List)
+        .map((json) => PricingAddon.fromJson(json))
+        .toList();
+  }
+
+  /// Get add-on by ID
+  Future<PricingAddon?> getAddonById(String id) async {
+    final response = await _addonsTable
+        .select()
+        .eq('id', id)
+        .maybeSingle();
+
+    return response != null ? PricingAddon.fromJson(response) : null;
+  }
+
+  /// Create new add-on
+  Future<PricingAddon> createAddon({
+    required String name,
+    String? description,
+    required String addonType,
+    required double price,
+    String? icon,
+    int displayOrder = 0,
+    bool isActive = true,
+  }) async {
+    final response = await _addonsTable
+        .insert({
+          'name': name,
+          'description': description,
+          'addon_type': addonType,
+          'price': price,
+          'icon': icon,
+          'display_order': displayOrder,
+          'is_active': isActive,
+        })
+        .select()
+        .single();
+
+    return PricingAddon.fromJson(response);
+  }
+
+  /// Update add-on
+  Future<PricingAddon> updateAddon(
+    String id, {
+    String? name,
+    String? description,
+    String? addonType,
+    double? price,
+    String? icon,
+    int? displayOrder,
+    bool? isActive,
+  }) async {
+    final updates = <String, dynamic>{
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    if (name != null) updates['name'] = name;
+    if (description != null) updates['description'] = description;
+    if (addonType != null) updates['addon_type'] = addonType;
+    if (price != null) updates['price'] = price;
+    if (icon != null) updates['icon'] = icon;
+    if (displayOrder != null) updates['display_order'] = displayOrder;
+    if (isActive != null) updates['is_active'] = isActive;
+
+    final response = await _addonsTable
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+    return PricingAddon.fromJson(response);
+  }
+
+  /// Delete add-on
+  Future<void> deleteAddon(String id) async {
+    await _addonsTable.delete().eq('id', id);
+  }
+
+  /// Reorder add-ons
+  Future<void> reorderAddons(List<String> addonIds) async {
+    for (int i = 0; i < addonIds.length; i++) {
+      await _addonsTable
+          .update({'display_order': i})
+          .eq('id', addonIds[i]);
+    }
+  }
+}

@@ -146,9 +146,9 @@ Status Legend:
 ### Earnings
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| DRV-50 | Weekly earnings summary | [ ] | High |
-| DRV-51 | Pending earnings display | [ ] | High |
-| DRV-52 | Completed trip count | [ ] | Medium |
+| DRV-50 | Weekly earnings summary | [x] | High |
+| DRV-51 | Pending earnings display | [x] | High |
+| DRV-52 | Completed trip count | [x] | Medium |
 
 ---
 
@@ -157,47 +157,47 @@ Status Legend:
 ### User Management
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| ADM-01 | View all users | [ ] | High |
-| ADM-02 | Edit user details | [ ] | Medium |
-| ADM-03 | Deactivate user | [ ] | Medium |
+| ADM-01 | View all users | [x] | High |
+| ADM-02 | Edit user details | [x] | Medium |
+| ADM-03 | Deactivate user | [x] | Medium |
 
 ### Booking Management
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| ADM-10 | View all bookings | [ ] | High |
-| ADM-11 | Filter bookings by status | [ ] | Medium |
+| ADM-10 | View all bookings | [x] | High |
+| ADM-11 | Filter bookings by status | [x] | Medium |
 | ADM-12 | Edit booking | [ ] | Medium |
 | ADM-13 | Cancel booking | [ ] | Medium |
 
 ### Dashboard
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| ADM-20 | KPI: Trips today | [ ] | High |
-| ADM-21 | KPI: Revenue MTD | [ ] | High |
-| ADM-22 | KPI: Fleet utilization | [ ] | High |
-| ADM-23 | KPI: Active cars | [ ] | Medium |
-| ADM-24 | Trend indicators (vs average, % change) | [ ] | Medium |
-| ADM-25 | Recent bookings list | [ ] | High |
+| ADM-20 | KPI: Trips today | [x] | High |
+| ADM-21 | KPI: Revenue MTD | [x] | High |
+| ADM-22 | KPI: Fleet utilization | [x] | High |
+| ADM-23 | KPI: Active cars | [x] | Medium |
+| ADM-24 | Trend indicators (vs average, % change) | [x] | Medium |
+| ADM-25 | Recent bookings list | [x] | High |
 
 ### Reports
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| ADM-30 | Daily trips report | [ ] | High |
-| ADM-31 | Monthly revenue report | [ ] | High |
-| ADM-32 | Monthly revenue bar chart | [ ] | Medium |
-| ADM-33 | Fleet utilization report | [ ] | High |
-| ADM-34 | Per-vehicle utilization breakdown | [ ] | Medium |
+| ADM-30 | Daily trips report | [x] | High |
+| ADM-31 | Monthly revenue report | [x] | High |
+| ADM-32 | Monthly revenue bar chart | [x] | Medium |
+| ADM-33 | Fleet utilization report | [x] | High |
+| ADM-34 | Per-vehicle utilization breakdown | [x] | Medium |
 
 ### Pricing Configuration
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| ADM-40 | Set base rate | [ ] | High |
-| ADM-41 | Set distance fee per km | [ ] | High |
-| ADM-42 | Manage add-ons list | [ ] | High |
-| ADM-43 | Add-on: Airport meet & greet | [ ] | High |
-| ADM-44 | Add-on: Child seat | [ ] | Medium |
-| ADM-45 | Add-on: Extra waiting (per hour) | [ ] | Medium |
-| ADM-46 | Sample fare calculator preview | [ ] | Medium |
+| ADM-40 | Set base rate | [x] | High |
+| ADM-41 | Set distance fee per km | [x] | High |
+| ADM-42 | Manage add-ons list | [x] | High |
+| ADM-43 | Add-on: Airport meet & greet | [x] | High |
+| ADM-44 | Add-on: Child seat | [x] | Medium |
+| ADM-45 | Add-on: Extra waiting (per hour) | [x] | Medium |
+| ADM-46 | Sample fare calculator preview | [x] | Medium |
 
 ---
 
@@ -239,7 +239,7 @@ Status Legend:
 | Infrastructure | 7 | 2 | 0 | 5 |
 | Database | 10 | 0 | 0 | 10 |
 | Customer | 30 | 6 | 1 | 23 |
-| Driver | 29 | 1 | 0 | 28 |
-| Admin | 21 | 21 | 0 | 0 |
+| Driver | 32 | 1 | 0 | 31 |
+| Admin | 25 | 2 | 0 | 23 |
 | UI Components | 8 | 0 | 0 | 8 |
-| **Total MVP** | **105** | **30** | **1** | **74** |
+| **Total MVP** | **112** | **11** | **1** | **100** |

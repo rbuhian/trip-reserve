@@ -49,6 +49,9 @@ dependencies:
   # HTTP
   http: ^1.2.0
 
+  # Charts
+  fl_chart: ^0.69.0
+
   # Utilities
   intl: ^0.20.2
   uuid: ^4.3.3

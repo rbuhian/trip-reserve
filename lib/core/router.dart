@@ -26,6 +26,14 @@ import '../screens/driver/calendar/calendar_screen.dart';
 import '../screens/driver/bookings/bookings_list_screen.dart';
 import '../screens/driver/bookings/booking_details_screen.dart';
 import '../screens/driver/profile/driver_profile_screen.dart';
+import '../screens/admin/admin_shell.dart';
+import '../screens/admin/dashboard_screen.dart';
+import '../screens/admin/bookings/admin_bookings_screen.dart';
+import '../screens/admin/users/admin_users_screen.dart';
+import '../screens/admin/users/user_details_screen.dart';
+import '../screens/admin/settings/admin_settings_screen.dart';
+import '../screens/admin/reports/admin_reports_screen.dart';
+import '../screens/admin/pricing/admin_pricing_screen.dart';
 
 /// Router provider with auth-aware redirects
 final routerProvider = Provider<GoRouter>((ref) {
@@ -179,11 +187,53 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-      // TODO: Admin routes (placeholder)
-      // /admin - Admin dashboard
-      // /admin/users - User management
-      // /admin/bookings - All bookings
-      // /admin/pricing - Pricing config
+      // Admin routes with shell for bottom navigation
+      ShellRoute(
+        builder: (context, state, child) => AdminShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/admin',
+            builder: (context, state) => const AdminDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/admin/bookings',
+            builder: (context, state) => const AdminBookingsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/users',
+            builder: (context, state) => const AdminUsersScreen(),
+          ),
+          GoRoute(
+            path: '/admin/settings',
+            builder: (context, state) => const AdminSettingsScreen(),
+          ),
+        ],
+      ),
+
+      // Admin routes without shell (full screen)
+      GoRoute(
+        path: '/admin/bookings/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          // For now, reuse customer booking details
+          return BookingDetailsScreen(bookingId: id);
+        },
+      ),
+      GoRoute(
+        path: '/admin/users/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return UserDetailsScreen(userId: id);
+        },
+      ),
+      GoRoute(
+        path: '/admin/reports',
+        builder: (context, state) => const AdminReportsScreen(),
+      ),
+      GoRoute(
+        path: '/admin/pricing',
+        builder: (context, state) => const AdminPricingScreen(),
+      ),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(

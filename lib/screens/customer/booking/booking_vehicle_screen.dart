@@ -5,13 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/vehicle.dart';
 import '../../../providers/booking_form_provider.dart';
-import '../../../repositories/vehicle_repository.dart';
-
-/// Provider for available vehicles
-final availableVehiclesProvider = FutureProvider<List<Vehicle>>((ref) async {
-  final vehicleRepo = ref.watch(vehicleRepositoryProvider);
-  return vehicleRepo.getAvailableVehicles();
-});
 
 /// Screen for selecting a vehicle
 class BookingVehicleScreen extends ConsumerWidget {
@@ -20,7 +13,7 @@ class BookingVehicleScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formState = ref.watch(bookingFormProvider);
-    final vehiclesAsync = ref.watch(availableVehiclesProvider);
+    final vehiclesAsync = ref.watch(availableVehiclesForBookingProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -40,6 +33,10 @@ class BookingVehicleScreen extends ConsumerWidget {
           Expanded(
             child: vehiclesAsync.when(
               data: (vehicles) {
+                // If date/time not selected, show message
+                if (vehicles == null) {
+                  return _buildDateTimeRequiredState();
+                }
                 if (vehicles.isEmpty) {
                   return _buildEmptyState();
                 }
@@ -79,7 +76,7 @@ class BookingVehicleScreen extends ConsumerWidget {
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: () =>
-                          ref.invalidate(availableVehiclesProvider),
+                          ref.invalidate(availableVehiclesForBookingProvider),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -158,6 +155,38 @@ class BookingVehicleScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildDateTimeRequiredState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.calendar_today_outlined,
+            size: 64,
+            color: AppColors.textLight,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Select date and time first',
+            style: TextStyle(
+              color: AppColors.textMedium,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Please go back and select your pickup date and time',
+            style: TextStyle(
+              color: AppColors.textLight,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -178,11 +207,12 @@ class BookingVehicleScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Please try a different date or time',
+            'All vehicles are booked for this date and time.\nPlease try a different schedule.',
             style: TextStyle(
               color: AppColors.textLight,
               fontSize: 14,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

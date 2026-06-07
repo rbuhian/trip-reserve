@@ -79,6 +79,133 @@ class VehicleRepository {
         .toList();
   }
 
+  /// Get vehicles available for a specific date and time
+  ///
+  /// Checks against:
+  /// 1. Driver availability blocks (time-offs, vacations, maintenance)
+  /// 2. Existing confirmed/in-progress bookings
+  Future<List<Vehicle>> getAvailableVehiclesForDateTime({
+    required DateTime date,
+    required String pickupTime,
+    int estimatedDurationMinutes = 120,
+  }) async {
+    final dateStr = date.toIso8601String().split('T')[0];
+
+    // Calculate estimated end time
+    final timeParts = pickupTime.split(':');
+    final startHour = int.parse(timeParts[0]);
+    final startMinute = int.parse(timeParts[1]);
+    final startMinutes = startHour * 60 + startMinute;
+    final endMinutes = startMinutes + estimatedDurationMinutes;
+    final endHour = (endMinutes ~/ 60).clamp(0, 23);
+    final endMinute = endMinutes % 60;
+    final endTime = '${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}';
+
+    // Get all active vehicles
+    final vehiclesResponse = await _table
+        .select('''
+          *,
+          driver:users!driver_id(id, full_name, phone, avatar_url)
+        ''')
+        .eq('is_active', true)
+        .order('name');
+
+    final allVehicles = (vehiclesResponse as List)
+        .map((json) => Vehicle.fromJson(json))
+        .toList();
+
+    if (allVehicles.isEmpty) return [];
+
+    // Get driver IDs from vehicles
+    final driverIds = allVehicles
+        .where((v) => v.driverId != null)
+        .map((v) => v.driverId!)
+        .toSet()
+        .toList();
+
+    // Get vehicle IDs
+    final vehicleIds = allVehicles.map((v) => v.id).toList();
+
+    // Check for availability blocks (driver time-offs)
+    Set<String> blockedDrivers = {};
+    if (driverIds.isNotEmpty) {
+      // Check for full-day blocks
+      final fullDayBlocks = await _client
+          .from('availability_blocks')
+          .select('driver_id')
+          .inFilter('driver_id', driverIds)
+          .eq('block_date', dateStr)
+          .eq('is_full_day', true);
+
+      for (final block in fullDayBlocks as List) {
+        blockedDrivers.add(block['driver_id'] as String);
+      }
+
+      // Check for partial blocks that overlap with requested time
+      final partialBlocks = await _client
+          .from('availability_blocks')
+          .select('driver_id, start_time, end_time')
+          .inFilter('driver_id', driverIds)
+          .eq('block_date', dateStr)
+          .eq('is_full_day', false);
+
+      for (final block in partialBlocks as List) {
+        final blockStart = block['start_time'] as String? ?? '00:00';
+        final blockEnd = block['end_time'] as String? ?? '23:59';
+        if (_timesOverlap(pickupTime, endTime, blockStart, blockEnd)) {
+          blockedDrivers.add(block['driver_id'] as String);
+        }
+      }
+    }
+
+    // Check for existing bookings (confirmed or in_progress)
+    Set<String> bookedVehicles = {};
+    if (vehicleIds.isNotEmpty) {
+      final existingBookings = await _client
+          .from('bookings')
+          .select('vehicle_id, pickup_time, duration_minutes')
+          .inFilter('vehicle_id', vehicleIds)
+          .eq('scheduled_date', dateStr)
+          .inFilter('status', ['confirmed', 'in_progress']);
+
+      for (final booking in existingBookings as List) {
+        final bookingStart = booking['pickup_time'] as String;
+        final bookingDuration = booking['duration_minutes'] as int? ?? 120;
+
+        // Calculate booking end time
+        final bookingTimeParts = bookingStart.split(':');
+        final bookingStartMinutes = int.parse(bookingTimeParts[0]) * 60 + int.parse(bookingTimeParts[1]);
+        final bookingEndMinutes = bookingStartMinutes + bookingDuration;
+        final bookingEndHour = (bookingEndMinutes ~/ 60).clamp(0, 23);
+        final bookingEndMinute = bookingEndMinutes % 60;
+        final bookingEnd = '${bookingEndHour.toString().padLeft(2, '0')}:${bookingEndMinute.toString().padLeft(2, '0')}';
+
+        if (_timesOverlap(pickupTime, endTime, bookingStart, bookingEnd)) {
+          bookedVehicles.add(booking['vehicle_id'] as String);
+        }
+      }
+    }
+
+    // Filter out unavailable vehicles
+    return allVehicles.where((vehicle) {
+      // Check if driver is blocked
+      if (vehicle.driverId != null && blockedDrivers.contains(vehicle.driverId)) {
+        return false;
+      }
+      // Check if vehicle is booked
+      if (bookedVehicles.contains(vehicle.id)) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
+  /// Check if two time ranges overlap
+  bool _timesOverlap(String start1, String end1, String start2, String end2) {
+    // Simple string comparison works for HH:MM format
+    return start1.compareTo(end2) < 0 && start2.compareTo(end1) < 0;
+  }
+
   /// Create a new vehicle
   Future<Vehicle> create(VehicleCreate data) async {
     if (_currentUserId == null) {

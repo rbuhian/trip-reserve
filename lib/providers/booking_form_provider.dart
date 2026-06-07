@@ -213,19 +213,23 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
   }
 
   /// Set scheduled date
+  /// Clears selected vehicle since availability may have changed
   void setDate(DateTime date) {
     state = state.copyWith(
       scheduledDate: date,
       clearError: true,
+      clearVehicle: true, // Clear vehicle when date changes
     );
     _updatePriceBreakdown();
   }
 
   /// Set pickup time
+  /// Clears selected vehicle since availability may have changed
   void setTime(String time) {
     state = state.copyWith(
       pickupTime: time,
       clearError: true,
+      clearVehicle: true, // Clear vehicle when time changes
     );
   }
 
@@ -433,4 +437,22 @@ final availableAddonsProvider = FutureProvider<List<PricingAddon>>((ref) async {
 final bookingVehiclesProvider = FutureProvider<List<Vehicle>>((ref) async {
   final vehicleRepo = ref.watch(vehicleRepositoryProvider);
   return vehicleRepo.getAvailableVehicles();
+});
+
+/// Provider for vehicles available for the selected date/time
+/// Returns null if date/time not selected, otherwise returns available vehicles
+final availableVehiclesForBookingProvider = FutureProvider<List<Vehicle>?>((ref) async {
+  final formState = ref.watch(bookingFormProvider);
+
+  // Return null if date/time not selected yet
+  if (formState.scheduledDate == null || formState.pickupTime == null) {
+    return null;
+  }
+
+  final vehicleRepo = ref.watch(vehicleRepositoryProvider);
+  return vehicleRepo.getAvailableVehiclesForDateTime(
+    date: formState.scheduledDate!,
+    pickupTime: formState.pickupTime!,
+    estimatedDurationMinutes: formState.durationMinutes ?? 120,
+  );
 });

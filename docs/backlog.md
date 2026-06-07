@@ -59,7 +59,7 @@ Status Legend:
 | CUST-16 | Select booking date | [x] | High |
 | CUST-17 | Select pickup time | [x] | High |
 | CUST-18 | Select vehicle | [x] | High |
-| CUST-19 | Check availability | [~] | High |
+| CUST-19 | Check availability | [x] | High |
 | CUST-20 | View price breakdown | [x] | High |
 | CUST-21 | Select add-ons | [x] | Medium |
 | CUST-22 | Select payment method (GCash/Card) | [ ] | High |
@@ -238,8 +238,8 @@ Status Legend:
 |----------|-------|-------------|-------------|------|
 | Infrastructure | 7 | 2 | 0 | 5 |
 | Database | 10 | 0 | 0 | 10 |
-| Customer | 30 | 6 | 1 | 23 |
+| Customer | 30 | 6 | 0 | 24 |
 | Driver | 32 | 0 | 0 | 32 |
 | Admin | 25 | 0 | 0 | 25 |
 | UI Components | 8 | 0 | 0 | 8 |
-| **Total MVP** | **112** | **8** | **1** | **103** |
+| **Total MVP** | **112** | **8** | **0** | **104** |

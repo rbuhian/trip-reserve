@@ -62,6 +62,10 @@ class CalendarScreen extends ConsumerWidget {
                 date: selectedDate,
                 onViewSchedule: () => _showDaySchedule(context, ref, selectedDate),
               ),
+
+            // Space for FAB when no date selected
+            if (selectedDate == null)
+              const SizedBox(height: 80),
           ],
         ),
       ),
@@ -70,6 +74,7 @@ class CalendarScreen extends ConsumerWidget {
         icon: const Icon(Icons.event_busy),
         label: const Text('Block Time'),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -392,7 +397,7 @@ class _SelectedDatePanel extends StatelessWidget {
     final dateFormat = DateFormat('EEEE, MMMM d');
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 80), // Extra bottom padding for FAB
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
@@ -401,54 +406,60 @@ class _SelectedDatePanel extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  dateFormat.format(date),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Consumer(
-                  builder: (context, ref, _) {
-                    final availability = ref.watch(dayAvailabilityProvider(date));
-                    String status = 'Available';
-                    Color statusColor = AppColors.success;
-
-                    if (availability.isBlocked) {
-                      status = 'Fully Blocked';
-                      statusColor = AppColors.error;
-                    } else if (availability.hasBooking) {
-                      status = 'Has Booking';
-                      statusColor = AppColors.success;
-                    } else if (availability.isPartiallyBlocked) {
-                      status = 'Partially Blocked';
-                      statusColor = AppColors.accent;
-                    }
-
-                    return Text(
-                      status,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: statusColor,
-                        fontWeight: FontWeight.w500,
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      dateFormat.format(date),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
-                    );
-                  },
+                    ),
+                    const SizedBox(height: 2),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final availability = ref.watch(dayAvailabilityProvider(date));
+                        String status = 'Available';
+                        Color statusColor = AppColors.success;
+
+                        if (availability.isBlocked) {
+                          status = 'Fully Blocked';
+                          statusColor = AppColors.error;
+                        } else if (availability.hasBooking) {
+                          status = 'Has Booking';
+                          statusColor = AppColors.success;
+                        } else if (availability.isPartiallyBlocked) {
+                          status = 'Partially Blocked';
+                          statusColor = AppColors.accent;
+                        }
+
+                        return Text(
+                          status,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: statusColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          FilledButton.tonal(
-            onPressed: onViewSchedule,
-            child: const Text('View Schedule'),
+              ),
+              FilledButton.tonal(
+                onPressed: onViewSchedule,
+                child: const Text('View Schedule'),
+              ),
+            ],
           ),
         ],
       ),

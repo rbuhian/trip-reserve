@@ -208,6 +208,7 @@ class _BookingLocationScreenState
           child: TripRouteMap(
             pickup: state.pickup!,
             dropoff: state.dropoff!,
+            routePoints: state.routePoints,
             showTripInfo: false,
             interactive: true,
           ),
@@ -235,12 +236,14 @@ class _BookingLocationScreenState
                 height: 40,
                 color: AppColors.divider,
               ),
-              // Estimated time (rough: 30 km/h average)
+              // Estimated time (from route if available, otherwise rough estimate)
               Expanded(
                 child: _buildInfoTile(
                   icon: Icons.access_time,
                   label: 'Est. Duration',
-                  value: _formatDuration(state.distanceKm),
+                  value: state.durationMinutes != null
+                      ? _formatMinutes(state.durationMinutes!)
+                      : _formatDuration(state.distanceKm),
                 ),
               ),
             ],
@@ -283,12 +286,20 @@ class _BookingLocationScreenState
     if (distanceKm == null) return '--';
     // Rough estimate: 30 km/h average in city traffic
     final minutes = (distanceKm / 30 * 60).round();
+    return _formatMinutes(minutes, isEstimate: true);
+  }
+
+  String _formatMinutes(int minutes, {bool isEstimate = false}) {
+    final prefix = isEstimate ? '~' : '';
     if (minutes < 60) {
-      return '~$minutes min';
+      return '$prefix$minutes min';
     }
     final hours = minutes ~/ 60;
     final remainingMins = minutes % 60;
-    return '~${hours}h ${remainingMins}m';
+    if (remainingMins == 0) {
+      return '$prefix${hours}h';
+    }
+    return '$prefix${hours}h ${remainingMins}m';
   }
 
   Widget _buildBottomButton(LocationSelectionState state) {

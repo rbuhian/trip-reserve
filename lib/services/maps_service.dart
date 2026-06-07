@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 
+import '../config/app_config.dart';
 import '../core/theme/app_colors.dart';
 import '../models/booking.dart';
 
@@ -184,6 +188,154 @@ class MapsService {
       width: 4,
     );
   }
+
+  /// Get driving route between two locations using Google Directions API
+  ///
+  /// Returns [RouteInfo] with route points, distance, and duration
+  Future<RouteInfo> getRoute(LocationData origin, LocationData destination) async {
+    final apiKey = AppConfig.googleMapsApiKey;
+    if (apiKey.isEmpty) {
+      throw MapsServiceException(
+        'Google Maps API key not configured',
+        code: MapsErrorCode.unknown,
+      );
+    }
+
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/directions/json'
+      '?origin=${origin.lat},${origin.lng}'
+      '&destination=${destination.lat},${destination.lng}'
+      '&mode=driving'
+      '&key=$apiKey',
+    );
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode != 200) {
+        throw MapsServiceException(
+          'Failed to fetch route: HTTP ${response.statusCode}',
+          code: MapsErrorCode.networkError,
+        );
+      }
+
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final status = data['status'] as String?;
+
+      if (status != 'OK') {
+        throw MapsServiceException(
+          'Directions API error: $status',
+          code: MapsErrorCode.noResults,
+        );
+      }
+
+      final routes = data['routes'] as List<dynamic>?;
+      if (routes == null || routes.isEmpty) {
+        throw MapsServiceException(
+          'No route found',
+          code: MapsErrorCode.noResults,
+        );
+      }
+
+      final route = routes.first as Map<String, dynamic>;
+      final legs = route['legs'] as List<dynamic>;
+      final leg = legs.first as Map<String, dynamic>;
+
+      // Get distance and duration
+      final distanceData = leg['distance'] as Map<String, dynamic>;
+      final durationData = leg['duration'] as Map<String, dynamic>;
+      final distanceMeters = distanceData['value'] as int;
+      final durationSeconds = durationData['value'] as int;
+
+      // Decode polyline
+      final overviewPolyline = route['overview_polyline'] as Map<String, dynamic>;
+      final encodedPolyline = overviewPolyline['points'] as String;
+      final routePoints = _decodePolyline(encodedPolyline);
+
+      return RouteInfo(
+        points: routePoints,
+        distanceMeters: distanceMeters,
+        durationSeconds: durationSeconds,
+        distanceText: distanceData['text'] as String,
+        durationText: durationData['text'] as String,
+      );
+    } catch (e) {
+      if (e is MapsServiceException) rethrow;
+      throw MapsServiceException(
+        'Failed to fetch route: $e',
+        code: MapsErrorCode.networkError,
+      );
+    }
+  }
+
+  /// Decode an encoded polyline string into a list of LatLng points
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = [];
+    int index = 0;
+    int lat = 0;
+    int lng = 0;
+
+    while (index < encoded.length) {
+      // Decode latitude
+      int shift = 0;
+      int result = 0;
+      int byte;
+      do {
+        byte = encoded.codeUnitAt(index++) - 63;
+        result |= (byte & 0x1F) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+      int deltaLat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lat += deltaLat;
+
+      // Decode longitude
+      shift = 0;
+      result = 0;
+      do {
+        byte = encoded.codeUnitAt(index++) - 63;
+        result |= (byte & 0x1F) << shift;
+        shift += 5;
+      } while (byte >= 0x20);
+      int deltaLng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lng += deltaLng;
+
+      points.add(LatLng(lat / 1E5, lng / 1E5));
+    }
+
+    return points;
+  }
+}
+
+/// Route information from Directions API
+class RouteInfo {
+  /// List of points forming the route
+  final List<LatLng> points;
+
+  /// Distance in meters
+  final int distanceMeters;
+
+  /// Duration in seconds
+  final int durationSeconds;
+
+  /// Human-readable distance (e.g., "5.2 km")
+  final String distanceText;
+
+  /// Human-readable duration (e.g., "15 mins")
+  final String durationText;
+
+  const RouteInfo({
+    required this.points,
+    required this.distanceMeters,
+    required this.durationSeconds,
+    required this.distanceText,
+    required this.durationText,
+  });
+
+  /// Distance in kilometers
+  double get distanceKm => distanceMeters / 1000;
+
+  /// Duration in minutes
+  int get durationMinutes => (durationSeconds / 60).round();
 }
 
 /// Error codes for maps service errors

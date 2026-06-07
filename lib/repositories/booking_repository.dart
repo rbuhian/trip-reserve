@@ -260,9 +260,8 @@ class BookingRepository {
       throw Exception('User not authenticated');
     }
 
-    // Get bookings that are pending and either:
-    // 1. Have no driver assigned (driver_id is null)
-    // 2. Have a vehicle that belongs to current driver
+    // Get pending bookings where the selected vehicle belongs to current driver
+    // When a customer books, they select a vehicle - that vehicle's owner should see the request
 
     final response = await _table
         .select('''
@@ -276,13 +275,12 @@ class BookingRepository {
         .order('scheduled_date')
         .order('pickup_time');
 
-    // Filter to only show relevant bookings
+    // Filter to only show bookings where the vehicle belongs to current driver
     return (response as List)
         .where((json) {
           final vehicle = json['vehicle'];
-          // Show if no driver assigned, or if vehicle belongs to current driver
-          return json['driver_id'] == null ||
-                 (vehicle != null && vehicle['driver_id'] == _currentUserId);
+          // Only show if vehicle belongs to current driver
+          return vehicle != null && vehicle['driver_id'] == _currentUserId;
         })
         .map((json) => BookingListItem.fromJson(json))
         .toList();

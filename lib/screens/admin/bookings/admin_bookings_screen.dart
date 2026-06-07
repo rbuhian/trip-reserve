@@ -61,6 +61,7 @@ class _AdminBookingsScreenState extends ConsumerState<AdminBookingsScreen>
       appBar: AppBar(
         title: const Text('All Bookings'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,

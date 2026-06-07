@@ -214,7 +214,6 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Vehicle'),
-        backgroundColor: colorScheme.surface,
       ),
       body: Form(
         key: _formKey,

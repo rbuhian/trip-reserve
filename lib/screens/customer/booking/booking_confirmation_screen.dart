@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../models/enums.dart';
 import '../../../providers/booking_form_provider.dart';
 
 /// Screen for reviewing and confirming booking
@@ -41,9 +42,9 @@ class BookingConfirmationScreen extends ConsumerWidget {
 
                   const SizedBox(height: 20),
 
-                  // Vehicle section
-                  _buildSectionTitle('Vehicle'),
-                  _buildVehicleCard(formState),
+                  // Category & Trip Details section
+                  _buildSectionTitle('Trip Details'),
+                  _buildCategoryCard(formState),
 
                   if (formState.selectedAddons.isNotEmpty) ...[
                     const SizedBox(height: 20),
@@ -317,8 +318,8 @@ class BookingConfirmationScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildVehicleCard(BookingFormState formState) {
-    final vehicle = formState.selectedVehicle;
+  Widget _buildCategoryCard(BookingFormState formState) {
+    final category = formState.selectedCategory;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -327,52 +328,39 @@ class BookingConfirmationScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 60,
-            height: 45,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.directions_car,
-              color: AppColors.textMedium,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  vehicle?.name ?? '-',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+          // Category row
+          Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: _getCategoryColor(category).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 4),
-                Row(
+                child: Icon(
+                  _getCategoryIcon(category),
+                  color: _getCategoryColor(category),
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      vehicle?.plateNumber ?? '-',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textMedium,
+                      category.displayName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Icon(
-                      Icons.people_outline,
-                      size: 14,
-                      color: AppColors.textMedium,
-                    ),
-                    const SizedBox(width: 4),
+                    const SizedBox(height: 2),
                     Text(
-                      '${vehicle?.capacity ?? 0} seats',
+                      category.description,
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColors.textMedium,
@@ -380,12 +368,90 @@ class BookingConfirmationScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
+          // Bags and additional info
+          Row(
+            children: [
+              // Number of bags
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.luggage,
+                      size: 20,
+                      color: AppColors.textMedium,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${formState.numBags} bag${formState.numBags != 1 ? 's' : ''}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          // Additional info if provided
+          if (formState.additionalInfo != null &&
+              formState.additionalInfo!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Additional Notes',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textMedium,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    formState.additionalInfo!,
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return Icons.directions_car;
+      case VehicleCategory.mpvSuv:
+        return Icons.airport_shuttle;
+      case VehicleCategory.van:
+        return Icons.directions_bus;
+    }
+  }
+
+  Color _getCategoryColor(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return AppColors.primary;
+      case VehicleCategory.mpvSuv:
+        return AppColors.primaryLight;
+      case VehicleCategory.van:
+        return AppColors.success;
+    }
   }
 
   Widget _buildAddonsCard(BookingFormState formState) {

@@ -466,7 +466,6 @@ class _EditVehicleScreenState extends ConsumerState<EditVehicleScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Vehicle'),
-        backgroundColor: colorScheme.surface,
         actions: [
           vehicleAsync.whenOrNull(
             data: (vehicle) => vehicle != null

@@ -53,6 +53,7 @@ class _AdminBookingDetailsScreenState extends ConsumerState<AdminBookingDetailsS
       appBar: AppBar(
         title: const Text('Booking Details'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         actions: [
           bookingAsync.whenOrNull(
             data: (booking) {

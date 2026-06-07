@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../models/booking.dart';
 import '../../../models/enums.dart';
 import '../../../models/vehicle.dart';
@@ -60,20 +61,17 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Bookings',
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        backgroundColor: colorScheme.surface,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
-          indicatorColor: colorScheme.primary,
+          labelColor: AppColors.accent,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: AppColors.accent,
           tabs: const [
             Tab(text: 'Requests'),
             Tab(text: 'Upcoming'),
@@ -88,7 +86,6 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
             onRefresh: _refresh,
             loadingBookingId: _loadingBookingId,
             onAccept: (booking) => _showAcceptDialog(booking),
-            onDecline: (booking) => _showDeclineDialog(booking),
           ),
           _UpcomingBookingsTab(
             onRefresh: _refresh,
@@ -103,21 +100,26 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
 
   Future<void> _showAcceptDialog(BookingListItem booking) async {
     final vehicles = await ref.read(myVehiclesProvider.future);
-    final activeVehicles = vehicles.where((v) => v.isActive).toList();
+    // Filter to active vehicles that can accept the booking's category
+    final eligibleVehicles = vehicles
+        .where((v) => v.isActive && v.category.canAcceptCategory(booking.category))
+        .toList();
 
     if (!mounted) return;
 
-    if (activeVehicles.isEmpty) {
+    if (eligibleVehicles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need an active vehicle to accept bookings'),
+        SnackBar(
+          content: Text(
+            'You need an active ${booking.category.displayName} or larger vehicle to accept this booking',
+          ),
           backgroundColor: Colors.orange,
         ),
       );
       return;
     }
 
-    Vehicle? selectedVehicle = activeVehicles.first;
+    Vehicle? selectedVehicle = eligibleVehicles.first;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -132,15 +134,42 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
                 'Accept booking ${booking.referenceNumber}?',
                 style: const TextStyle(fontSize: 14),
               ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.directions_car,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Category: ${booking.category.displayName}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Select vehicle:',
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
-              ...activeVehicles.map((vehicle) => RadioListTile<Vehicle>(
+              ...eligibleVehicles.map((vehicle) => RadioListTile<Vehicle>(
                     title: Text(vehicle.name),
-                    subtitle: Text(vehicle.plateNumber),
+                    subtitle: Text('${vehicle.plateNumber} • ${vehicle.category.displayName}'),
                     value: vehicle,
                     groupValue: selectedVehicle,
                     onChanged: (v) => setDialogState(() => selectedVehicle = v),
@@ -181,64 +210,6 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
             content: Text('Booking accepted'),
             backgroundColor: Colors.green,
           ),
-        );
-      }
-
-      _refresh();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _loadingBookingId = null);
-      }
-    }
-  }
-
-  Future<void> _showDeclineDialog(BookingListItem booking) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Decline Booking'),
-        content: Text(
-          'Are you sure you want to decline booking ${booking.referenceNumber}?\n\n'
-          'The booking will be available for other drivers.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Decline'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await _declineBooking(booking);
-    }
-  }
-
-  Future<void> _declineBooking(BookingListItem booking) async {
-    setState(() => _loadingBookingId = booking.id);
-
-    try {
-      final repo = ref.read(bookingRepositoryProvider);
-      await repo.decline(booking.id);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Booking declined')),
         );
       }
 
@@ -320,13 +291,11 @@ class _PendingRequestsTab extends ConsumerWidget {
   final VoidCallback onRefresh;
   final String? loadingBookingId;
   final Function(BookingListItem) onAccept;
-  final Function(BookingListItem) onDecline;
 
   const _PendingRequestsTab({
     required this.onRefresh,
     required this.loadingBookingId,
     required this.onAccept,
-    required this.onDecline,
   });
 
   @override
@@ -359,7 +328,6 @@ class _PendingRequestsTab extends ConsumerWidget {
                   isLoading: loadingBookingId == booking.id,
                   onTap: () => context.push('/driver/bookings/${booking.id}'),
                   onAccept: () => onAccept(booking),
-                  onDecline: () => onDecline(booking),
                 ),
               );
             },

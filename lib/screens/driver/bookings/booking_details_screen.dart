@@ -40,7 +40,6 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
     return Scaffold(
       appBar: AppBar(
         title: const Text('Booking Details'),
-        backgroundColor: colorScheme.surface,
       ),
       body: bookingAsync.when(
         data: (booking) {
@@ -509,6 +508,97 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
             ],
           ),
           const SizedBox(height: 16),
+
+          // Category and bags info
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: _getCategoryColor(booking.category).withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _getCategoryColor(booking.category).withOpacity(0.2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _getCategoryIcon(booking.category),
+                  size: 20,
+                  color: _getCategoryColor(booking.category),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  booking.category.displayName,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _getCategoryColor(booking.category),
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.luggage,
+                  size: 16,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${booking.numBags} bag${booking.numBags != 1 ? 's' : ''}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Additional info if present
+          if (booking.additionalInfo != null && booking.additionalInfo!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.note_alt_outlined,
+                        size: 16,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Customer Notes',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    booking.additionalInfo!,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -565,6 +655,28 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return Icons.directions_car;
+      case VehicleCategory.mpvSuv:
+        return Icons.airport_shuttle;
+      case VehicleCategory.van:
+        return Icons.directions_bus;
+    }
+  }
+
+  Color _getCategoryColor(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return AppColors.primary;
+      case VehicleCategory.mpvSuv:
+        return AppColors.primaryLight;
+      case VehicleCategory.van:
+        return AppColors.success;
+    }
   }
 
   Widget _buildDetailItem(
@@ -706,31 +818,16 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
 
     switch (booking.status) {
       case BookingStatus.pending:
-        return Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => _showDeclineDialog(booking),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: colorScheme.error,
-                  side: BorderSide(color: colorScheme.error.withOpacity(0.5)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('Decline'),
-              ),
+        return SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: () => _showAcceptDialog(booking),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.success,
+              padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: FilledButton(
-                onPressed: () => _showAcceptDialog(booking),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.success,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('Accept'),
-              ),
-            ),
-          ],
+            child: const Text('Accept'),
+          ),
         );
 
       case BookingStatus.confirmed:
@@ -767,21 +864,26 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
 
   Future<void> _showAcceptDialog(Booking booking) async {
     final vehicles = await ref.read(myVehiclesProvider.future);
-    final activeVehicles = vehicles.where((v) => v.isActive).toList();
+    // Filter to active vehicles that can accept the booking's category
+    final eligibleVehicles = vehicles
+        .where((v) => v.isActive && v.category.canAcceptCategory(booking.category))
+        .toList();
 
     if (!mounted) return;
 
-    if (activeVehicles.isEmpty) {
+    if (eligibleVehicles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You need an active vehicle to accept bookings'),
+        SnackBar(
+          content: Text(
+            'You need an active ${booking.category.displayName} or larger vehicle to accept this booking',
+          ),
           backgroundColor: Colors.orange,
         ),
       );
       return;
     }
 
-    Vehicle? selectedVehicle = activeVehicles.first;
+    Vehicle? selectedVehicle = eligibleVehicles.first;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -792,11 +894,38 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getCategoryIcon(booking.category),
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Category: ${booking.category.displayName}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
               const Text('Select vehicle for this trip:'),
               const SizedBox(height: 8),
-              ...activeVehicles.map((vehicle) => RadioListTile<Vehicle>(
+              ...eligibleVehicles.map((vehicle) => RadioListTile<Vehicle>(
                     title: Text(vehicle.name),
-                    subtitle: Text(vehicle.plateNumber),
+                    subtitle: Text('${vehicle.plateNumber} • ${vehicle.category.displayName}'),
                     value: vehicle,
                     groupValue: selectedVehicle,
                     onChanged: (v) => setDialogState(() => selectedVehicle = v),
@@ -852,59 +981,6 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  Future<void> _showDeclineDialog(Booking booking) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Decline Booking'),
-        content: const Text(
-          'Are you sure you want to decline this booking?\n\n'
-          'The booking will be available for other drivers.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Decline'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      setState(() => _isLoading = true);
-
-      try {
-        final repo = ref.read(bookingRepositoryProvider);
-        await repo.decline(booking.id);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Booking declined')),
-          );
-          context.pop();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
       }
     }
   }

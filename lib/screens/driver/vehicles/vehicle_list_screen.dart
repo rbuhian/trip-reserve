@@ -16,87 +16,85 @@ class VehicleListScreen extends ConsumerWidget {
     final vehicles = ref.watch(myVehiclesProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // App Bar
-            SliverAppBar(
-              floating: true,
-              backgroundColor: colorScheme.surface,
-              title: const Text(
-                'My Vehicles',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () => context.push('/driver/vehicles/add'),
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      color: colorScheme.primary,
-                      size: 20,
-                    ),
+      body: CustomScrollView(
+        slivers: [
+          // App Bar
+          SliverAppBar(
+            floating: true,
+            pinned: true,
+            title: const Text(
+              'My Vehicles',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () => context.push('/driver/vehicles/add'),
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
-                const SizedBox(width: 8),
-              ],
-            ),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
 
-            // Content
-            vehicles.when(
-              data: (vehicleList) {
-                if (vehicleList.isEmpty) {
-                  return SliverFillRemaining(
-                    child: _buildEmptyState(context),
-                  );
-                }
-
-                return SliverPadding(
-                  padding: const EdgeInsets.all(20),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final vehicle = vehicleList[index];
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            bottom: index < vehicleList.length - 1 ? 12 : 0,
-                          ),
-                          child: _VehicleCard(vehicle: vehicle),
-                        );
-                      },
-                      childCount: vehicleList.length,
-                    ),
-                  ),
+          // Content
+          vehicles.when(
+            data: (vehicleList) {
+              if (vehicleList.isEmpty) {
+                return SliverFillRemaining(
+                  child: _buildEmptyState(context),
                 );
-              },
-              loading: () => const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
-              ),
-              error: (error, _) => SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 48, color: colorScheme.error),
-                      const SizedBox(height: 16),
-                      Text('Error loading vehicles'),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => ref.invalidate(myVehiclesProvider),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+              }
+
+              return SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final vehicle = vehicleList[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: index < vehicleList.length - 1 ? 12 : 0,
+                        ),
+                        child: _VehicleCard(vehicle: vehicle),
+                      );
+                    },
+                    childCount: vehicleList.length,
                   ),
+                ),
+              );
+            },
+            loading: () => const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, _) => SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+                    const SizedBox(height: 16),
+                    const Text('Error loading vehicles'),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => ref.invalidate(myVehiclesProvider),
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/driver/vehicles/add'),

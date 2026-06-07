@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/booking.dart';
+import '../models/enums.dart';
 import '../models/pricing.dart';
 import '../models/vehicle.dart';
 import '../repositories/booking_repository.dart';
@@ -16,19 +17,25 @@ class BookingFormState {
   final double? distanceKm;
   final int? durationMinutes;
 
-  // Step 2: Date & Time
+  // Step 2: Category & Trip Info
+  final VehicleCategory selectedCategory;
+  final int numBags;
+  final String? additionalInfo;
+
+  // Step 3: Date & Time
   final DateTime? scheduledDate;
   final String? pickupTime; // Format: "HH:mm"
 
-  // Step 3: Vehicle
+  // Step 4: Vehicle (optional - assigned when driver accepts)
   final Vehicle? selectedVehicle;
 
-  // Step 4: Add-ons
+  // Step 5: Add-ons
   final List<SelectedAddonItem> selectedAddons;
 
   // Pricing
   final PriceBreakdown? priceBreakdown;
   final PricingConfig? pricingConfig;
+  final CategoryPricing? categoryPricing;
 
   // Form state
   final bool isLoading;
@@ -40,12 +47,16 @@ class BookingFormState {
     this.dropoff,
     this.distanceKm,
     this.durationMinutes,
+    this.selectedCategory = VehicleCategory.sedan,
+    this.numBags = 0,
+    this.additionalInfo,
     this.scheduledDate,
     this.pickupTime,
     this.selectedVehicle,
     this.selectedAddons = const [],
     this.priceBreakdown,
     this.pricingConfig,
+    this.categoryPricing,
     this.isLoading = false,
     this.error,
     this.currentStep = 0,
@@ -58,12 +69,16 @@ class BookingFormState {
   /// Check if date/time step is complete
   bool get isDateTimeComplete => scheduledDate != null && pickupTime != null;
 
-  /// Check if vehicle step is complete
+  /// Check if vehicle step is complete (optional for new flow)
   bool get isVehicleComplete => selectedVehicle != null;
 
-  /// Check if all required fields are complete
+  /// Check if category is selected (always true since has default)
+  bool get isCategoryComplete => true;
+
+  /// Check if all required fields are complete for booking
+  /// Note: Vehicle is NOT required - driver assigns vehicle when accepting
   bool get isComplete =>
-      isLocationComplete && isDateTimeComplete && isVehicleComplete;
+      isLocationComplete && isDateTimeComplete && isCategoryComplete;
 
   /// Get total add-ons fee
   double get addonsTotal =>
@@ -108,29 +123,38 @@ class BookingFormState {
     LocationData? dropoff,
     double? distanceKm,
     int? durationMinutes,
+    VehicleCategory? selectedCategory,
+    int? numBags,
+    String? additionalInfo,
     DateTime? scheduledDate,
     String? pickupTime,
     Vehicle? selectedVehicle,
     List<SelectedAddonItem>? selectedAddons,
     PriceBreakdown? priceBreakdown,
     PricingConfig? pricingConfig,
+    CategoryPricing? categoryPricing,
     bool? isLoading,
     String? error,
     int? currentStep,
     bool clearError = false,
     bool clearVehicle = false,
+    bool clearAdditionalInfo = false,
   }) {
     return BookingFormState(
       pickup: pickup ?? this.pickup,
       dropoff: dropoff ?? this.dropoff,
       distanceKm: distanceKm ?? this.distanceKm,
       durationMinutes: durationMinutes ?? this.durationMinutes,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
+      numBags: numBags ?? this.numBags,
+      additionalInfo: clearAdditionalInfo ? null : (additionalInfo ?? this.additionalInfo),
       scheduledDate: scheduledDate ?? this.scheduledDate,
       pickupTime: pickupTime ?? this.pickupTime,
       selectedVehicle: clearVehicle ? null : (selectedVehicle ?? this.selectedVehicle),
       selectedAddons: selectedAddons ?? this.selectedAddons,
       priceBreakdown: priceBreakdown ?? this.priceBreakdown,
       pricingConfig: pricingConfig ?? this.pricingConfig,
+      categoryPricing: categoryPricing ?? this.categoryPricing,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
       currentStep: currentStep ?? this.currentStep,
@@ -198,15 +222,22 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
     }
   }
 
-  /// Load pricing configuration
+  /// Load pricing configuration (global and category-specific)
   Future<void> _loadPricingConfig() async {
     try {
       final pricingRepo = _ref.read(pricingRepositoryProvider);
+
+      // Load global config
       final config = await pricingRepo.getActivePricingConfig();
       if (config != null) {
         state = state.copyWith(pricingConfig: config);
-        _updatePriceBreakdown();
       }
+
+      // Load category-specific pricing
+      final categoryPricing = await pricingRepo.getCategoryPricing(state.selectedCategory);
+      state = state.copyWith(categoryPricing: categoryPricing);
+
+      _updatePriceBreakdown();
     } catch (e) {
       state = state.copyWith(error: 'Failed to load pricing: $e');
     }
@@ -244,6 +275,45 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
   /// Clear selected vehicle
   void clearVehicle() {
     state = state.copyWith(clearVehicle: true);
+  }
+
+  /// Set selected category
+  void setCategory(VehicleCategory category) {
+    state = state.copyWith(
+      selectedCategory: category,
+      clearError: true,
+    );
+    _loadCategoryPricing();
+  }
+
+  /// Set number of bags
+  void setNumBags(int numBags) {
+    state = state.copyWith(
+      numBags: numBags,
+      clearError: true,
+    );
+  }
+
+  /// Set additional info
+  void setAdditionalInfo(String? info) {
+    if (info == null || info.isEmpty) {
+      state = state.copyWith(clearAdditionalInfo: true);
+    } else {
+      state = state.copyWith(additionalInfo: info);
+    }
+  }
+
+  /// Load category-specific pricing
+  Future<void> _loadCategoryPricing() async {
+    try {
+      final pricingRepo = _ref.read(pricingRepositoryProvider);
+      final categoryPricing = await pricingRepo.getCategoryPricing(state.selectedCategory);
+      state = state.copyWith(categoryPricing: categoryPricing);
+      _updatePriceBreakdown();
+    } catch (e) {
+      // Fall back to global pricing if category pricing fails
+      _updatePriceBreakdown();
+    }
   }
 
   /// Add an addon
@@ -312,13 +382,26 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
     return state.selectedAddons.any((item) => item.addon.id == addonId);
   }
 
-  /// Update price breakdown
+  /// Update price breakdown using category-specific pricing
   void _updatePriceBreakdown() {
-    if (state.pricingConfig == null || state.distanceKm == null) return;
+    if (state.distanceKm == null) return;
 
-    final config = state.pricingConfig!;
-    final baseFare = config.baseRate;
-    final distanceFee = config.calculateDistanceFee(state.distanceKm!);
+    // Use category pricing if available, fall back to global config
+    double baseFare;
+    double distanceFee;
+    double minimumFare;
+
+    if (state.categoryPricing != null) {
+      baseFare = state.categoryPricing!.baseRate;
+      distanceFee = state.categoryPricing!.calculateDistanceFee(state.distanceKm!);
+      minimumFare = state.categoryPricing!.minimumFare;
+    } else if (state.pricingConfig != null) {
+      baseFare = state.pricingConfig!.baseRate;
+      distanceFee = state.pricingConfig!.calculateDistanceFee(state.distanceKm!);
+      minimumFare = state.pricingConfig!.minimumFare;
+    } else {
+      return; // No pricing available
+    }
 
     final addonLineItems = state.selectedAddons.map((item) {
       return AddonLineItem(
@@ -332,7 +415,7 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
     final addonsTotal = state.addonsTotal;
     final subtotal = baseFare + distanceFee;
     final total = subtotal + addonsTotal;
-    final finalTotal = total < config.minimumFare ? config.minimumFare : total;
+    final finalTotal = total < minimumFare ? minimumFare : total;
 
     state = state.copyWith(
       priceBreakdown: PriceBreakdown(
@@ -376,17 +459,25 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
       final bookingRepo = _ref.read(bookingRepositoryProvider);
 
       final bookingData = BookingCreate(
+        // Category selection
+        category: state.selectedCategory,
+        numBags: state.numBags,
+        additionalInfo: state.additionalInfo,
+        // Locations
         pickupAddress: state.pickup!.address,
         pickupLat: state.pickup!.lat,
         pickupLng: state.pickup!.lng,
         dropoffAddress: state.dropoff!.address,
         dropoffLat: state.dropoff!.lat,
         dropoffLng: state.dropoff!.lng,
+        // Trip details
         distanceKm: state.distanceKm!,
         durationMinutes: state.durationMinutes ?? 0,
         scheduledDate: state.scheduledDate!,
         pickupTime: state.pickupTime!,
-        vehicleId: state.selectedVehicle!.id,
+        // Vehicle is NOT set here - driver assigns when accepting
+        vehicleId: null,
+        // Pricing
         baseFare: state.priceBreakdown?.baseFare ?? 0,
         distanceFee: state.priceBreakdown?.distanceFee ?? 0,
         addonsFee: state.addonsTotal,

@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'enums.dart';
 import 'user.dart';
 
 part 'vehicle.freezed.dart';
@@ -13,6 +14,7 @@ abstract class Vehicle with _$Vehicle {
     @JsonKey(name: 'driver_id') required String driverId,
     required String name,
     @JsonKey(name: 'plate_number') required String plateNumber,
+    @Default(VehicleCategory.sedan) VehicleCategory category,
     @Default(4) int capacity,
     int? year,
     String? model,
@@ -64,6 +66,7 @@ abstract class VehicleRef with _$VehicleRef {
     required String id,
     required String name,
     @JsonKey(name: 'plate_number') required String plateNumber,
+    @Default(VehicleCategory.sedan) VehicleCategory category,
     @Default(4) int capacity,
     int? year,
     String? model,
@@ -141,6 +144,7 @@ abstract class VehicleCreate with _$VehicleCreate {
   const factory VehicleCreate({
     required String name,
     @JsonKey(name: 'plate_number') required String plateNumber,
+    @Default(VehicleCategory.sedan) VehicleCategory category,
     @Default(4) int capacity,
     int? year,
     String? model,
@@ -159,6 +163,7 @@ abstract class VehicleUpdate with _$VehicleUpdate {
   const factory VehicleUpdate({
     String? name,
     @JsonKey(name: 'plate_number') String? plateNumber,
+    VehicleCategory? category,
     int? capacity,
     int? year,
     String? model,

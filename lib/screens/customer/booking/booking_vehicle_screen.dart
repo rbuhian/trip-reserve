@@ -1,24 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../../models/vehicle.dart';
+import '../../../models/enums.dart';
 import '../../../providers/booking_form_provider.dart';
 
-/// Screen for selecting a vehicle
-class BookingVehicleScreen extends ConsumerWidget {
+/// Screen for selecting vehicle category and providing trip details
+class BookingVehicleScreen extends ConsumerStatefulWidget {
   const BookingVehicleScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BookingVehicleScreen> createState() =>
+      _BookingVehicleScreenState();
+}
+
+class _BookingVehicleScreenState extends ConsumerState<BookingVehicleScreen> {
+  final _additionalInfoController = TextEditingController();
+  final _bagsController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final formState = ref.read(bookingFormProvider);
+    _bagsController.text =
+        formState.numBags > 0 ? formState.numBags.toString() : '';
+    _additionalInfoController.text = formState.additionalInfo ?? '';
+  }
+
+  @override
+  void dispose() {
+    _additionalInfoController.dispose();
+    _bagsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final formState = ref.watch(bookingFormProvider);
-    final vehiclesAsync = ref.watch(availableVehiclesForBookingProvider);
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Select Vehicle'),
+        title: const Text('Select Category'),
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -29,58 +56,178 @@ class BookingVehicleScreen extends ConsumerWidget {
           // Trip summary
           _buildTripSummary(formState),
 
-          // Vehicle list
+          // Category selection and details
           Expanded(
-            child: vehiclesAsync.when(
-              data: (vehicles) {
-                // If date/time not selected, show message
-                if (vehicles == null) {
-                  return _buildDateTimeRequiredState();
-                }
-                if (vehicles.isEmpty) {
-                  return _buildEmptyState();
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: vehicles.length,
-                  itemBuilder: (context, index) {
-                    final vehicle = vehicles[index];
-                    final isSelected =
-                        formState.selectedVehicle?.id == vehicle.id;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _VehicleCard(
-                        vehicle: vehicle,
-                        isSelected: isSelected,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category selection header
+                  Text(
+                    'Vehicle Category',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Choose the type of vehicle you need',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Category cards
+                  ...VehicleCategory.values.map((category) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _CategoryCard(
+                          category: category,
+                          isSelected: formState.selectedCategory == category,
+                          pricing: formState.categoryPricing,
+                          onTap: () {
+                            ref
+                                .read(bookingFormProvider.notifier)
+                                .setCategory(category);
+                          },
+                        ),
+                      )),
+
+                  const SizedBox(height: 24),
+
+                  // Number of bags
+                  Text(
+                    'Number of Bags',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'How many bags will you bring?',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      // Decrement button
+                      _CounterButton(
+                        icon: Icons.remove,
                         onTap: () {
-                          ref
-                              .read(bookingFormProvider.notifier)
-                              .setVehicle(vehicle);
+                          final current = formState.numBags;
+                          if (current > 0) {
+                            ref
+                                .read(bookingFormProvider.notifier)
+                                .setNumBags(current - 1);
+                            _bagsController.text = (current - 1).toString();
+                          }
                         },
                       ),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              error: (error, _) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline,
-                        size: 48, color: theme.colorScheme.error),
-                    const SizedBox(height: 16),
-                    Text('Error loading vehicles'),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () =>
-                          ref.invalidate(availableVehiclesForBookingProvider),
-                      child: const Text('Retry'),
+                      const SizedBox(width: 16),
+                      // Number display
+                      SizedBox(
+                        width: 60,
+                        child: TextField(
+                          controller: _bagsController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(2),
+                          ],
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            final numBags = int.tryParse(value) ?? 0;
+                            ref
+                                .read(bookingFormProvider.notifier)
+                                .setNumBags(numBags);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Increment button
+                      _CounterButton(
+                        icon: Icons.add,
+                        onTap: () {
+                          final current = formState.numBags;
+                          if (current < 99) {
+                            ref
+                                .read(bookingFormProvider.notifier)
+                                .setNumBags(current + 1);
+                            _bagsController.text = (current + 1).toString();
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 16),
+                      Icon(
+                        Icons.luggage,
+                        size: 24,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Additional info
+                  Text(
+                    'Additional Information',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface,
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Any special requests or notes for the driver (optional)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _additionalInfoController,
+                    maxLines: 3,
+                    maxLength: 500,
+                    decoration: InputDecoration(
+                      hintText:
+                          'E.g., Need help with luggage, traveling with pets, child seats needed...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      ref
+                          .read(bookingFormProvider.notifier)
+                          .setAdditionalInfo(value.isEmpty ? null : value);
+                    },
+                  ),
+
+                  const SizedBox(height: 80), // Space for bottom button
+                ],
               ),
             ),
           ),
@@ -155,113 +302,87 @@ class BookingVehicleScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDateTimeRequiredState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.calendar_today_outlined,
-            size: 64,
-            color: AppColors.textLight,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Select date and time first',
-            style: TextStyle(
-              color: AppColors.textMedium,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Please go back and select your pickup date and time',
-            style: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.directions_car_outlined,
-            size: 64,
-            color: AppColors.textLight,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No vehicles available',
-            style: TextStyle(
-              color: AppColors.textMedium,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'All vehicles are booked for this date and time.\nPlease try a different schedule.',
-            style: TextStyle(
-              color: AppColors.textLight,
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomButton(
       BuildContext context, WidgetRef ref, BookingFormState formState) {
-    final isComplete = formState.selectedVehicle != null;
+    final isComplete = formState.isCategoryComplete;
 
     return SafeArea(
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: isComplete
-                ? () {
-                    context.push('/book/addons');
-                  }
-                : null,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              disabledBackgroundColor: AppColors.disabled,
-            ),
-            child: const Text(
-              'Continue',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: Border(
+            top: BorderSide(color: AppColors.divider),
           ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Price summary
+            if (formState.priceBreakdown != null) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Estimated Fare',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    formState.priceBreakdown!.totalText,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: isComplete
+                    ? () {
+                        context.push('/book/addons');
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  disabledBackgroundColor: AppColors.disabled,
+                ),
+                child: const Text(
+                  'Continue',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _VehicleCard extends StatelessWidget {
-  final Vehicle vehicle;
+class _CategoryCard extends StatelessWidget {
+  final VehicleCategory category;
   final bool isSelected;
+  final dynamic pricing; // CategoryPricing?
   final VoidCallback onTap;
 
-  const _VehicleCard({
-    required this.vehicle,
+  const _CategoryCard({
+    required this.category,
     required this.isSelected,
+    required this.pricing,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -270,10 +391,10 @@ class _VehicleCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withOpacity(0.05)
-              : AppColors.white,
+              : colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? AppColors.primary : colorScheme.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -288,79 +409,53 @@ class _VehicleCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Vehicle image placeholder
+            // Category icon
             Container(
-              width: 80,
+              width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(8),
+                color: _getCategoryColor(category).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: vehicle.imageUrl != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        vehicle.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Icon(
-                          Icons.directions_car,
-                          size: 32,
-                          color: AppColors.textMedium,
-                        ),
-                      ),
-                    )
-                  : Icon(
-                      Icons.directions_car,
-                      size: 32,
-                      color: AppColors.textMedium,
-                    ),
+              child: Icon(
+                _getCategoryIcon(category),
+                size: 32,
+                color: _getCategoryColor(category),
+              ),
             ),
             const SizedBox(width: 16),
-            // Vehicle info
+            // Category info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    vehicle.name,
+                    category.displayName,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textDark,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.confirmation_number_outlined,
-                        size: 14,
-                        color: AppColors.textMedium,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        vehicle.plateNumber,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textMedium,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(
-                        Icons.people_outline,
-                        size: 14,
-                        color: AppColors.textMedium,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${vehicle.capacity} seats',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textMedium,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    category.description,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
+                  if (pricing != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'From ${pricing.baseRateText}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -373,7 +468,9 @@ class _VehicleCard extends StatelessWidget {
                 color: isSelected ? AppColors.primary : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
+                  color: isSelected
+                      ? AppColors.primary
+                      : colorScheme.outlineVariant,
                   width: 2,
                 ),
               ),
@@ -386,6 +483,58 @@ class _VehicleCard extends StatelessWidget {
                   : null,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getCategoryIcon(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return Icons.directions_car;
+      case VehicleCategory.mpvSuv:
+        return Icons.airport_shuttle;
+      case VehicleCategory.van:
+        return Icons.directions_bus;
+    }
+  }
+
+  Color _getCategoryColor(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return AppColors.primary;
+      case VehicleCategory.mpvSuv:
+        return AppColors.primaryLight;
+      case VehicleCategory.van:
+        return AppColors.success;
+    }
+  }
+}
+
+class _CounterButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _CounterButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          child: Icon(icon, color: colorScheme.onSurface),
         ),
       ),
     );

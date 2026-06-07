@@ -82,6 +82,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
       appBar: AppBar(
         title: const Text('User Management'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         actions: [
           IconButton(
             onPressed: () => _showFilterSheet(context),

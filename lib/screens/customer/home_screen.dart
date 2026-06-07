@@ -39,6 +39,7 @@ class HomeScreen extends ConsumerWidget {
                 SliverAppBar(
                   floating: true,
                   backgroundColor: colorScheme.surface,
+                  foregroundColor: colorScheme.onSurface,
                   title: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

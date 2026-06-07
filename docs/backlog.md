@@ -132,7 +132,7 @@ Status Legend:
 |----|---------|--------|----------|
 | DRV-30 | View incoming booking requests | [x] | High |
 | DRV-31 | Accept booking | [x] | High |
-| DRV-32 | Decline booking | [x] | High |
+| DRV-32 | ~~Decline booking~~ (removed - bookings remain visible) | [-] | - |
 | DRV-33 | View booking details | [x] | High |
 
 ### Trip Lifecycle
@@ -216,6 +216,62 @@ Status Legend:
 
 ---
 
+## Vehicle Categories Feature
+
+### Database Changes
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| CAT-01 | Add vehicle_category enum (Sedan, MPV/SUV, Van) | [x] | High |
+| CAT-02 | Add category field to vehicles table | [x] | High |
+| CAT-03 | Add category, num_bags, additional_info to bookings table | [x] | High |
+| CAT-04 | Add category-based pricing to pricing_config | [x] | High |
+
+### Admin Features
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| CAT-10 | Configure base rate per category | [x] | High |
+| CAT-11 | Configure distance fee per category | [x] | High |
+
+### Customer Booking Flow
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| CAT-20 | Select vehicle category (Sedan/MPV-SUV/Van) | [x] | High |
+| CAT-21 | Enter number of bags | [x] | High |
+| CAT-22 | Enter optional additional info | [x] | Medium |
+| CAT-23 | Display category-based pricing | [x] | High |
+
+### Driver Booking Flow
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| CAT-30 | Display customer name on pending bookings | [x] | High |
+| CAT-31 | Display number of bags on pending bookings | [x] | High |
+| CAT-32 | Display additional info on pending bookings | [x] | Medium |
+| CAT-33 | Display selected category on pending bookings | [x] | High |
+| CAT-34 | Category-based acceptance rules | [x] | High |
+
+**Category Acceptance Rules:**
+- **Van** can accept: Van, MPV/SUV, Sedan (price follows selected category)
+- **MPV/SUV** can accept: MPV/SUV, Sedan (price follows selected category)
+- **Sedan** can accept: Sedan only
+
+---
+
+## In-App Messaging
+
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| MSG-01 | Chat/messages table in database | [ ] | Low |
+| MSG-02 | Conversations table (booking-based) | [ ] | Low |
+| MSG-03 | Real-time messaging with Supabase Realtime | [ ] | Low |
+| MSG-04 | Customer can message driver after booking confirmed | [ ] | Low |
+| MSG-05 | Driver can message customer after accepting | [ ] | Low |
+| MSG-06 | Chat screen UI | [ ] | Low |
+| MSG-07 | Unread message badge/indicator | [ ] | Low |
+| MSG-08 | Push notifications for new messages | [ ] | Low |
+| MSG-09 | Message history per booking | [ ] | Low |
+
+---
+
 ## Future (Phase 2+)
 
 | ID | Feature | Status | Priority | Phase |
@@ -242,4 +298,6 @@ Status Legend:
 | Driver | 32 | 0 | 0 | 32 |
 | Admin | 25 | 0 | 0 | 25 |
 | UI Components | 8 | 0 | 0 | 8 |
-| **Total MVP** | **112** | **8** | **0** | **104** |
+| Vehicle Categories | 15 | 0 | 0 | 15 |
+| In-App Messaging | 9 | 9 | 0 | 0 |
+| **Total MVP** | **136** | **17** | **0** | **119** |

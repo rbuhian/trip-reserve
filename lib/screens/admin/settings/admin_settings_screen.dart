@@ -16,6 +16,7 @@ class AdminSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Settings'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

@@ -65,6 +65,7 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen>
       appBar: AppBar(
         title: const Text('Reports & Analytics'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         bottom: TabBar(
           controller: _tabController,
           labelColor: colorScheme.primary,

@@ -164,6 +164,7 @@ class _UserDetailsScreenState extends ConsumerState<UserDetailsScreen> {
       appBar: AppBar(
         title: const Text('User Details'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         actions: [
           if (!_isEditing && userAsync.valueOrNull != null)
             IconButton(

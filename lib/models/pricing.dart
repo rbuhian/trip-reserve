@@ -114,3 +114,43 @@ abstract class BookingAddonCreate with _$BookingAddonCreate {
   factory BookingAddonCreate.fromJson(Map<String, dynamic> json) =>
       _$BookingAddonCreateFromJson(json);
 }
+
+/// Category-specific pricing configuration
+@freezed
+abstract class CategoryPricing with _$CategoryPricing {
+  const factory CategoryPricing({
+    required String id,
+    required VehicleCategory category,
+    @JsonKey(name: 'base_rate') required double baseRate,
+    @JsonKey(name: 'per_km_rate') required double perKmRate,
+    @JsonKey(name: 'minimum_fare') required double minimumFare,
+    @JsonKey(name: 'is_active') @Default(true) bool isActive,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
+  }) = _CategoryPricing;
+
+  const CategoryPricing._();
+
+  factory CategoryPricing.fromJson(Map<String, dynamic> json) =>
+      _$CategoryPricingFromJson(json);
+
+  /// Calculate fare for a given distance
+  double calculateFare(double distanceKm) {
+    final fare = baseRate + (distanceKm * perKmRate);
+    return fare < minimumFare ? minimumFare : fare;
+  }
+
+  /// Calculate distance fee only
+  double calculateDistanceFee(double distanceKm) {
+    return distanceKm * perKmRate;
+  }
+
+  /// Formatted base rate
+  String get baseRateText => '₱${baseRate.toStringAsFixed(0)}';
+
+  /// Formatted per km rate
+  String get perKmRateText => '₱${perKmRate.toStringAsFixed(0)}/km';
+
+  /// Formatted minimum fare
+  String get minimumFareText => '₱${minimumFare.toStringAsFixed(0)}';
+}

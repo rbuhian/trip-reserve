@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/enums.dart';
 import '../models/pricing.dart';
 import '../providers/supabase_provider.dart';
 
@@ -18,6 +19,7 @@ class PricingRepository {
 
   SupabaseQueryBuilder get _configTable => _client.from('pricing_config');
   SupabaseQueryBuilder get _addonsTable => _client.from('pricing_addons');
+  SupabaseQueryBuilder get _categoryPricingTable => _client.from('category_pricing');
 
   /// Get the active pricing configuration
   Future<PricingConfig?> getActivePricingConfig() async {
@@ -53,18 +55,56 @@ class PricingRepository {
     return response != null ? PricingAddon.fromJson(response) : null;
   }
 
-  /// Calculate fare for a booking
+  /// Get all category pricing configurations
+  Future<List<CategoryPricing>> getAllCategoryPricing() async {
+    final response = await _categoryPricingTable
+        .select()
+        .eq('is_active', true)
+        .order('category');
+
+    return (response as List)
+        .map((json) => CategoryPricing.fromJson(json))
+        .toList();
+  }
+
+  /// Get pricing for a specific category
+  Future<CategoryPricing?> getCategoryPricing(VehicleCategory category) async {
+    final response = await _categoryPricingTable
+        .select()
+        .eq('category', category.value)
+        .eq('is_active', true)
+        .maybeSingle();
+
+    return response != null ? CategoryPricing.fromJson(response) : null;
+  }
+
+  /// Calculate fare for a booking based on category
   Future<PriceBreakdown> calculateFare({
     required double distanceKm,
+    required VehicleCategory category,
     List<SelectedAddon> selectedAddons = const [],
   }) async {
-    final config = await getActivePricingConfig();
-    if (config == null) {
-      throw Exception('No active pricing configuration found');
-    }
+    // Try to get category-specific pricing first
+    final categoryPricing = await getCategoryPricing(category);
 
-    final baseFare = config.baseRate;
-    final distanceFee = config.calculateDistanceFee(distanceKm);
+    double baseFare;
+    double distanceFee;
+    double minimumFare;
+
+    if (categoryPricing != null) {
+      baseFare = categoryPricing.baseRate;
+      distanceFee = categoryPricing.calculateDistanceFee(distanceKm);
+      minimumFare = categoryPricing.minimumFare;
+    } else {
+      // Fall back to global pricing config
+      final config = await getActivePricingConfig();
+      if (config == null) {
+        throw Exception('No active pricing configuration found');
+      }
+      baseFare = config.baseRate;
+      distanceFee = config.calculateDistanceFee(distanceKm);
+      minimumFare = config.minimumFare;
+    }
 
     // Calculate addons total
     double addonsTotal = 0;
@@ -88,7 +128,7 @@ class PricingRepository {
     final total = subtotal + addonsTotal;
 
     // Apply minimum fare
-    final finalTotal = total < config.minimumFare ? config.minimumFare : total;
+    final finalTotal = total < minimumFare ? minimumFare : total;
 
     return PriceBreakdown(
       baseFare: baseFare,
@@ -175,6 +215,58 @@ class AdminPricingRepository {
 
   SupabaseQueryBuilder get _configTable => _client.from('pricing_config');
   SupabaseQueryBuilder get _addonsTable => _client.from('pricing_addons');
+  SupabaseQueryBuilder get _categoryPricingTable => _client.from('category_pricing');
+
+  // ============================================================
+  // CATEGORY PRICING METHODS
+  // ============================================================
+
+  /// Get all category pricing configurations
+  Future<List<CategoryPricing>> getAllCategoryPricing() async {
+    final response = await _categoryPricingTable
+        .select()
+        .order('category');
+
+    return (response as List)
+        .map((json) => CategoryPricing.fromJson(json))
+        .toList();
+  }
+
+  /// Get pricing for a specific category
+  Future<CategoryPricing?> getCategoryPricing(VehicleCategory category) async {
+    final response = await _categoryPricingTable
+        .select()
+        .eq('category', category.value)
+        .maybeSingle();
+
+    return response != null ? CategoryPricing.fromJson(response) : null;
+  }
+
+  /// Update category pricing
+  Future<CategoryPricing> updateCategoryPricing(
+    VehicleCategory category, {
+    double? baseRate,
+    double? perKmRate,
+    double? minimumFare,
+    bool? isActive,
+  }) async {
+    final updates = <String, dynamic>{
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    if (baseRate != null) updates['base_rate'] = baseRate;
+    if (perKmRate != null) updates['per_km_rate'] = perKmRate;
+    if (minimumFare != null) updates['minimum_fare'] = minimumFare;
+    if (isActive != null) updates['is_active'] = isActive;
+
+    final response = await _categoryPricingTable
+        .update(updates)
+        .eq('category', category.value)
+        .select()
+        .single();
+
+    return CategoryPricing.fromJson(response);
+  }
 
   // ============================================================
   // PRICING CONFIG METHODS

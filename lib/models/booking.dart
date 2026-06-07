@@ -22,6 +22,11 @@ abstract class Booking with _$Booking {
     // Status
     @Default(BookingStatus.pending) BookingStatus status,
 
+    // Vehicle category selection
+    @Default(VehicleCategory.sedan) VehicleCategory category,
+    @JsonKey(name: 'num_bags') @Default(0) int numBags,
+    @JsonKey(name: 'additional_info') String? additionalInfo,
+
     // Locations
     @JsonKey(name: 'pickup_address') required String pickupAddress,
     @JsonKey(name: 'pickup_lat') required double pickupLat,
@@ -92,6 +97,12 @@ abstract class BookingListItem with _$BookingListItem {
     required String id,
     @JsonKey(name: 'reference_number') required String referenceNumber,
     required BookingStatus status,
+
+    // Vehicle category info (for driver display)
+    @Default(VehicleCategory.sedan) VehicleCategory category,
+    @JsonKey(name: 'num_bags') @Default(0) int numBags,
+    @JsonKey(name: 'additional_info') String? additionalInfo,
+
     @JsonKey(name: 'pickup_address') required String pickupAddress,
     @JsonKey(name: 'dropoff_address') required String dropoffAddress,
     @JsonKey(name: 'scheduled_date') required DateTime scheduledDate,
@@ -124,6 +135,11 @@ abstract class BookingListItem with _$BookingListItem {
 @freezed
 abstract class BookingCreate with _$BookingCreate {
   const factory BookingCreate({
+    // Vehicle category selection
+    @Default(VehicleCategory.sedan) VehicleCategory category,
+    @JsonKey(name: 'num_bags') @Default(0) int numBags,
+    @JsonKey(name: 'additional_info') String? additionalInfo,
+
     // Locations
     @JsonKey(name: 'pickup_address') required String pickupAddress,
     @JsonKey(name: 'pickup_lat') required double pickupLat,
@@ -138,7 +154,7 @@ abstract class BookingCreate with _$BookingCreate {
     @JsonKey(name: 'scheduled_date') required DateTime scheduledDate,
     @JsonKey(name: 'pickup_time') required String pickupTime,
 
-    // Vehicle selection (optional - can be assigned by driver)
+    // Vehicle selection (optional - driver accepts based on category)
     @JsonKey(name: 'vehicle_id') String? vehicleId,
 
     // Pricing

@@ -11,7 +11,6 @@ class DriverBookingCard extends StatelessWidget {
   final BookingListItem booking;
   final VoidCallback? onTap;
   final VoidCallback? onAccept;
-  final VoidCallback? onDecline;
   final VoidCallback? onStart;
   final VoidCallback? onComplete;
   final bool isLoading;
@@ -21,7 +20,6 @@ class DriverBookingCard extends StatelessWidget {
     required this.booking,
     this.onTap,
     this.onAccept,
-    this.onDecline,
     this.onStart,
     this.onComplete,
     this.isLoading = false,
@@ -113,6 +111,11 @@ class DriverBookingCard extends StatelessWidget {
 
             const SizedBox(height: 12),
 
+            // Category and Trip Info
+            _buildCategoryInfo(colorScheme),
+
+            const SizedBox(height: 12),
+
             // Route
             _buildRouteSection(colorScheme),
 
@@ -146,6 +149,42 @@ class DriverBookingCard extends StatelessWidget {
               ],
             ),
 
+            // Additional info if present
+            if (booking.additionalInfo != null && booking.additionalInfo!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        booking.additionalInfo!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             // Action buttons based on status
             if (_shouldShowActions) ...[
               const SizedBox(height: 16),
@@ -158,9 +197,78 @@ class DriverBookingCard extends StatelessWidget {
   }
 
   bool get _shouldShowActions =>
-      (booking.status == BookingStatus.pending && (onAccept != null || onDecline != null)) ||
+      (booking.status == BookingStatus.pending && onAccept != null) ||
       (booking.status == BookingStatus.confirmed && onStart != null) ||
       (booking.status == BookingStatus.inProgress && onComplete != null);
+
+  Widget _buildCategoryInfo(ColorScheme colorScheme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: _getCategoryColor(booking.category).withOpacity(0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: _getCategoryColor(booking.category).withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Category icon and name
+          Icon(
+            _getCategoryIcon(booking.category),
+            size: 20,
+            color: _getCategoryColor(booking.category),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            booking.category.displayName,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: _getCategoryColor(booking.category),
+            ),
+          ),
+          const Spacer(),
+          // Number of bags
+          Icon(
+            Icons.luggage,
+            size: 16,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '${booking.numBags} bag${booking.numBags != 1 ? 's' : ''}',
+            style: TextStyle(
+              fontSize: 12,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getCategoryIcon(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return Icons.directions_car;
+      case VehicleCategory.mpvSuv:
+        return Icons.airport_shuttle;
+      case VehicleCategory.van:
+        return Icons.directions_bus;
+    }
+  }
+
+  Color _getCategoryColor(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return AppColors.primary;
+      case VehicleCategory.mpvSuv:
+        return AppColors.primaryLight;
+      case VehicleCategory.van:
+        return AppColors.success;
+    }
+  }
 
   Widget _buildRouteSection(ColorScheme colorScheme) {
     return Row(
@@ -292,34 +400,20 @@ class DriverBookingCard extends StatelessWidget {
 
     switch (booking.status) {
       case BookingStatus.pending:
-        return Row(
-          children: [
-            if (onDecline != null)
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onDecline,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: colorScheme.error,
-                    side: BorderSide(color: colorScheme.error.withOpacity(0.5)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: const Text('Decline'),
-                ),
+        if (onAccept != null) {
+          return SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: onAccept,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.success,
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-            if (onDecline != null && onAccept != null) const SizedBox(width: 12),
-            if (onAccept != null)
-              Expanded(
-                child: FilledButton(
-                  onPressed: onAccept,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.success,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: const Text('Accept'),
-                ),
-              ),
-          ],
-        );
+              child: const Text('Accept'),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
 
       case BookingStatus.confirmed:
         if (onStart != null) {

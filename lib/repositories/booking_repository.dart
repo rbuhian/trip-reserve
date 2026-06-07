@@ -53,7 +53,7 @@ class BookingRepository {
           *,
           customer:users!customer_id(id, full_name, phone, avatar_url),
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .single();
 
@@ -79,7 +79,7 @@ class BookingRepository {
           *,
           customer:users!customer_id(id, full_name, phone, avatar_url),
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('id', id)
         .maybeSingle();
@@ -94,7 +94,7 @@ class BookingRepository {
           *,
           customer:users!customer_id(id, full_name, phone, avatar_url),
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('reference_number', referenceNumber)
         .maybeSingle();
@@ -114,11 +114,11 @@ class BookingRepository {
 
     var query = _table
         .select('''
-          id, reference_number, status,
+          id, reference_number, status, category, num_bags, additional_info,
           pickup_address, dropoff_address,
           scheduled_date, pickup_time, total_amount, created_at,
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('customer_id', _currentUserId!);
 
@@ -145,11 +145,11 @@ class BookingRepository {
 
     final response = await _table
         .select('''
-          id, reference_number, status,
+          id, reference_number, status, category, num_bags, additional_info,
           pickup_address, dropoff_address,
           scheduled_date, pickup_time, total_amount, created_at,
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('customer_id', _currentUserId!)
         .gte('scheduled_date', today)
@@ -170,11 +170,11 @@ class BookingRepository {
 
     final response = await _table
         .select('''
-          id, reference_number, status,
+          id, reference_number, status, category, num_bags, additional_info,
           pickup_address, dropoff_address,
           scheduled_date, pickup_time, total_amount, created_at,
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('customer_id', _currentUserId!)
         .inFilter('status', ['completed', 'cancelled'])
@@ -199,7 +199,7 @@ class BookingRepository {
           *,
           customer:users!customer_id(id, full_name, phone, avatar_url),
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .single();
 
@@ -233,11 +233,11 @@ class BookingRepository {
 
     var query = _table
         .select('''
-          id, reference_number, status,
+          id, reference_number, status, category, num_bags, additional_info,
           pickup_address, dropoff_address,
           scheduled_date, pickup_time, total_amount, created_at,
           customer:users!customer_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('driver_id', _currentUserId!);
 
@@ -254,34 +254,63 @@ class BookingRepository {
         .toList();
   }
 
-  /// Get pending booking requests (unassigned or assigned to driver's vehicles)
+  /// Get pending booking requests that driver can accept based on vehicle categories
+  ///
+  /// Shows bookings where:
+  /// - Status is pending (not yet accepted)
+  /// - Driver has at least one vehicle that can accept the booking's category
+  ///
+  /// Category acceptance rules:
+  /// - Van can accept: Van, MPV/SUV, Sedan
+  /// - MPV/SUV can accept: MPV/SUV, Sedan
+  /// - Sedan can accept: Sedan only
   Future<List<BookingListItem>> getPendingRequests() async {
     if (_currentUserId == null) {
       throw Exception('User not authenticated');
     }
 
-    // Get pending bookings where the selected vehicle belongs to current driver
-    // When a customer books, they select a vehicle - that vehicle's owner should see the request
+    // First, get the driver's vehicles to determine which categories they can accept
+    final vehiclesResponse = await _client
+        .from('vehicles')
+        .select('category')
+        .eq('driver_id', _currentUserId!)
+        .eq('is_active', true);
+
+    final driverVehicleCategories = (vehiclesResponse as List)
+        .map((v) => VehicleCategory.fromString(v['category'] as String))
+        .toSet();
+
+    if (driverVehicleCategories.isEmpty) {
+      return []; // Driver has no vehicles
+    }
+
+    // Determine all categories this driver can accept
+    final acceptableCategories = <String>{};
+    for (final vehicleCategory in driverVehicleCategories) {
+      for (final acceptable in vehicleCategory.acceptableCategories) {
+        acceptableCategories.add(acceptable.value);
+      }
+    }
+
+    // Get all pending bookings (no driver assigned yet) that are today or in the future
+    final today = DateTime.now().toIso8601String().split('T')[0];
 
     final response = await _table
         .select('''
-          id, reference_number, status,
+          id, reference_number, status, category, num_bags, additional_info,
           pickup_address, dropoff_address,
           scheduled_date, pickup_time, total_amount, created_at,
           customer:users!customer_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url, driver_id)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('status', BookingStatus.pending.value)
+        .isFilter('driver_id', null)
+        .gte('scheduled_date', today)
+        .inFilter('category', acceptableCategories.toList())
         .order('scheduled_date')
         .order('pickup_time');
 
-    // Filter to only show bookings where the vehicle belongs to current driver
     return (response as List)
-        .where((json) {
-          final vehicle = json['vehicle'];
-          // Only show if vehicle belongs to current driver
-          return vehicle != null && vehicle['driver_id'] == _currentUserId;
-        })
         .map((json) => BookingListItem.fromJson(json))
         .toList();
   }
@@ -296,11 +325,11 @@ class BookingRepository {
 
     final response = await _table
         .select('''
-          id, reference_number, status,
+          id, reference_number, status, category, num_bags, additional_info,
           pickup_address, dropoff_address,
           scheduled_date, pickup_time, total_amount, created_at,
           customer:users!customer_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('driver_id', _currentUserId!)
         .gte('scheduled_date', today)
@@ -321,11 +350,11 @@ class BookingRepository {
 
     final response = await _table
         .select('''
-          id, reference_number, status,
+          id, reference_number, status, category, num_bags, additional_info,
           pickup_address, dropoff_address,
           scheduled_date, pickup_time, total_amount, created_at,
           customer:users!customer_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('driver_id', _currentUserId!)
         .eq('status', BookingStatus.completed.value)
@@ -355,7 +384,7 @@ class BookingRepository {
           *,
           customer:users!customer_id(id, full_name, phone, avatar_url),
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .single();
 
@@ -385,7 +414,7 @@ class BookingRepository {
           *,
           customer:users!customer_id(id, full_name, phone, avatar_url),
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .single();
 
@@ -404,7 +433,7 @@ class BookingRepository {
           *,
           customer:users!customer_id(id, full_name, phone, avatar_url),
           driver:users!driver_id(id, full_name, phone, avatar_url),
-          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+          vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .single();
 

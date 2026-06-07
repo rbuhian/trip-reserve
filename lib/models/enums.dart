@@ -211,3 +211,86 @@ enum EarningStatus {
     );
   }
 }
+
+/// Vehicle categories
+@JsonEnum(valueField: 'value')
+enum VehicleCategory {
+  sedan('sedan'),
+  mpvSuv('mpv_suv'),
+  van('van');
+
+  const VehicleCategory(this.value);
+  final String value;
+
+  static VehicleCategory fromString(String value) {
+    return VehicleCategory.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => VehicleCategory.sedan,
+    );
+  }
+
+  /// Human-readable display name
+  String get displayName {
+    switch (this) {
+      case VehicleCategory.sedan:
+        return 'Sedan';
+      case VehicleCategory.mpvSuv:
+        return 'MPV/SUV';
+      case VehicleCategory.van:
+        return 'Van';
+    }
+  }
+
+  /// Description of the category
+  String get description {
+    switch (this) {
+      case VehicleCategory.sedan:
+        return 'Standard car, up to 4 passengers';
+      case VehicleCategory.mpvSuv:
+        return 'Larger vehicle, up to 7 passengers';
+      case VehicleCategory.van:
+        return 'Van, up to 15 passengers';
+    }
+  }
+
+  /// Icon name for the category
+  String get iconName {
+    switch (this) {
+      case VehicleCategory.sedan:
+        return 'directions_car';
+      case VehicleCategory.mpvSuv:
+        return 'airport_shuttle';
+      case VehicleCategory.van:
+        return 'directions_bus';
+    }
+  }
+
+  /// Check if this category can accept bookings for another category
+  /// Returns true if this vehicle category can accept a booking of the given category
+  bool canAcceptCategory(VehicleCategory bookingCategory) {
+    switch (this) {
+      case VehicleCategory.van:
+        // Van can accept all categories
+        return true;
+      case VehicleCategory.mpvSuv:
+        // MPV/SUV can accept mpvSuv and sedan
+        return bookingCategory == VehicleCategory.mpvSuv ||
+            bookingCategory == VehicleCategory.sedan;
+      case VehicleCategory.sedan:
+        // Sedan can only accept sedan
+        return bookingCategory == VehicleCategory.sedan;
+    }
+  }
+
+  /// Get all categories this vehicle can accept
+  List<VehicleCategory> get acceptableCategories {
+    switch (this) {
+      case VehicleCategory.van:
+        return [VehicleCategory.van, VehicleCategory.mpvSuv, VehicleCategory.sedan];
+      case VehicleCategory.mpvSuv:
+        return [VehicleCategory.mpvSuv, VehicleCategory.sedan];
+      case VehicleCategory.sedan:
+        return [VehicleCategory.sedan];
+    }
+  }
+}

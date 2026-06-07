@@ -45,78 +45,77 @@ class DriverDashboardScreen extends ConsumerWidget {
     final upcomingBookings = ref.watch(dashboardUpcomingProvider);
 
     return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            ref.invalidate(weeklyEarningsProvider);
-            ref.invalidate(pendingRequestsCountProvider);
-            ref.invalidate(dashboardUpcomingProvider);
-            ref.invalidate(myVehiclesProvider);
-          },
-          child: CustomScrollView(
-            slivers: [
-              // App Bar
-              SliverAppBar(
-                floating: true,
-                backgroundColor: colorScheme.surface,
-                title: authUser.when(
-                  data: (user) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Good ${_getGreeting()},',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w400,
-                        ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(weeklyEarningsProvider);
+          ref.invalidate(pendingRequestsCountProvider);
+          ref.invalidate(dashboardUpcomingProvider);
+          ref.invalidate(myVehiclesProvider);
+        },
+        child: CustomScrollView(
+          slivers: [
+            // App Bar
+            SliverAppBar(
+              floating: true,
+              pinned: true,
+              title: authUser.when(
+                data: (user) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Good ${_getGreeting()},',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withOpacity(0.8),
+                        fontWeight: FontWeight.w400,
                       ),
-                      Text(
-                        user?.firstName ?? 'Driver',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    ),
+                    Text(
+                      user?.firstName ?? 'Driver',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
-                  loading: () => const SizedBox(),
-                  error: (_, __) => const Text('Error'),
+                    ),
+                  ],
                 ),
-                actions: [
-                  // Notifications
-                  IconButton(
-                    onPressed: () {},
-                    icon: Badge(
-                      smallSize: 8,
-                      child: Icon(
-                        Icons.notifications_outlined,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  // Profile
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: IconButton(
-                      onPressed: () => context.go('/driver/profile'),
-                      icon: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: colorScheme.primary.withOpacity(0.1),
-                        child: Icon(
-                          Icons.person,
-                          size: 18,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                loading: () => const SizedBox(),
+                error: (_, __) => const Text('Error'),
               ),
+              actions: [
+                // Notifications
+                IconButton(
+                  onPressed: () {},
+                  icon: const Badge(
+                    smallSize: 8,
+                    child: Icon(
+                      Icons.notifications_outlined,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                // Profile
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: IconButton(
+                    onPressed: () => context.go('/driver/profile'),
+                    icon: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.white.withOpacity(0.15),
+                      child: const Icon(
+                        Icons.person,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
 
-              // Content
-              SliverPadding(
+            // Content
+            SliverPadding(
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
@@ -292,7 +291,6 @@ class DriverDashboardScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 

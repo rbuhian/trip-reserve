@@ -336,7 +336,6 @@ class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: colorScheme.surface,
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),

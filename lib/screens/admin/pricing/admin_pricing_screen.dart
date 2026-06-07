@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../models/enums.dart';
 import '../../../models/pricing.dart';
 import '../../../repositories/pricing_repository.dart';
 
@@ -18,6 +19,12 @@ final allAddonsProvider = FutureProvider<List<PricingAddon>>((ref) async {
   return repo.getAllAddons();
 });
 
+/// Provider for all category pricing
+final allCategoryPricingProvider = FutureProvider<List<CategoryPricing>>((ref) async {
+  final repo = ref.watch(adminPricingRepositoryProvider);
+  return repo.getAllCategoryPricing();
+});
+
 class AdminPricingScreen extends ConsumerWidget {
   const AdminPricingScreen({super.key});
 
@@ -26,16 +33,19 @@ class AdminPricingScreen extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final config = ref.watch(activePricingConfigProvider);
     final addons = ref.watch(allAddonsProvider);
+    final categoryPricing = ref.watch(allCategoryPricingProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pricing Configuration'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
       ),
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(activePricingConfigProvider);
           ref.invalidate(allAddonsProvider);
+          ref.invalidate(allCategoryPricingProvider);
         },
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -57,6 +67,46 @@ class AdminPricingScreen extends ConsumerWidget {
                   context,
                   'Failed to load pricing',
                   () => ref.invalidate(activePricingConfigProvider),
+                ),
+              ),
+
+              const SizedBox(height: 28),
+
+              // Category Pricing Section
+              _buildSectionHeader(context, 'Category Pricing', Icons.directions_car_outlined),
+              const SizedBox(height: 8),
+              Text(
+                'Set different rates for each vehicle category',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              categoryPricing.when(
+                data: (pricingList) => Column(
+                  children: VehicleCategory.values.map((category) {
+                    final pricing = pricingList
+                        .cast<CategoryPricing?>()
+                        .firstWhere(
+                          (p) => p?.category == category,
+                          orElse: () => null,
+                        );
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _CategoryPricingCard(
+                        category: category,
+                        pricing: pricing,
+                        onEdit: () => _showCategoryPricingDialog(context, ref, category, pricing),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                loading: () => const _LoadingCard(),
+                error: (_, __) => _buildErrorCard(
+                  context,
+                  'Failed to load category pricing',
+                  () => ref.invalidate(allCategoryPricingProvider),
                 ),
               ),
 
@@ -361,6 +411,31 @@ class AdminPricingScreen extends ConsumerWidget {
       }
     }
   }
+
+  void _showCategoryPricingDialog(
+    BuildContext context,
+    WidgetRef ref,
+    VehicleCategory category,
+    CategoryPricing? pricing,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => _CategoryPricingDialog(
+        category: category,
+        pricing: pricing,
+        onSave: (baseRate, perKmRate, minimumFare) async {
+          final repo = ref.read(adminPricingRepositoryProvider);
+          await repo.updateCategoryPricing(
+            category,
+            baseRate: baseRate,
+            perKmRate: perKmRate,
+            minimumFare: minimumFare,
+          );
+          ref.invalidate(allCategoryPricingProvider);
+        },
+      ),
+    );
+  }
 }
 
 class _LoadingCard extends StatelessWidget {
@@ -459,6 +534,134 @@ class _PricingConfigCard extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _CategoryPricingCard extends StatelessWidget {
+  final VehicleCategory category;
+  final CategoryPricing? pricing;
+  final VoidCallback onEdit;
+
+  const _CategoryPricingCard({
+    required this.category,
+    required this.pricing,
+    required this.onEdit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _getCategoryColor(category).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              _getCategoryIcon(category),
+              color: _getCategoryColor(category),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      category.displayName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
+                    ),
+                    if (pricing != null && !pricing!.isActive) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: colorScheme.onSurfaceVariant.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'DISABLED',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                if (pricing != null) ...[
+                  Text(
+                    'Base: ${pricing!.baseRateText} • ${pricing!.perKmRateText} • Min: ${pricing!.minimumFareText}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ] else ...[
+                  Text(
+                    'Not configured - using default rates',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onEdit,
+            icon: const Icon(Icons.edit_outlined),
+            style: IconButton.styleFrom(
+              backgroundColor: colorScheme.primary.withOpacity(0.1),
+              foregroundColor: colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getCategoryIcon(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return Icons.directions_car;
+      case VehicleCategory.mpvSuv:
+        return Icons.airport_shuttle;
+      case VehicleCategory.van:
+        return Icons.bus_alert;
+    }
+  }
+
+  Color _getCategoryColor(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.sedan:
+        return AppColors.primary;
+      case VehicleCategory.mpvSuv:
+        return AppColors.primaryLight;
+      case VehicleCategory.van:
+        return AppColors.success;
+    }
   }
 }
 
@@ -975,6 +1178,170 @@ class _AddonDialogState extends State<_AddonDialog> {
   }
 }
 
+class _CategoryPricingDialog extends StatefulWidget {
+  final VehicleCategory category;
+  final CategoryPricing? pricing;
+  final Future<void> Function(double baseRate, double perKmRate, double minimumFare) onSave;
+
+  const _CategoryPricingDialog({
+    required this.category,
+    this.pricing,
+    required this.onSave,
+  });
+
+  @override
+  State<_CategoryPricingDialog> createState() => _CategoryPricingDialogState();
+}
+
+class _CategoryPricingDialogState extends State<_CategoryPricingDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _baseRateController;
+  late TextEditingController _perKmRateController;
+  late TextEditingController _minimumFareController;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _baseRateController = TextEditingController(
+      text: widget.pricing?.baseRate.toStringAsFixed(0) ?? _getDefaultBaseRate(),
+    );
+    _perKmRateController = TextEditingController(
+      text: widget.pricing?.perKmRate.toStringAsFixed(0) ?? _getDefaultPerKmRate(),
+    );
+    _minimumFareController = TextEditingController(
+      text: widget.pricing?.minimumFare.toStringAsFixed(0) ?? _getDefaultMinimumFare(),
+    );
+  }
+
+  String _getDefaultBaseRate() {
+    switch (widget.category) {
+      case VehicleCategory.sedan:
+        return '500';
+      case VehicleCategory.mpvSuv:
+        return '700';
+      case VehicleCategory.van:
+        return '1000';
+    }
+  }
+
+  String _getDefaultPerKmRate() {
+    switch (widget.category) {
+      case VehicleCategory.sedan:
+        return '20';
+      case VehicleCategory.mpvSuv:
+        return '25';
+      case VehicleCategory.van:
+        return '30';
+    }
+  }
+
+  String _getDefaultMinimumFare() {
+    switch (widget.category) {
+      case VehicleCategory.sedan:
+        return '300';
+      case VehicleCategory.mpvSuv:
+        return '400';
+      case VehicleCategory.van:
+        return '500';
+    }
+  }
+
+  @override
+  void dispose() {
+    _baseRateController.dispose();
+    _perKmRateController.dispose();
+    _minimumFareController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      await widget.onSave(
+        double.parse(_baseRateController.text),
+        double.parse(_perKmRateController.text),
+        double.parse(_minimumFareController.text),
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('${widget.category.displayName} Pricing'),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _baseRateController,
+                decoration: const InputDecoration(
+                  labelText: 'Base Rate (₱)',
+                  prefixText: '₱ ',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _perKmRateController,
+                decoration: const InputDecoration(
+                  labelText: 'Per Kilometer Rate (₱)',
+                  prefixText: '₱ ',
+                  suffixText: '/km',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _minimumFareController,
+                decoration: const InputDecoration(
+                  labelText: 'Minimum Fare (₱)',
+                  prefixText: '₱ ',
+                ),
+                keyboardType: TextInputType.number,
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSaving ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _isSaving ? null : _save,
+          child: _isSaving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Save'),
+        ),
+      ],
+    );
+  }
+}
+
 class _FareCalculatorPreview extends ConsumerStatefulWidget {
   const _FareCalculatorPreview();
 
@@ -984,11 +1351,13 @@ class _FareCalculatorPreview extends ConsumerStatefulWidget {
 
 class _FareCalculatorPreviewState extends ConsumerState<_FareCalculatorPreview> {
   double _distance = 10.0;
+  VehicleCategory _selectedCategory = VehicleCategory.sedan;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final config = ref.watch(activePricingConfigProvider);
+    final categoryPricing = ref.watch(allCategoryPricingProvider);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -997,97 +1366,139 @@ class _FareCalculatorPreviewState extends ConsumerState<_FareCalculatorPreview> 
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.3)),
       ),
-      child: config.when(
-        data: (cfg) {
-          if (cfg == null) {
-            return Center(
-              child: Text(
-                'Configure pricing to see preview',
-                style: TextStyle(color: colorScheme.onSurfaceVariant),
-              ),
-            );
-          }
+      child: categoryPricing.when(
+        data: (pricingList) {
+          // Find pricing for selected category, or use fallback
+          final pricing = pricingList
+              .cast<CategoryPricing?>()
+              .firstWhere(
+                (p) => p?.category == _selectedCategory,
+                orElse: () => null,
+              );
 
-          final baseFare = cfg.baseRate;
-          final distanceFee = cfg.perKmRate * _distance;
-          final total = baseFare + distanceFee;
-          final finalTotal = total < cfg.minimumFare ? cfg.minimumFare : total;
+          // Use category pricing or fallback to global config
+          return config.when(
+            data: (cfg) {
+              final baseFare = pricing?.baseRate ?? cfg?.baseRate ?? 500;
+              final perKmRate = pricing?.perKmRate ?? cfg?.perKmRate ?? 20;
+              final minimumFare = pricing?.minimumFare ?? cfg?.minimumFare ?? 300;
 
-          return Column(
-            children: [
-              // Distance slider
-              Row(
+              final distanceFee = perKmRate * _distance;
+              final total = baseFare + distanceFee;
+              final finalTotal = total < minimumFare ? minimumFare : total;
+
+              return Column(
                 children: [
-                  Text(
-                    'Distance:',
-                    style: TextStyle(color: colorScheme.onSurfaceVariant),
+                  // Category selector
+                  Row(
+                    children: [
+                      Text(
+                        'Category:',
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SegmentedButton<VehicleCategory>(
+                          segments: VehicleCategory.values.map((cat) => ButtonSegment(
+                            value: cat,
+                            label: Text(
+                              cat.displayName,
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                          )).toList(),
+                          selected: {_selectedCategory},
+                          onSelectionChanged: (selected) {
+                            setState(() => _selectedCategory = selected.first);
+                          },
+                          showSelectedIcon: false,
+                          style: ButtonStyle(
+                            visualDensity: VisualDensity.compact,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: Slider(
-                      value: _distance,
-                      min: 1,
-                      max: 100,
-                      divisions: 99,
-                      label: '${_distance.toStringAsFixed(0)} km',
-                      onChanged: (v) => setState(() => _distance = v),
+
+                  const SizedBox(height: 16),
+
+                  // Distance slider
+                  Row(
+                    children: [
+                      Text(
+                        'Distance:',
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      ),
+                      Expanded(
+                        child: Slider(
+                          value: _distance,
+                          min: 1,
+                          max: 100,
+                          divisions: 99,
+                          label: '${_distance.toStringAsFixed(0)} km',
+                          onChanged: (v) => setState(() => _distance = v),
+                        ),
+                      ),
+                      Text(
+                        '${_distance.toStringAsFixed(0)} km',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+
+                  const Divider(height: 24),
+
+                  // Breakdown
+                  _buildBreakdownRow(context, 'Base Fare (${_selectedCategory.displayName})', '₱${baseFare.toStringAsFixed(0)}'),
+                  const SizedBox(height: 8),
+                  _buildBreakdownRow(
+                    context,
+                    'Distance (${_distance.toStringAsFixed(0)} km × ₱${perKmRate.toStringAsFixed(0)})',
+                    '₱${distanceFee.toStringAsFixed(0)}',
+                  ),
+                  if (total < minimumFare) ...[
+                    const SizedBox(height: 8),
+                    _buildBreakdownRow(
+                      context,
+                      'Minimum fare applied',
+                      '₱${minimumFare.toStringAsFixed(0)}',
+                      isNote: true,
                     ),
-                  ),
-                  Text(
-                    '${_distance.toStringAsFixed(0)} km',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ],
+
+                  const Divider(height: 24),
+
+                  // Total
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Estimated Total',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        '₱${finalTotal.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 22,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-
-              const Divider(height: 24),
-
-              // Breakdown
-              _buildBreakdownRow(context, 'Base Fare', '₱${baseFare.toStringAsFixed(0)}'),
-              const SizedBox(height: 8),
-              _buildBreakdownRow(
-                context,
-                'Distance (${_distance.toStringAsFixed(0)} km × ₱${cfg.perKmRate.toStringAsFixed(0)})',
-                '₱${distanceFee.toStringAsFixed(0)}',
-              ),
-              if (total < cfg.minimumFare) ...[
-                const SizedBox(height: 8),
-                _buildBreakdownRow(
-                  context,
-                  'Minimum fare applied',
-                  '₱${cfg.minimumFare.toStringAsFixed(0)}',
-                  isNote: true,
-                ),
-              ],
-
-              const Divider(height: 24),
-
-              // Total
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Estimated Total',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  Text(
-                    '₱${finalTotal.toStringAsFixed(0)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 22,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) => const Center(child: Text('Error loading config')),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Error loading config')),
+        error: (_, __) => const Center(child: Text('Error loading category pricing')),
       ),
     );
   }

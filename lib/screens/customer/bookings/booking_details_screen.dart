@@ -85,6 +85,7 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
       appBar: AppBar(
         title: const Text('Booking Details'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         actions: [
           bookingAsync.whenOrNull(
             data: (booking) {

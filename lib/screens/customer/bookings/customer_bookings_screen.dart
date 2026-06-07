@@ -57,6 +57,7 @@ class _CustomerBookingsScreenState extends ConsumerState<CustomerBookingsScreen>
       appBar: AppBar(
         title: const Text('My Bookings'),
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         bottom: TabBar(
           controller: _tabController,
           labelColor: colorScheme.primary,

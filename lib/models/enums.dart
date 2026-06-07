@@ -19,6 +19,18 @@ enum UserRole {
       orElse: () => UserRole.customer,
     );
   }
+
+  /// Human-readable display name
+  String get displayName {
+    switch (this) {
+      case UserRole.customer:
+        return 'Customer';
+      case UserRole.driver:
+        return 'Driver';
+      case UserRole.admin:
+        return 'Admin';
+    }
+  }
 }
 
 /// Booking lifecycle statuses

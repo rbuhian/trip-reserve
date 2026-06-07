@@ -165,14 +165,10 @@ class _UserDetailsScreenState extends ConsumerState<UserDetailsScreen> {
         title: const Text('User Details'),
         backgroundColor: colorScheme.surface,
         actions: [
-          if (!_isEditing)
-            userAsync.whenOrNull(
-              data: (user) => user != null
-                  ? IconButton(
-                      onPressed: () => _startEditing(user),
-                      icon: const Icon(Icons.edit),
-                    )
-                  : null,
+          if (!_isEditing && userAsync.valueOrNull != null)
+            IconButton(
+              onPressed: () => _startEditing(userAsync.valueOrNull!),
+              icon: const Icon(Icons.edit),
             ),
         ],
       ),

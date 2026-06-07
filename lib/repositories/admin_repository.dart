@@ -94,8 +94,8 @@ class AdminRepository {
       tripsToday: tripsToday,
       tripsTodayChange: tripsTodayChange,
       revenueMtd: revenueMtd,
-      revenueMtdChange: revenueMtdChange,
-      fleetUtilization: fleetUtilization,
+      revenueMtdChange: revenueMtdChange.toDouble(),
+      fleetUtilization: fleetUtilization.toDouble(),
       activeVehicles: vehicleStats['active']!,
       totalVehicles: vehicleStats['total']!,
     );

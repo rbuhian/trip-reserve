@@ -102,7 +102,7 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
   }
 
   Future<void> _showAcceptDialog(BookingListItem booking) async {
-    final vehicles = await ref.read(driverVehiclesProvider.future);
+    final vehicles = await ref.read(myVehiclesProvider.future);
     final activeVehicles = vehicles.where((v) => v.isActive).toList();
 
     if (!mounted) return;

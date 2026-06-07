@@ -154,9 +154,10 @@ supabase/snippets/
 # Flutter metadata
 .metadata
 
-# Claude Code sessions
+# Claude Code
 .claude/sessions/
 .claude/*.jsonl
+.claude/settings.local.json
 
 # Temporary files
 *.tmp

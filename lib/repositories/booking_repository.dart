@@ -47,7 +47,7 @@ class BookingRepository {
           ...data.toJson(),
           'customer_id': _currentUserId,
           'reference_number': referenceNumber,
-          'status': BookingStatus.pending.name,
+          'status': BookingStatus.pending.value,
         })
         .select('''
           *,
@@ -123,7 +123,7 @@ class BookingRepository {
         .eq('customer_id', _currentUserId!);
 
     if (status != null) {
-      query = query.eq('status', status.name);
+      query = query.eq('status', status.value);
     }
 
     final response = await query
@@ -190,7 +190,7 @@ class BookingRepository {
   Future<Booking> cancel(String id, {String? reason}) async {
     final response = await _table
         .update({
-          'status': BookingStatus.cancelled.name,
+          'status': BookingStatus.cancelled.value,
           'cancelled_at': DateTime.now().toIso8601String(),
           'cancellation_reason': reason,
         })
@@ -242,7 +242,7 @@ class BookingRepository {
         .eq('driver_id', _currentUserId!);
 
     if (status != null) {
-      query = query.eq('status', status.name);
+      query = query.eq('status', status.value);
     }
 
     final response = await query
@@ -272,7 +272,7 @@ class BookingRepository {
           customer:users!customer_id(id, full_name, phone, avatar_url),
           vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url, driver_id)
         ''')
-        .eq('status', BookingStatus.pending.name)
+        .eq('status', BookingStatus.pending.value)
         .order('scheduled_date')
         .order('pickup_time');
 
@@ -330,7 +330,7 @@ class BookingRepository {
           vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
         ''')
         .eq('driver_id', _currentUserId!)
-        .eq('status', BookingStatus.completed.name)
+        .eq('status', BookingStatus.completed.value)
         .order('completed_at', ascending: false)
         .limit(limit);
 
@@ -347,7 +347,7 @@ class BookingRepository {
 
     final response = await _table
         .update({
-          'status': BookingStatus.confirmed.name,
+          'status': BookingStatus.confirmed.value,
           'driver_id': _currentUserId,
           'vehicle_id': vehicleId,
           'confirmed_at': DateTime.now().toIso8601String(),
@@ -379,7 +379,7 @@ class BookingRepository {
   Future<Booking> startTrip(String id) async {
     final response = await _table
         .update({
-          'status': BookingStatus.inProgress.name,
+          'status': BookingStatus.inProgress.value,
           'started_at': DateTime.now().toIso8601String(),
         })
         .eq('id', id)
@@ -398,7 +398,7 @@ class BookingRepository {
   Future<Booking> completeTrip(String id) async {
     final response = await _table
         .update({
-          'status': BookingStatus.completed.name,
+          'status': BookingStatus.completed.value,
           'completed_at': DateTime.now().toIso8601String(),
         })
         .eq('id', id)

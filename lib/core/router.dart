@@ -29,6 +29,7 @@ import '../screens/driver/profile/driver_profile_screen.dart';
 import '../screens/admin/admin_shell.dart';
 import '../screens/admin/dashboard_screen.dart';
 import '../screens/admin/bookings/admin_bookings_screen.dart';
+import '../screens/admin/bookings/admin_booking_details_screen.dart';
 import '../screens/admin/users/admin_users_screen.dart';
 import '../screens/admin/users/user_details_screen.dart';
 import '../screens/admin/settings/admin_settings_screen.dart';
@@ -215,8 +216,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/admin/bookings/:id',
         builder: (context, state) {
           final id = state.pathParameters['id']!;
-          // For now, reuse customer booking details
-          return BookingDetailsScreen(bookingId: id);
+          return AdminBookingDetailsScreen(bookingId: id);
         },
       ),
       GoRoute(

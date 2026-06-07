@@ -237,6 +237,124 @@ class AdminRepository {
     return counts;
   }
 
+  /// Get full booking details by ID
+  Future<Booking?> getBookingById(String id) async {
+    final response = await _bookingsTable
+        .select('''
+          *,
+          customer:users!customer_id(id, full_name, phone, avatar_url),
+          driver:users!driver_id(id, full_name, phone, avatar_url),
+          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+        ''')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return Booking.fromJson(response);
+  }
+
+  /// Update booking details (admin)
+  Future<Booking> updateBooking(String id, {
+    DateTime? scheduledDate,
+    String? pickupTime,
+    String? pickupAddress,
+    double? pickupLat,
+    double? pickupLng,
+    String? dropoffAddress,
+    double? dropoffLat,
+    double? dropoffLng,
+    String? driverId,
+    String? vehicleId,
+    BookingStatus? status,
+  }) async {
+    final updates = <String, dynamic>{
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    if (scheduledDate != null) {
+      updates['scheduled_date'] = scheduledDate.toIso8601String().split('T')[0];
+    }
+    if (pickupTime != null) updates['pickup_time'] = pickupTime;
+    if (pickupAddress != null) updates['pickup_address'] = pickupAddress;
+    if (pickupLat != null) updates['pickup_lat'] = pickupLat;
+    if (pickupLng != null) updates['pickup_lng'] = pickupLng;
+    if (dropoffAddress != null) updates['dropoff_address'] = dropoffAddress;
+    if (dropoffLat != null) updates['dropoff_lat'] = dropoffLat;
+    if (dropoffLng != null) updates['dropoff_lng'] = dropoffLng;
+    if (driverId != null) updates['driver_id'] = driverId;
+    if (vehicleId != null) updates['vehicle_id'] = vehicleId;
+    if (status != null) {
+      updates['status'] = status.value;
+      // Set timestamps based on status
+      switch (status) {
+        case BookingStatus.confirmed:
+          updates['confirmed_at'] = DateTime.now().toIso8601String();
+          break;
+        case BookingStatus.inProgress:
+          updates['started_at'] = DateTime.now().toIso8601String();
+          break;
+        case BookingStatus.completed:
+          updates['completed_at'] = DateTime.now().toIso8601String();
+          break;
+        case BookingStatus.cancelled:
+          updates['cancelled_at'] = DateTime.now().toIso8601String();
+          break;
+        default:
+          break;
+      }
+    }
+
+    final response = await _bookingsTable
+        .update(updates)
+        .eq('id', id)
+        .select('''
+          *,
+          customer:users!customer_id(id, full_name, phone, avatar_url),
+          driver:users!driver_id(id, full_name, phone, avatar_url),
+          vehicle:vehicles!vehicle_id(id, name, plate_number, capacity, image_url)
+        ''')
+        .single();
+
+    return Booking.fromJson(response);
+  }
+
+  /// Cancel booking (admin)
+  Future<void> cancelBooking(String id, {String? reason}) async {
+    await _bookingsTable
+        .update({
+          'status': 'cancelled',
+          'cancelled_at': DateTime.now().toIso8601String(),
+          'cancellation_reason': reason ?? 'Cancelled by admin',
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', id);
+  }
+
+  /// Get available drivers for assignment
+  Future<List<app_user.User>> getAvailableDrivers() async {
+    final response = await _usersTable
+        .select()
+        .eq('role', 'driver')
+        .eq('is_active', true)
+        .order('full_name');
+
+    return (response as List)
+        .map((json) => app_user.User.fromJson(json))
+        .toList();
+  }
+
+  /// Get available vehicles for assignment
+  Future<List<VehicleOption>> getAvailableVehicles() async {
+    final response = await _vehiclesTable
+        .select('id, name, plate_number, capacity')
+        .eq('is_active', true)
+        .order('name');
+
+    return (response as List)
+        .map((json) => VehicleOption.fromJson(json))
+        .toList();
+  }
+
   // ============================================================
   // USER MANAGEMENT
   // ============================================================
@@ -583,4 +701,30 @@ class FleetUtilizationReport {
     required this.totalRevenue,
     required this.vehicleUtilizations,
   });
+}
+
+/// Vehicle option for assignment dropdown
+class VehicleOption {
+  final String id;
+  final String name;
+  final String plateNumber;
+  final int capacity;
+
+  VehicleOption({
+    required this.id,
+    required this.name,
+    required this.plateNumber,
+    required this.capacity,
+  });
+
+  factory VehicleOption.fromJson(Map<String, dynamic> json) {
+    return VehicleOption(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      plateNumber: json['plate_number'] as String,
+      capacity: json['capacity'] as int,
+    );
+  }
+
+  String get displayName => '$name ($plateNumber)';
 }

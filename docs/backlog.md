@@ -166,8 +166,8 @@ Status Legend:
 |----|---------|--------|----------|
 | ADM-10 | View all bookings | [x] | High |
 | ADM-11 | Filter bookings by status | [x] | Medium |
-| ADM-12 | Edit booking | [ ] | Medium |
-| ADM-13 | Cancel booking | [ ] | Medium |
+| ADM-12 | Edit booking | [x] | Medium |
+| ADM-13 | Cancel booking | [x] | Medium |
 
 ### Dashboard
 | ID | Feature | Status | Priority |
@@ -240,6 +240,6 @@ Status Legend:
 | Database | 10 | 0 | 0 | 10 |
 | Customer | 30 | 6 | 1 | 23 |
 | Driver | 32 | 1 | 0 | 31 |
-| Admin | 25 | 2 | 0 | 23 |
+| Admin | 25 | 0 | 0 | 25 |
 | UI Components | 8 | 0 | 0 | 8 |
-| **Total MVP** | **112** | **11** | **1** | **100** |
+| **Total MVP** | **112** | **9** | **1** | **102** |

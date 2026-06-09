@@ -5,16 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/booking.dart';
 import '../../providers/auth_provider.dart';
-import '../../repositories/booking_repository.dart';
+import '../../providers/booking_provider.dart';
 import '../../widgets/booking_card.dart';
-
-/// Provider for recent upcoming bookings on home screen
-final _recentBookingsProvider = FutureProvider<List<BookingListItem>>((ref) async {
-  final repo = ref.watch(bookingRepositoryProvider);
-  final bookings = await repo.getUpcomingBookings();
-  // Show max 3 on home screen
-  return bookings.take(3).toList();
-});
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -24,119 +16,102 @@ class HomeScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final authUser = ref.watch(authUserProvider);
+    final user = authUser.valueOrNull;
 
     return Scaffold(
-      body: SafeArea(
-        child: authUser.when(
-          data: (user) {
-            if (user == null) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            return CustomScrollView(
-              slivers: [
-                // App Bar
-                SliverAppBar(
-                  floating: true,
-                  backgroundColor: colorScheme.surface,
-                  foregroundColor: colorScheme.onSurface,
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Hello,',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      Text(
-                        user.firstName,
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    // Profile avatar
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: GestureDetector(
-                        onTap: () => _showProfileMenu(context, ref, user.initials),
-                        child: CircleAvatar(
-                          radius: 20,
-                          backgroundColor: colorScheme.primary.withOpacity(0.1),
-                          child: Text(
-                            user.initials,
-                            style: TextStyle(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Content
-                SliverPadding(
-                  padding: const EdgeInsets.all(24),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      // Quick book card
-                      _buildQuickBookCard(context),
-
-                      const SizedBox(height: 32),
-
-                      // Section title with View All
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Upcoming Trips',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () => context.push('/bookings'),
-                            child: const Text('View All'),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // Bookings list
-                      _buildRecentBookings(context, ref),
-                    ]),
-                  ),
-                ),
-              ],
-            );
-          },
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
-          error: (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 48, color: colorScheme.error),
-                const SizedBox(height: 16),
-                Text('Error: $error'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.invalidate(authUserProvider),
-                  child: const Text('Retry'),
-                ),
-              ],
+      appBar: AppBar(
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
+        automaticallyImplyLeading: false,
+        toolbarHeight: 70,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Hello,',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.white.withOpacity(0.7),
+                fontWeight: FontWeight.w400,
+              ),
             ),
+            Text(
+              user?.firstName ?? '',
+              style: const TextStyle(
+                fontSize: 20,
+                color: AppColors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: GestureDetector(
+              onTap: () {
+                if (user != null) _showProfileMenu(context, ref, user.initials);
+              },
+              child: CircleAvatar(
+                radius: 20,
+                backgroundColor: AppColors.accent,
+                child: Text(
+                  user?.initials ?? '?',
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: authUser.when(
+        data: (user) {
+          if (user == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              _buildQuickBookCard(context),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Upcoming Trips',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => context.push('/bookings'),
+                    child: const Text('View All'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              _buildRecentBookings(context, ref),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: colorScheme.error),
+              const SizedBox(height: 16),
+              Text('Error: $error'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(authUserProvider),
+                child: const Text('Retry'),
+              ),
+            ],
           ),
         ),
       ),
@@ -340,7 +315,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildRecentBookings(BuildContext context, WidgetRef ref) {
-    final bookingsAsync = ref.watch(_recentBookingsProvider);
+    final bookingsAsync = ref.watch(recentBookingsProvider);
 
     return bookingsAsync.when(
       data: (bookings) {

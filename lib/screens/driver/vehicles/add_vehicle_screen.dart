@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../models/document.dart';
+import '../../../models/enums.dart';
 import '../../../models/vehicle.dart';
 import '../../../providers/vehicle_provider.dart';
 import '../../../repositories/document_repository.dart';
@@ -28,6 +29,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
   final _colorController = TextEditingController();
   final _descriptionController = TextEditingController();
   int _capacity = 4;
+  VehicleCategory _category = VehicleCategory.sedan;
   int? _year;
   bool _isSubmitting = false;
 
@@ -99,6 +101,7 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
       form.setName(_nameController.text);
       form.setPlateNumber(_plateController.text);
       form.setCapacity(_capacity);
+      form.setCategory(_category);
       form.setYear(_year);
       form.setModel(_modelController.text.isEmpty ? null : _modelController.text);
       form.setColor(_colorController.text.isEmpty ? null : _colorController.text);
@@ -356,6 +359,13 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
 
             const SizedBox(height: 20),
 
+            // Category
+            _buildSectionLabel('Vehicle Category', colorScheme),
+            const SizedBox(height: 12),
+            _buildCategorySelector(colorScheme),
+
+            const SizedBox(height: 20),
+
             // Description
             TextFormField(
               controller: _descriptionController,
@@ -542,6 +552,83 @@ class _AddVehicleScreenState extends ConsumerState<AddVehicleScreen> {
                         : colorScheme.onSurface,
                   ),
                 ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildCategorySelector(ColorScheme colorScheme) {
+    const categoryIcons = {
+      VehicleCategory.sedan: Icons.directions_car,
+      VehicleCategory.mpvSuv: Icons.airport_shuttle,
+      VehicleCategory.van: Icons.directions_bus,
+    };
+
+    return Column(
+      children: VehicleCategory.values.map((cat) {
+        final isSelected = _category == cat;
+        return GestureDetector(
+          onTap: () => setState(() => _category = cat),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colorScheme.primary.withOpacity(0.1)
+                  : colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isSelected
+                    ? colorScheme.primary
+                    : colorScheme.outlineVariant.withOpacity(0.3),
+                width: isSelected ? 1.5 : 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  categoryIcons[cat]!,
+                  size: 22,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        cat.displayName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        cat.description,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  Icon(
+                    Icons.check_circle,
+                    size: 20,
+                    color: colorScheme.primary,
+                  ),
               ],
             ),
           ),

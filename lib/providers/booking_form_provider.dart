@@ -7,6 +7,7 @@ import '../models/vehicle.dart';
 import '../repositories/booking_repository.dart';
 import '../repositories/pricing_repository.dart';
 import '../repositories/vehicle_repository.dart';
+import 'booking_provider.dart';
 import 'location_provider.dart';
 
 /// Booking form state for multi-step booking flow
@@ -512,6 +513,11 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
       );
 
       state = state.copyWith(isLoading: false);
+
+      // Refresh booking lists so the new pending booking appears immediately
+      _ref.invalidate(upcomingBookingsProvider);
+      _ref.invalidate(recentBookingsProvider);
+
       return booking;
     } catch (e) {
       state = state.copyWith(

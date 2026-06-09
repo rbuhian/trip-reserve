@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/enums.dart';
 import '../models/vehicle.dart';
 import '../repositories/vehicle_repository.dart';
 
@@ -120,6 +121,7 @@ class VehicleFormState {
   final String name;
   final String plateNumber;
   final int capacity;
+  final VehicleCategory category;
   final int? year;
   final String? model;
   final String? color;
@@ -132,6 +134,7 @@ class VehicleFormState {
     this.name = '',
     this.plateNumber = '',
     this.capacity = 4,
+    this.category = VehicleCategory.sedan,
     this.year,
     this.model,
     this.color,
@@ -145,6 +148,7 @@ class VehicleFormState {
     String? name,
     String? plateNumber,
     int? capacity,
+    VehicleCategory? category,
     int? year,
     String? model,
     String? color,
@@ -160,6 +164,7 @@ class VehicleFormState {
       name: name ?? this.name,
       plateNumber: plateNumber ?? this.plateNumber,
       capacity: capacity ?? this.capacity,
+      category: category ?? this.category,
       year: clearYear ? null : (year ?? this.year),
       model: clearModel ? null : (model ?? this.model),
       color: clearColor ? null : (color ?? this.color),
@@ -179,6 +184,7 @@ class VehicleFormState {
         name: name.trim(),
         plateNumber: plateNumber.trim().toUpperCase(),
         capacity: capacity,
+        category: category,
         year: year,
         model: model?.trim(),
         color: color?.trim(),
@@ -190,6 +196,7 @@ class VehicleFormState {
         name: name.trim(),
         plateNumber: plateNumber.trim().toUpperCase(),
         capacity: capacity,
+        category: category,
         year: year,
         model: model?.trim(),
         color: color?.trim(),
@@ -204,6 +211,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
   void setName(String value) => state = state.copyWith(name: value);
   void setPlateNumber(String value) => state = state.copyWith(plateNumber: value);
   void setCapacity(int value) => state = state.copyWith(capacity: value);
+  void setCategory(VehicleCategory value) => state = state.copyWith(category: value);
   void setYear(int? value) => state = state.copyWith(year: value, clearYear: value == null);
   void setModel(String? value) => state = state.copyWith(model: value, clearModel: value == null);
   void setColor(String? value) => state = state.copyWith(color: value, clearColor: value == null);
@@ -219,6 +227,7 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
       name: vehicle.name,
       plateNumber: vehicle.plateNumber,
       capacity: vehicle.capacity,
+      category: vehicle.category,
       year: vehicle.year,
       model: vehicle.model,
       color: vehicle.color,

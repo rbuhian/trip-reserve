@@ -39,7 +39,15 @@ class PlacesService {
 
       final result = data['result'];
       final location = result['geometry']['location'];
-      final address = result['formatted_address'] ?? result['name'] ?? '';
+      final name = result['name'] as String?;
+      final formattedAddress = result['formatted_address'] as String? ?? '';
+      // Plus Codes look like "8WH5+X7P " at the start of formatted_address.
+      // Prefer the place name; fall back to formatted_address with Plus Code stripped.
+      final cleanAddress = formattedAddress.replaceFirst(
+        RegExp(r'^[A-Z0-9]{4,8}\+[A-Z0-9]{2,3}[,\s]+'),
+        '',
+      );
+      final address = (name != null && name.isNotEmpty) ? name : cleanAddress;
 
       return LocationData(
         address: address,

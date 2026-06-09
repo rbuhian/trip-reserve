@@ -58,7 +58,7 @@ class _BookingLocationScreenState
                     if (location.address.isNotEmpty) {
                       ref
                           .read(locationSelectionProvider.notifier)
-                          .setPickupFromCoords(location.lat, location.lng);
+                          .setPickup(location);
                     } else {
                       ref.read(locationSelectionProvider.notifier).clearPickup();
                     }
@@ -117,7 +117,7 @@ class _BookingLocationScreenState
                     if (location.address.isNotEmpty) {
                       ref
                           .read(locationSelectionProvider.notifier)
-                          .setDropoffFromCoords(location.lat, location.lng);
+                          .setDropoff(location);
                     } else {
                       ref
                           .read(locationSelectionProvider.notifier)

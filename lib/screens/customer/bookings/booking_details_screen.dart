@@ -7,10 +7,10 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/booking.dart';
 import '../../../models/enums.dart';
+import '../../../providers/booking_provider.dart';
 import '../../../repositories/booking_repository.dart';
 import '../../../widgets/status_pill.dart';
 import '../../../widgets/trip_lifecycle_stepper.dart';
-import 'customer_bookings_screen.dart';
 
 /// Provider for a single booking by ID
 final bookingDetailsProvider = FutureProvider.family<Booking?, String>((ref, id) async {
@@ -49,6 +49,7 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
       ref.invalidate(bookingDetailsProvider(widget.bookingId));
       ref.invalidate(upcomingBookingsProvider);
       ref.invalidate(pastBookingsProvider);
+      ref.invalidate(recentBookingsProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -84,8 +85,8 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Booking Details'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
         actions: [
           bookingAsync.whenOrNull(
             data: (booking) {

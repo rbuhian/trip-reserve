@@ -69,6 +69,18 @@ class LocationSelectionNotifier extends StateNotifier<LocationSelectionState> {
   LocationSelectionNotifier(this._mapsService, this._locationService)
       : super(const LocationSelectionState());
 
+  /// Set pickup location directly (address already resolved — no reverse geocode)
+  Future<void> setPickup(LocationData location) async {
+    state = state.copyWith(pickup: location, clearRoute: true, error: null);
+    await _fetchRouteIfComplete();
+  }
+
+  /// Set dropoff location directly (address already resolved — no reverse geocode)
+  Future<void> setDropoff(LocationData location) async {
+    state = state.copyWith(dropoff: location, clearRoute: true, error: null);
+    await _fetchRouteIfComplete();
+  }
+
   /// Set pickup location from address
   Future<void> setPickupFromAddress(String address) async {
     state = state.copyWith(isLoading: true, error: null, clearRoute: true);

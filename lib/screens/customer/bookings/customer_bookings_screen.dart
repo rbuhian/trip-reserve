@@ -2,22 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../models/booking.dart';
 import '../../../models/enums.dart';
-import '../../../repositories/booking_repository.dart';
+import '../../../providers/booking_provider.dart';
 import '../../../widgets/booking_card.dart';
-
-/// Provider for customer's upcoming bookings
-final upcomingBookingsProvider = FutureProvider<List<BookingListItem>>((ref) async {
-  final repo = ref.watch(bookingRepositoryProvider);
-  return repo.getUpcomingBookings();
-});
-
-/// Provider for customer's past bookings
-final pastBookingsProvider = FutureProvider<List<BookingListItem>>((ref) async {
-  final repo = ref.watch(bookingRepositoryProvider);
-  return repo.getPastBookings(limit: 50);
-});
 
 /// Customer bookings list screen with tabs for upcoming and past
 class CustomerBookingsScreen extends ConsumerStatefulWidget {
@@ -56,13 +45,13 @@ class _CustomerBookingsScreenState extends ConsumerState<CustomerBookingsScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bookings'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
-          indicatorColor: colorScheme.primary,
+          labelColor: AppColors.white,
+          unselectedLabelColor: AppColors.white.withOpacity(0.6),
+          indicatorColor: AppColors.accent,
           tabs: const [
             Tab(text: 'Upcoming'),
             Tab(text: 'Past'),

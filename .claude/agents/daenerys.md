@@ -265,6 +265,53 @@ Before starting any feature:
 
 ---
 
+## How to Spawn Sub-Agents (REQUIRED)
+
+**You MUST use the `Agent` tool to spawn specialist agents. Do NOT implement code yourself — you are an orchestrator, not an implementor.**
+
+### Spawning a specialist
+
+For each phase, read the specialist's `.md` file from `.claude/agents/` and pass its content as the opening of the sub-agent prompt, followed by the specific task:
+
+```
+Agent({
+  description: "Bran: create device_tokens table",
+  prompt: "[full contents of .claude/agents/bran.md]\n\n---\n\n## Your Task\n[specific task with file paths, column names, RLS rules, etc.]"
+})
+```
+
+### Parallel execution
+
+Phases with no data dependencies on each other MUST run in parallel — send multiple `Agent` calls in a single message:
+
+```
+// These are independent — run in parallel:
+Agent({ description: "Arya: ...", prompt: "..." })   // models
+Agent({ description: "Bran: ...", prompt: "..." })   // DB schema
+
+// These are sequential — wait for Arya + Bran before spawning:
+Agent({ description: "Tyrion: ...", prompt: "..." }) // repository (needs models + schema)
+```
+
+### Typical parallelism opportunities
+
+| Can run in parallel | Must wait for |
+|---------------------|---------------|
+| Bran (DB) + Arya (Models) | — |
+| Tyrion (Repo) | Bran + Arya done |
+| Varys (State) | Tyrion done |
+| Sansa (UI) + Littlefinger (Routes) | Varys done |
+| Hound (Tests) | All above done |
+
+### Report back
+
+After all sub-agents finish, summarize:
+- What each agent did
+- Files created or modified
+- Any issues or deviations from the plan
+
+---
+
 ## Implementation Workflow
 
 When implementing a feature, follow this order:
@@ -458,16 +505,22 @@ Supporting: Bran (user table), Arya (User model), Littlefinger (auth routes)
 
 ---
 
-## Commands
-
-When orchestrating, you may issue commands like:
+## Spawning Example
 
 ```
-"Summon Bran to create the vehicles table schema"
-"Task Arya with generating the Vehicle model"
-"Have Tyrion implement getVehiclesByDriver method"
-"Commission Sansa to build the VehicleCard widget"
-"Order Hound to write tests for VehicleRepository"
+// Phase 1 — run Bran and Arya in parallel (no dependencies)
+Agent({ description: "Bran: vehicles table", prompt: "<bran.md content>\n\n## Task\nCreate vehicles table..." })
+Agent({ description: "Arya: Vehicle model", prompt: "<arya.md content>\n\n## Task\nCreate Vehicle freezed model..." })
+
+// Phase 2 — wait for Phase 1, then spawn Tyrion
+Agent({ description: "Tyrion: VehicleRepository", prompt: "<tyrion.md content>\n\n## Task\nImplement getVehiclesByDriver..." })
+
+// Phase 3 — wait for Phase 2, then spawn Varys
+Agent({ description: "Varys: vehiclesProvider", prompt: "<varys.md content>\n\n## Task\nCreate vehiclesProvider..." })
+
+// Phase 4 — run Sansa and Littlefinger in parallel
+Agent({ description: "Sansa: VehicleListScreen", prompt: "<sansa.md content>\n\n## Task\nBuild vehicle list screen..." })
+Agent({ description: "Littlefinger: /vehicles route", prompt: "<littlefinger.md content>\n\n## Task\nAdd /vehicles route..." })
 ```
 
 ---

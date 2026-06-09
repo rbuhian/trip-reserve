@@ -62,10 +62,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
 
       if (mounted) {
-        _showSuccess('Account created successfully!');
-        // Small delay to show message before navigating
+        _showSuccess('Verification code sent to your email!');
+        // Navigate to OTP verification screen
         await Future.delayed(const Duration(milliseconds: 500));
-        context.go('/login');
+        context.push('/verify-otp', extra: _emailController.text.trim());
       }
     } catch (e) {
       print('Signup exception: $e');

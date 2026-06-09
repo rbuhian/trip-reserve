@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../models/enums.dart';
+import '../../../models/pricing.dart';
 import '../../../providers/booking_form_provider.dart';
 
 /// Screen for selecting vehicle category and providing trip details
@@ -88,7 +89,7 @@ class _BookingVehicleScreenState extends ConsumerState<BookingVehicleScreen> {
                         child: _CategoryCard(
                           category: category,
                           isSelected: formState.selectedCategory == category,
-                          pricing: formState.categoryPricing,
+                          pricing: formState.allCategoryPricing?[category],
                           onTap: () {
                             ref
                                 .read(bookingFormProvider.notifier)
@@ -369,7 +370,7 @@ class _BookingVehicleScreenState extends ConsumerState<BookingVehicleScreen> {
 class _CategoryCard extends StatelessWidget {
   final VehicleCategory category;
   final bool isSelected;
-  final dynamic pricing; // CategoryPricing?
+  final CategoryPricing? pricing;
   final VoidCallback onTap;
 
   const _CategoryCard({
@@ -448,7 +449,7 @@ class _CategoryCard extends StatelessWidget {
                   if (pricing != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      'From ${pricing.baseRateText}',
+                      'From ${pricing!.baseRateText}',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,

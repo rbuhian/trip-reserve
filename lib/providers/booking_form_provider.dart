@@ -36,6 +36,7 @@ class BookingFormState {
   final PriceBreakdown? priceBreakdown;
   final PricingConfig? pricingConfig;
   final CategoryPricing? categoryPricing;
+  final Map<VehicleCategory, CategoryPricing>? allCategoryPricing;
 
   // Form state
   final bool isLoading;
@@ -57,6 +58,7 @@ class BookingFormState {
     this.priceBreakdown,
     this.pricingConfig,
     this.categoryPricing,
+    this.allCategoryPricing,
     this.isLoading = false,
     this.error,
     this.currentStep = 0,
@@ -133,6 +135,7 @@ class BookingFormState {
     PriceBreakdown? priceBreakdown,
     PricingConfig? pricingConfig,
     CategoryPricing? categoryPricing,
+    Map<VehicleCategory, CategoryPricing>? allCategoryPricing,
     bool? isLoading,
     String? error,
     int? currentStep,
@@ -155,6 +158,7 @@ class BookingFormState {
       priceBreakdown: priceBreakdown ?? this.priceBreakdown,
       pricingConfig: pricingConfig ?? this.pricingConfig,
       categoryPricing: categoryPricing ?? this.categoryPricing,
+      allCategoryPricing: allCategoryPricing ?? this.allCategoryPricing,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
       currentStep: currentStep ?? this.currentStep,
@@ -233,8 +237,16 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
         state = state.copyWith(pricingConfig: config);
       }
 
-      // Load category-specific pricing
-      final categoryPricing = await pricingRepo.getCategoryPricing(state.selectedCategory);
+      // Load all category pricing at once
+      final allPricing = await pricingRepo.getAllCategoryPricing();
+      final pricingMap = <VehicleCategory, CategoryPricing>{};
+      for (final pricing in allPricing) {
+        pricingMap[pricing.category] = pricing;
+      }
+      state = state.copyWith(allCategoryPricing: pricingMap);
+
+      // Set the current category pricing
+      final categoryPricing = pricingMap[state.selectedCategory];
       state = state.copyWith(categoryPricing: categoryPricing);
 
       _updatePriceBreakdown();
@@ -303,15 +315,15 @@ class BookingFormNotifier extends StateNotifier<BookingFormState> {
     }
   }
 
-  /// Load category-specific pricing
-  Future<void> _loadCategoryPricing() async {
-    try {
-      final pricingRepo = _ref.read(pricingRepositoryProvider);
-      final categoryPricing = await pricingRepo.getCategoryPricing(state.selectedCategory);
+  /// Load category-specific pricing from cached map
+  void _loadCategoryPricing() {
+    // Use cached pricing map if available
+    if (state.allCategoryPricing != null) {
+      final categoryPricing = state.allCategoryPricing![state.selectedCategory];
       state = state.copyWith(categoryPricing: categoryPricing);
       _updatePriceBreakdown();
-    } catch (e) {
-      // Fall back to global pricing if category pricing fails
+    } else {
+      // Fall back to global pricing if category pricing not available
       _updatePriceBreakdown();
     }
   }

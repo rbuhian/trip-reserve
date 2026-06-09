@@ -141,14 +141,25 @@ class AuthActionsNotifier extends AsyncNotifier<void> {
     state = const AsyncLoading();
 
     state = await AsyncValue.guard(() async {
-      final updates = <String, dynamic>{};
-      if (fullName != null) updates['full_name'] = fullName;
-      if (phone != null) updates['phone'] = phone;
-      if (avatarUrl != null) updates['avatar_url'] = avatarUrl;
+      final metadataUpdates = <String, dynamic>{};
+      if (fullName != null) metadataUpdates['full_name'] = fullName;
+      if (phone != null) metadataUpdates['phone'] = phone;
+      if (avatarUrl != null) metadataUpdates['avatar_url'] = avatarUrl;
 
-      if (updates.isNotEmpty) {
-        await _authService.updateUserMetadata(updates);
-        // Refresh session to get updated user data
+      if (metadataUpdates.isNotEmpty) {
+        final client = ref.read(supabaseClientProvider) as supabase.SupabaseClient;
+        final userId = client.auth.currentUser?.id;
+
+        await Future.wait([
+          _authService.updateUserMetadata(metadataUpdates),
+          if (userId != null)
+            client.from('users').update({
+              if (fullName != null) 'full_name': fullName,
+              if (phone != null) 'phone': phone,
+              if (avatarUrl != null) 'avatar_url': avatarUrl,
+            }).eq('id', userId),
+        ]);
+
         await _authService.refreshSession();
       }
     });

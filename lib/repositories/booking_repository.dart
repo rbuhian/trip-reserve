@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -5,18 +7,21 @@ import '../models/booking.dart';
 import '../models/enums.dart';
 import '../models/pricing.dart';
 import '../providers/supabase_provider.dart';
+import '../services/email_service.dart';
 
 /// Provider for BookingRepository
 final bookingRepositoryProvider = Provider<BookingRepository>((ref) {
   final client = ref.watch(supabaseClientProvider);
-  return BookingRepository(client);
+  final emailService = ref.watch(emailServiceProvider);
+  return BookingRepository(client, emailService);
 });
 
 /// Repository for booking CRUD operations
 class BookingRepository {
   final SupabaseClient _client;
+  final EmailService _emailService;
 
-  BookingRepository(this._client);
+  BookingRepository(this._client, this._emailService);
 
   SupabaseQueryBuilder get _table => _client.from('bookings');
   SupabaseQueryBuilder get _addonsTable => _client.from('booking_addons');
@@ -69,7 +74,33 @@ class BookingRepository {
       );
     }
 
+    // Send booking confirmation email (fire-and-forget)
+    _sendBookingConfirmationEmail(booking);
+
     return booking;
+  }
+
+  /// Send booking confirmation email (fire-and-forget)
+  void _sendBookingConfirmationEmail(Booking booking) {
+    _emailService.sendBookingConfirmation(booking).then((result) {
+      if (result.success) {
+        developer.log(
+          'Booking confirmation email sent for ${booking.referenceNumber}',
+          name: 'BookingRepository',
+        );
+      } else {
+        developer.log(
+          'Failed to send booking confirmation email: ${result.error}',
+          name: 'BookingRepository',
+        );
+      }
+    }).catchError((e) {
+      developer.log(
+        'Error sending booking confirmation email',
+        name: 'BookingRepository',
+        error: e,
+      );
+    });
   }
 
   /// Get a booking by ID
@@ -203,7 +234,37 @@ class BookingRepository {
         ''')
         .single();
 
-    return Booking.fromJson(response);
+    final booking = Booking.fromJson(response);
+
+    // Send cancellation emails (fire-and-forget)
+    _sendCancellationEmails(booking, reason);
+
+    return booking;
+  }
+
+  /// Send cancellation emails (fire-and-forget)
+  void _sendCancellationEmails(Booking booking, String? reason) {
+    _emailService.sendBookingCancelled(booking, reason: reason).then((results) {
+      for (final result in results) {
+        if (result.success) {
+          developer.log(
+            'Cancellation email sent for ${booking.referenceNumber}',
+            name: 'BookingRepository',
+          );
+        } else {
+          developer.log(
+            'Failed to send cancellation email: ${result.error}',
+            name: 'BookingRepository',
+          );
+        }
+      }
+    }).catchError((e) {
+      developer.log(
+        'Error sending cancellation emails',
+        name: 'BookingRepository',
+        error: e,
+      );
+    });
   }
 
   /// Get booking addons
@@ -388,7 +449,35 @@ class BookingRepository {
         ''')
         .single();
 
-    return Booking.fromJson(response);
+    final booking = Booking.fromJson(response);
+
+    // Send driver assigned email (fire-and-forget)
+    _sendDriverAssignedEmail(booking);
+
+    return booking;
+  }
+
+  /// Send driver assigned email (fire-and-forget)
+  void _sendDriverAssignedEmail(Booking booking) {
+    _emailService.sendDriverAssigned(booking).then((result) {
+      if (result.success) {
+        developer.log(
+          'Driver assigned email sent for ${booking.referenceNumber}',
+          name: 'BookingRepository',
+        );
+      } else {
+        developer.log(
+          'Failed to send driver assigned email: ${result.error}',
+          name: 'BookingRepository',
+        );
+      }
+    }).catchError((e) {
+      developer.log(
+        'Error sending driver assigned email',
+        name: 'BookingRepository',
+        error: e,
+      );
+    });
   }
 
   /// Decline a booking (driver)
@@ -418,7 +507,35 @@ class BookingRepository {
         ''')
         .single();
 
-    return Booking.fromJson(response);
+    final booking = Booking.fromJson(response);
+
+    // Send trip started email (fire-and-forget)
+    _sendTripStartedEmail(booking);
+
+    return booking;
+  }
+
+  /// Send trip started email (fire-and-forget)
+  void _sendTripStartedEmail(Booking booking) {
+    _emailService.sendTripStarted(booking).then((result) {
+      if (result.success) {
+        developer.log(
+          'Trip started email sent for ${booking.referenceNumber}',
+          name: 'BookingRepository',
+        );
+      } else {
+        developer.log(
+          'Failed to send trip started email: ${result.error}',
+          name: 'BookingRepository',
+        );
+      }
+    }).catchError((e) {
+      developer.log(
+        'Error sending trip started email',
+        name: 'BookingRepository',
+        error: e,
+      );
+    });
   }
 
   /// Complete a trip (driver)
@@ -437,6 +554,34 @@ class BookingRepository {
         ''')
         .single();
 
-    return Booking.fromJson(response);
+    final booking = Booking.fromJson(response);
+
+    // Send trip receipt email (fire-and-forget)
+    _sendTripReceiptEmail(booking);
+
+    return booking;
+  }
+
+  /// Send trip receipt email (fire-and-forget)
+  void _sendTripReceiptEmail(Booking booking) {
+    _emailService.sendTripReceipt(booking).then((result) {
+      if (result.success) {
+        developer.log(
+          'Trip receipt email sent for ${booking.referenceNumber}',
+          name: 'BookingRepository',
+        );
+      } else {
+        developer.log(
+          'Failed to send trip receipt email: ${result.error}',
+          name: 'BookingRepository',
+        );
+      }
+    }).catchError((e) {
+      developer.log(
+        'Error sending trip receipt email',
+        name: 'BookingRepository',
+        error: e,
+      );
+    });
   }
 }

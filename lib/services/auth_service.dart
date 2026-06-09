@@ -134,6 +134,42 @@ class AuthService {
       throw AuthServiceException.fromAuthException(e);
     }
   }
+
+  /// Verify email OTP code
+  ///
+  /// Call this after signUp to verify the user's email with the OTP code
+  Future<AuthResponse> verifyEmailOtp({
+    required String email,
+    required String token,
+  }) async {
+    try {
+      final response = await _client.auth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.signup,
+      );
+
+      if (response.user == null) {
+        throw AuthServiceException('Invalid verification code');
+      }
+
+      return response;
+    } on AuthException catch (e) {
+      throw AuthServiceException.fromAuthException(e);
+    }
+  }
+
+  /// Resend OTP verification email
+  Future<void> resendOtp(String email) async {
+    try {
+      await _client.auth.resend(
+        type: OtpType.signup,
+        email: email,
+      );
+    } on AuthException catch (e) {
+      throw AuthServiceException.fromAuthException(e);
+    }
+  }
 }
 
 /// Custom exception for auth errors
@@ -175,6 +211,12 @@ class AuthServiceException implements Exception {
     }
     if (lowerMessage.contains('user not found')) {
       return 'No account found with this email';
+    }
+    if (lowerMessage.contains('otp') && lowerMessage.contains('expired')) {
+      return 'Verification code has expired. Please request a new one';
+    }
+    if (lowerMessage.contains('otp') || lowerMessage.contains('token')) {
+      return 'Invalid verification code';
     }
 
     // Return original message if no mapping found

@@ -26,4 +26,12 @@ class AppConfig {
   // Currency
   static const String currencyCode = 'PHP';
   static const String currencySymbol = '₱';
+
+  // Email Configuration
+  static const String emailFromAddress = 'bookings@tripreserve.ph';
+  static const String emailFromName = 'Trip Reserve';
+
+  // Brand Colors (for email templates)
+  static const String brandNavyColor = '#0C2340';
+  static const String brandAmberColor = '#F5A623';
 }

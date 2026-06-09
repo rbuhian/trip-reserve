@@ -7,6 +7,8 @@ import '../models/enums.dart';
 import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
+import '../screens/auth/otp_verification_screen.dart';
+import '../screens/auth/forgot_password_screen.dart';
 import '../screens/customer/home_screen.dart';
 import '../screens/customer/map_test_screen.dart';
 import '../screens/customer/booking/booking_location_screen.dart';
@@ -49,7 +51,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = user != null;
 
       final isAuthRoute = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/register';
+          state.matchedLocation == '/register' ||
+          state.matchedLocation == '/verify-otp' ||
+          state.matchedLocation == '/forgot-password';
 
       // Still loading auth state
       if (isLoading) return null;
@@ -75,6 +79,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path: '/verify-otp',
+        builder: (context, state) {
+          final email = state.extra as String? ?? '';
+          return OtpVerificationScreen(email: email);
+        },
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
 
       // Customer routes

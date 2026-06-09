@@ -16,8 +16,10 @@ Status Legend:
 | INF-03 | Flutter project initialization | [x] | High |
 | INF-04 | Google Maps API integration | [x] | High |
 | INF-05 | PayMongo/Xendit integration | [ ] | High |
-| INF-06 | Resend email setup | [ ] | Medium |
+| INF-06 | Email setup (Gmail SMTP) | [x] | Medium |
+| INF-09 | Migrate email sender from Gmail SMTP to Resend API | [ ] | Low |
 | INF-07 | Authentication flow (Supabase Auth) | [x] | High |
+| INF-08 | Firebase project setup & FCM credentials | [ ] | Medium |
 
 ---
 
@@ -45,7 +47,7 @@ Status Legend:
 |----|---------|--------|----------|
 | CUST-01 | Customer registration | [x] | High |
 | CUST-02 | Customer login | [x] | High |
-| CUST-03 | Password reset | [ ] | Medium |
+| CUST-03 | Password reset | [x] | Medium |
 
 ### Booking Creation
 | ID | Feature | Status | Priority |
@@ -82,9 +84,14 @@ Status Legend:
 ### Notifications
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| CUST-40 | Booking confirmation email | [ ] | High |
-| CUST-41 | Booking status update notification | [ ] | Medium |
+| CUST-40 | Booking confirmation email | [x] | High |
+| CUST-41 | Booking status update notification (email) | [x] | Medium |
 | CUST-42 | Trip reminder notification | [ ] | Medium |
+| CUST-43 | Save FCM device token to Supabase on login | [ ] | Medium |
+| CUST-44 | FCM push: driver assigned notification | [ ] | Medium |
+| CUST-45 | FCM push: trip started notification | [ ] | Medium |
+| CUST-46 | FCM push: trip completed notification | [ ] | Medium |
+| CUST-47 | FCM push: trip reminder (scheduled via Cloud Scheduler or Supabase cron) | [ ] | Low |
 
 ---
 
@@ -292,12 +299,12 @@ Status Legend:
 
 | Category | Total | Not Started | In Progress | Done |
 |----------|-------|-------------|-------------|------|
-| Infrastructure | 7 | 2 | 0 | 5 |
+| Infrastructure | 9 | 3 | 0 | 6 |
 | Database | 10 | 0 | 0 | 10 |
-| Customer | 30 | 6 | 0 | 24 |
+| Customer | 35 | 10 | 0 | 25 |
 | Driver | 32 | 0 | 0 | 32 |
 | Admin | 25 | 0 | 0 | 25 |
 | UI Components | 8 | 0 | 0 | 8 |
 | Vehicle Categories | 15 | 0 | 0 | 15 |
 | In-App Messaging | 9 | 9 | 0 | 0 |
-| **Total MVP** | **136** | **17** | **0** | **119** |
+| **Total MVP** | **142** | **23** | **0** | **119** |

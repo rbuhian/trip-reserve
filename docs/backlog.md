@@ -86,7 +86,7 @@ Status Legend:
 |----|---------|--------|----------|
 | CUST-40 | Booking confirmation email | [x] | High |
 | CUST-41 | Booking status update notification (email) | [x] | Medium |
-| CUST-42 | Trip reminder notification | [ ] | Medium |
+| CUST-42 | Trip reminder notification | [x] | Medium |
 | CUST-43 | Save FCM device token to Supabase on login | [ ] | Medium |
 | CUST-44 | FCM push: driver assigned notification | [ ] | Medium |
 | CUST-45 | FCM push: trip started notification | [ ] | Medium |

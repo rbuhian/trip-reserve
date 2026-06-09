@@ -55,6 +55,7 @@ abstract class Booking with _$Booking {
     @JsonKey(name: 'cancellation_reason') String? cancellationReason,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
+    @JsonKey(name: 'reminder_sent_at') DateTime? reminderSentAt,
 
     // Joined data (optional)
     UserRef? customer,

@@ -630,7 +630,7 @@ class _DriverProfileScreenState extends ConsumerState<DriverProfileScreen> {
     );
 
     if (confirmed == true) {
-      await ref.read(authServiceProvider).signOut();
+      await ref.read(authActionsProvider.notifier).signOut();
     }
   }
 }

@@ -51,7 +51,7 @@ class FCMService {
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
       // Get token and save to Supabase
-      await _saveToken();
+      await saveToken();
 
       // Listen for token refreshes
       _messaging.onTokenRefresh.listen(_onTokenRefresh);
@@ -81,7 +81,7 @@ class FCMService {
     await androidPlugin?.createNotificationChannel(_androidChannel);
   }
 
-  Future<void> _saveToken() async {
+  Future<void> saveToken() async {
     try {
       final token = await _messaging.getToken();
       if (token == null) return;

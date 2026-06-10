@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../models/enums.dart';
 import '../models/user.dart' as app;
 import '../services/auth_service.dart';
+import '../services/fcm_service.dart';
 import 'supabase_provider.dart';
 
 /// Current authenticated user state
@@ -90,6 +91,7 @@ class AuthActionsNotifier extends AsyncNotifier<void> {
         email: email,
         password: password,
       );
+      await FCMService.instance.saveToken();
     });
   }
 
@@ -119,6 +121,7 @@ class AuthActionsNotifier extends AsyncNotifier<void> {
     state = const AsyncLoading();
 
     state = await AsyncValue.guard(() async {
+      await FCMService.instance.deleteToken();
       await _authService.signOut();
     });
   }

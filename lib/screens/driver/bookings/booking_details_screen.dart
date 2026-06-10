@@ -12,9 +12,10 @@ import '../../../providers/vehicle_provider.dart';
 import '../../../repositories/booking_repository.dart';
 import '../../../widgets/status_pill.dart';
 import '../../../widgets/trip_lifecycle_stepper.dart';
+import 'bookings_list_screen.dart';
 
 /// Provider for driver booking details
-final driverBookingDetailsProvider = FutureProvider.family<Booking?, String>((ref, id) async {
+final driverBookingDetailsProvider = FutureProvider.autoDispose.family<Booking?, String>((ref, id) async {
   final repo = ref.watch(bookingRepositoryProvider);
   return repo.getById(id);
 });
@@ -1022,6 +1023,8 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
             ),
           );
           ref.invalidate(driverBookingDetailsProvider(widget.bookingId));
+          ref.invalidate(pendingRequestsProvider);
+          ref.invalidate(driverUpcomingProvider);
         }
       } catch (e) {
         if (mounted) {
@@ -1078,6 +1081,8 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
             ),
           );
           ref.invalidate(driverBookingDetailsProvider(widget.bookingId));
+          ref.invalidate(driverUpcomingProvider);
+          ref.invalidate(driverCompletedProvider);
         }
       } catch (e) {
         if (mounted) {

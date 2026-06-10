@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/app_config.dart';
 import 'core/router.dart';
 import 'core/theme/app_theme.dart';
+import 'firebase_options.dart';
+import 'services/fcm_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +29,18 @@ Future<void> main() async {
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.supabaseAnonKey,
   );
+
+  // Initialize Firebase & FCM after Supabase (FCMService needs Supabase.instance.client)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    await FCMService.instance.initialize();
+  } catch (e) {
+    // Firebase not configured yet — FCM features will be unavailable until
+    // google-services.json is placed and `flutterfire configure` is run.
+    debugPrint('Firebase initialization skipped: $e');
+  }
 
   runApp(
     const ProviderScope(

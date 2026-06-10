@@ -19,7 +19,7 @@ Status Legend:
 | INF-06 | Email setup (Gmail SMTP) | [x] | Medium |
 | INF-09 | Migrate email sender from Gmail SMTP to Resend API | [ ] | Low |
 | INF-07 | Authentication flow (Supabase Auth) | [x] | High |
-| INF-08 | Firebase project setup & FCM credentials | [ ] | Medium |
+| INF-08 | Firebase project setup & FCM credentials | [x] | Medium |
 
 ---
 

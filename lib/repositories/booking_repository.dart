@@ -451,10 +451,30 @@ class BookingRepository {
 
     final booking = Booking.fromJson(response);
 
-    // Send driver assigned email (fire-and-forget)
+    // Send driver assigned email + push notification (fire-and-forget)
     _sendDriverAssignedEmail(booking);
+    _sendDriverAssignedPush(booking);
 
     return booking;
+  }
+
+  /// Send driver assigned push notification (fire-and-forget)
+  void _sendDriverAssignedPush(Booking booking) {
+    _client.functions.invoke(
+      'notify-driver-assigned',
+      body: {'bookingId': booking.id},
+    ).then((_) {
+      developer.log(
+        'Driver assigned push sent for ${booking.referenceNumber}',
+        name: 'BookingRepository',
+      );
+    }).catchError((e) {
+      developer.log(
+        'Error sending driver assigned push',
+        name: 'BookingRepository',
+        error: e,
+      );
+    });
   }
 
   /// Send driver assigned email (fire-and-forget)

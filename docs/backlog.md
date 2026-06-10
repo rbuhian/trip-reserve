@@ -88,7 +88,7 @@ Status Legend:
 | CUST-41 | Booking status update notification (email) | [x] | Medium |
 | CUST-42 | Trip reminder notification | [x] | Medium |
 | CUST-43 | Save FCM device token to Supabase on login | [x] | Medium |
-| CUST-44 | FCM push: driver assigned notification | [ ] | Medium |
+| CUST-44 | FCM push: driver assigned notification | [x] | Medium |
 | CUST-45 | FCM push: trip started notification | [ ] | Medium |
 | CUST-46 | FCM push: trip completed notification | [ ] | Medium |
 | CUST-47 | FCM push: trip reminder (scheduled via Cloud Scheduler or Supabase cron) | [ ] | Low |

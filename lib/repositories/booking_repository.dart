@@ -596,10 +596,30 @@ class BookingRepository {
 
     final booking = Booking.fromJson(response);
 
-    // Send trip receipt email (fire-and-forget)
+    // Send trip receipt email + push notification (fire-and-forget)
     _sendTripReceiptEmail(booking);
+    _sendTripCompletedPush(booking);
 
     return booking;
+  }
+
+  /// Send trip completed push notification (fire-and-forget)
+  void _sendTripCompletedPush(Booking booking) {
+    _client.functions.invoke(
+      'notify-trip-completed',
+      body: {'bookingId': booking.id},
+    ).then((_) {
+      developer.log(
+        'Trip completed push sent for ${booking.referenceNumber}',
+        name: 'BookingRepository',
+      );
+    }).catchError((e) {
+      developer.log(
+        'Error sending trip completed push',
+        name: 'BookingRepository',
+        error: e,
+      );
+    });
   }
 
   /// Send trip receipt email (fire-and-forget)

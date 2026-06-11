@@ -89,7 +89,7 @@ Status Legend:
 | CUST-42 | Trip reminder notification | [x] | Medium |
 | CUST-43 | Save FCM device token to Supabase on login | [x] | Medium |
 | CUST-44 | FCM push: driver assigned notification | [x] | Medium |
-| CUST-45 | FCM push: trip started notification | [ ] | Medium |
+| CUST-45 | FCM push: trip started notification | [x] | Medium |
 | CUST-46 | FCM push: trip completed notification | [ ] | Medium |
 | CUST-47 | FCM push: trip reminder (scheduled via Cloud Scheduler or Supabase cron) | [ ] | Low |
 
@@ -301,10 +301,10 @@ Status Legend:
 |----------|-------|-------------|-------------|------|
 | Infrastructure | 9 | 3 | 0 | 6 |
 | Database | 10 | 0 | 0 | 10 |
-| Customer | 35 | 10 | 0 | 25 |
+| Customer | 35 | 9 | 0 | 26 |
 | Driver | 32 | 0 | 0 | 32 |
 | Admin | 25 | 0 | 0 | 25 |
 | UI Components | 8 | 0 | 0 | 8 |
 | Vehicle Categories | 15 | 0 | 0 | 15 |
 | In-App Messaging | 9 | 9 | 0 | 0 |
-| **Total MVP** | **142** | **23** | **0** | **119** |
+| **Total MVP** | **142** | **22** | **0** | **120** |

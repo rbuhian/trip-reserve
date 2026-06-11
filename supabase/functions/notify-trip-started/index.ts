@@ -8,7 +8,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-interface NotifyDriverAssignedRequest {
+interface NotifyTripStartedRequest {
   bookingId: string;
 }
 
@@ -27,7 +27,7 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const { bookingId }: NotifyDriverAssignedRequest = await req.json();
+    const { bookingId }: NotifyTripStartedRequest = await req.json();
 
     if (!bookingId) {
       return new Response(
@@ -41,14 +41,13 @@ serve(async (req: Request): Promise<Response> => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Step 1: Query the booking with driver and vehicle info
+    // Step 1: Query the booking with driver info
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .select(`
         id,
         customer_id,
-        driver:users!driver_id(full_name),
-        vehicle:vehicles!vehicle_id(name, plate_number)
+        driver:users!driver_id(full_name)
       `)
       .eq("id", bookingId)
       .single();
@@ -90,11 +89,9 @@ serve(async (req: Request): Promise<Response> => {
 
     // Step 4: Build notification content
     const driverName = (booking.driver as { full_name: string } | null)?.full_name ?? "Your driver";
-    const vehicleName = (booking.vehicle as { name: string; plate_number: string } | null)?.name ?? "the vehicle";
-    const plateNumber = (booking.vehicle as { name: string; plate_number: string } | null)?.plate_number ?? "";
 
-    const notificationTitle = "Driver Assigned!";
-    const notificationBody = `${driverName} will be driving you in ${vehicleName} (${plateNumber}).`;
+    const notificationTitle = "Your Trip Has Started";
+    const notificationBody = `${driverName} has started your trip. Enjoy your ride!`;
 
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
 
@@ -115,7 +112,7 @@ serve(async (req: Request): Promise<Response> => {
                 body: notificationBody,
               },
               data: {
-                type: "driver_assigned",
+                type: "trip_started",
                 booking_id: bookingId,
               },
             },
@@ -150,7 +147,7 @@ serve(async (req: Request): Promise<Response> => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("Unhandled error in notify-driver-assigned:", error);
+    console.error("Unhandled error in notify-trip-started:", error);
     return new Response(
       JSON.stringify({
         success: false,

@@ -318,6 +318,7 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
         ),
         icon: const Icon(Icons.chat_bubble_outline, size: 18),
         label: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text('Message customer'),

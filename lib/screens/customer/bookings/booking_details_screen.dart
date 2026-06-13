@@ -156,7 +156,14 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      // Add the system nav-bar inset to the bottom so the last action
+      // (e.g. Cancel Booking) isn't covered by the Android navigation bar.
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        20 + MediaQuery.of(context).padding.bottom,
+      ),
       children: [
         // Reference and Status
         _buildHeader(booking, colorScheme),
@@ -286,6 +293,7 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
         ),
         icon: const Icon(Icons.chat_bubble_outline, size: 18),
         label: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text('Message driver'),

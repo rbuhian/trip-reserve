@@ -50,7 +50,7 @@ class MessageRepository {
         .from('messages')
         .stream(primaryKey: ['id'])
         .eq('conversation_id', conversationId)
-        .order('created_at')
+        .order('created_at', ascending: true)
         .map((rows) => rows.map((j) => Message.fromJson(j)).toList());
   }
 

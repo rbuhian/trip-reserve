@@ -22,12 +22,26 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _inputController = TextEditingController();
+  final _scrollController = ScrollController();
   bool _isSending = false;
+  int _lastMessageCount = 0;
 
   @override
   void dispose() {
     _inputController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Jump to the newest message (bottom). Scheduled post-frame so the list
+  /// has laid out its final extent. Keeps the chat opened on the latest /
+  /// unread messages and follows new incoming messages.
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
   }
 
   /// Mark the conversation as read and refresh unread badges. Scheduled in a
@@ -133,16 +147,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               if (messages.isEmpty) {
                 return _buildEmptyState(context);
               }
+              // Auto-scroll to the latest message on first load and whenever
+              // new messages arrive.
+              if (messages.length != _lastMessageCount) {
+                _lastMessageCount = messages.length;
+                _scrollToBottom();
+              }
               return ListView.builder(
-                reverse: true,
+                controller: _scrollController,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 16,
                 ),
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
-                  // reverse:true -> render newest first from the end of list.
-                  final message = messages[messages.length - 1 - index];
+                  // Oldest at top, newest at bottom (stream is ascending).
+                  final message = messages[index];
                   return MessageBubble(
                     body: message.body,
                     createdAt: message.createdAt,

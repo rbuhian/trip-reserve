@@ -165,7 +165,7 @@ class HomeScreen extends ConsumerWidget {
               title: const Text('My Profile'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Navigate to profile
+                context.push('/profile');
               },
             ),
 

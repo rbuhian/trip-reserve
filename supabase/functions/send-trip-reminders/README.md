@@ -1,6 +1,6 @@
 # send-trip-reminders Edge Function
 
-Sends email reminders to customers ~2 hours before their confirmed trip starts.
+Sends an email reminder **and** an FCM push notification to customers ~2 hours before their confirmed trip starts.
 
 ## Setup
 
@@ -12,6 +12,14 @@ supabase functions deploy send-trip-reminders
 Set secrets (same as send-email):
 ```
 supabase secrets set SMTP_USERNAME=your@gmail.com SMTP_PASSWORD=your-app-password
+```
+
+This function also needs the `FIREBASE_SERVICE_ACCOUNT_JSON` secret to send the FCM
+push (the same value already set for `notify-trip-started` / `notify-driver-assigned`).
+If the secret is absent, the function degrades gracefully to email-only — the email
+reminder still goes out and bookings are still marked as reminded.
+```
+supabase secrets set FIREBASE_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
 ```
 
 ## Scheduling (Supabase Dashboard)

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { GoogleAuth } from "npm:google-auth-library@9";
 
 // ─── Environment ────────────────────────────────────────────────────────────
 
@@ -8,11 +9,13 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const SMTP_USERNAME = Deno.env.get("SMTP_USERNAME") ?? "";
 const SMTP_PASSWORD = Deno.env.get("SMTP_PASSWORD") ?? "";
+const FIREBASE_SERVICE_ACCOUNT_JSON = Deno.env.get("FIREBASE_SERVICE_ACCOUNT_JSON") ?? "";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface BookingRow {
   id: string;
+  customer_id: string;
   reference_number: string;
   scheduled_date: string;   // ISO date string: "2026-06-10"
   pickup_time: string;      // VARCHAR like "14:30"
@@ -26,6 +29,7 @@ interface BookingRow {
 
 interface ProcessResult {
   processed: number;
+  pushed: number;
   errors: string[];
 }
 
@@ -207,7 +211,14 @@ serve(async (req: Request): Promise<Response> => {
     );
   }
 
-  const result: ProcessResult = { processed: 0, errors: [] };
+  // FCM push is best-effort. Email remains required; push is enabled only when
+  // the Firebase service account secret is present.
+  let pushEnabled = FIREBASE_SERVICE_ACCOUNT_JSON.length > 0;
+  if (!pushEnabled) {
+    console.warn("FIREBASE_SERVICE_ACCOUNT_JSON not set — FCM push disabled, sending email only");
+  }
+
+  const result: ProcessResult = { processed: 0, pushed: 0, errors: [] };
 
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -230,6 +241,7 @@ serve(async (req: Request): Promise<Response> => {
       .from("bookings")
       .select(`
         id,
+        customer_id,
         reference_number,
         scheduled_date,
         pickup_time,
@@ -281,6 +293,7 @@ serve(async (req: Request): Promise<Response> => {
       })
       .map((b) => ({
         id: b.id,
+        customer_id: b.customer_id,
         reference_number: b.reference_number,
         scheduled_date: b.scheduled_date,
         pickup_time: b.pickup_time,
@@ -301,7 +314,26 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    // ── Step 3: Send emails one at a time ─────────────────────────────────
+    // ── Step 3: Acquire FCM OAuth token once (best-effort) ────────────────
+
+    let accessToken: string | null | undefined;
+    let projectId = "";
+    if (pushEnabled) {
+      try {
+        const serviceAccount = JSON.parse(FIREBASE_SERVICE_ACCOUNT_JSON.trim().replace(/^'+|'+$/g, ""));
+        const auth = new GoogleAuth({
+          credentials: serviceAccount,
+          scopes: ["https://www.googleapis.com/auth/firebase.messaging"],
+        });
+        accessToken = await auth.getAccessToken();
+        projectId = serviceAccount.project_id;
+      } catch (e) {
+        console.error("FCM auth failed, push disabled:", e);
+        pushEnabled = false;
+      }
+    }
+
+    // ── Step 4: Send emails (and best-effort push) one at a time ──────────
 
     for (const booking of candidates) {
       try {
@@ -338,6 +370,76 @@ serve(async (req: Request): Promise<Response> => {
 
         console.log(`Email sent to ${booking.customer_email} for booking ${booking.reference_number}`);
 
+        // Best-effort FCM push. A push failure must NEVER block marking the
+        // booking as reminded — the required email has already been sent.
+        if (pushEnabled) {
+          try {
+            const { data: deviceTokens, error: tokensError } = await supabase
+              .from("device_tokens")
+              .select("token")
+              .eq("user_id", booking.customer_id);
+
+            if (tokensError) {
+              console.error(`Booking ${booking.reference_number}: error fetching device tokens:`, tokensError);
+            }
+
+            if (!deviceTokens || deviceTokens.length === 0) {
+              console.log(`Booking ${booking.reference_number}: no device tokens for customer ${booking.customer_id}, skipping push`);
+            } else {
+              const fcmUrl = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
+              const pushResults = await Promise.allSettled(
+                deviceTokens.map(({ token }) =>
+                  fetch(fcmUrl, {
+                    method: "POST",
+                    headers: {
+                      "Authorization": `Bearer ${accessToken}`,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      message: {
+                        token,
+                        notification: {
+                          title: "Trip Reminder",
+                          body: "Your trip is starting in about 2 hours. Please be ready at your pickup location.",
+                        },
+                        data: {
+                          type: "trip_reminder",
+                          booking_id: booking.id,
+                        },
+                      },
+                    }),
+                  }).then(async (res) => {
+                    if (!res.ok) {
+                      const errorBody = await res.text();
+                      throw new Error(`FCM error ${res.status}: ${errorBody}`);
+                    }
+                    return res.json();
+                  })
+                )
+              );
+
+              for (const pushResult of pushResults) {
+                if (pushResult.status === "fulfilled") {
+                  result.pushed++;
+                } else {
+                  const message = pushResult.reason instanceof Error
+                    ? pushResult.reason.message
+                    : String(pushResult.reason);
+                  const msg = `Booking ${booking.reference_number}: FCM push failure – ${message}`;
+                  console.error(msg);
+                  result.errors.push(msg);
+                }
+              }
+            }
+          } catch (pushError) {
+            const msg = `Booking ${booking.reference_number}: push step failed – ${
+              pushError instanceof Error ? pushError.message : String(pushError)
+            }`;
+            console.error(msg);
+            result.errors.push(msg);
+          }
+        }
+
         // Mark reminder as sent
         const { error: updateError } = await supabase
           .from("bookings")
@@ -369,7 +471,7 @@ serve(async (req: Request): Promise<Response> => {
     );
   }
 
-  console.log(`Done. Processed: ${result.processed}, Errors: ${result.errors.length}`);
+  console.log(`Done. Processed: ${result.processed}, Pushed: ${result.pushed}, Errors: ${result.errors.length}`);
   return new Response(
     JSON.stringify(result),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

@@ -15,7 +15,7 @@ Status Legend:
 | INF-02 | Database schema creation | [x] | High |
 | INF-03 | Flutter project initialization | [x] | High |
 | INF-04 | Google Maps API integration | [x] | High |
-| INF-05 | PayMongo/Xendit integration | [ ] | High |
+| INF-05 | PayMongo/Xendit integration | [x] | High |
 | INF-06 | Email setup (Gmail SMTP) | [x] | Medium |
 | INF-09 | Migrate email sender from Gmail SMTP to Resend API | [ ] | Low |
 | INF-07 | Authentication flow (Supabase Auth) | [x] | High |
@@ -64,8 +64,8 @@ Status Legend:
 | CUST-19 | Check availability | [x] | High |
 | CUST-20 | View price breakdown | [x] | High |
 | CUST-21 | Select add-ons | [x] | Medium |
-| CUST-22 | Select payment method (GCash/Card) | [ ] | High |
-| CUST-23 | Process payment | [ ] | High |
+| CUST-22 | Select payment method (GCash/Card) | [x] | High |
+| CUST-23 | Process payment | [x] | High |
 | CUST-24 | Generate booking reference number | [x] | High |
 | CUST-25 | Booking confirmation screen | [x] | High |
 
@@ -299,12 +299,12 @@ Status Legend:
 
 | Category | Total | Not Started | In Progress | Done |
 |----------|-------|-------------|-------------|------|
-| Infrastructure | 9 | 3 | 0 | 6 |
+| Infrastructure | 9 | 2 | 0 | 7 |
 | Database | 10 | 0 | 0 | 10 |
-| Customer | 35 | 7 | 0 | 28 |
+| Customer | 35 | 5 | 0 | 30 |
 | Driver | 32 | 0 | 0 | 32 |
 | Admin | 25 | 0 | 0 | 25 |
 | UI Components | 8 | 0 | 0 | 8 |
 | Vehicle Categories | 15 | 0 | 0 | 15 |
 | In-App Messaging | 9 | 0 | 0 | 9 |
-| **Total MVP** | **142** | **11** | **0** | **131** |
+| **Total MVP** | **142** | **8** | **0** | **134** |

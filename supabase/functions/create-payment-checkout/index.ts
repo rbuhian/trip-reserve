@@ -15,18 +15,20 @@ const PAYMONGO_BASE = "https://api.paymongo.com/v1";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Method = "gcash" | "card" | "paymaya";
+// Our payment_method enum values (also what gets stored in payments.method).
+type Method = "gcash" | "card" | "maya";
 
 interface CreateCheckoutRequest {
   bookingId: string;
   method: Method;
 }
 
-// Maps our payment method to PayMongo payment_method_types values.
+// Maps our payment method to the PayMongo payment_method_types token.
+// Note PayMongo calls Maya "paymaya"; our DB enum stores "maya".
 const METHOD_MAP: Record<Method, string> = {
   gcash: "gcash",
   card: "card",
-  paymaya: "paymaya",
+  maya: "paymaya",
 };
 
 // ─── CORS headers ────────────────────────────────────────────────────────────
@@ -83,7 +85,7 @@ serve(async (req: Request): Promise<Response> => {
 
     if (!method || !(method in METHOD_MAP)) {
       return jsonResponse(
-        { error: "Invalid method. Expected one of: gcash, card, paymaya" },
+        { error: "Invalid method. Expected one of: gcash, card, maya" },
         400,
       );
     }

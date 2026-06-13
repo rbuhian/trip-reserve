@@ -17,13 +17,6 @@ class PaymentRepository {
 
   PaymentRepository(this._client);
 
-  /// Map our [PaymentMethod] enum to the PayMongo token the
-  /// `create-payment-checkout` edge function expects.
-  ///
-  /// `gcash` -> `gcash`, `card` -> `card`, `maya` -> `paymaya`.
-  String _methodToken(PaymentMethod m) =>
-      m == PaymentMethod.maya ? 'paymaya' : m.value;
-
   /// Create a PayMongo hosted checkout session for [bookingId] using [method].
   ///
   /// Calls the `create-payment-checkout` edge function, which returns
@@ -34,7 +27,7 @@ class PaymentRepository {
   }) async {
     final res = await _client.functions.invoke(
       'create-payment-checkout',
-      body: {'bookingId': bookingId, 'method': _methodToken(method)},
+      body: {'bookingId': bookingId, 'method': method.value},
     );
 
     if (res.status < 200 || res.status >= 300) {

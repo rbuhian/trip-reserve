@@ -626,7 +626,8 @@ class BookingConfirmationScreen extends ConsumerWidget {
                             .submitBooking();
 
                         if (booking != null && context.mounted) {
-                          // Navigate to success screen
+                          // Payment happens after a driver accepts (from the
+                          // booking details screen), so go straight to success.
                           context.go('/book/success/${booking.referenceNumber}');
                         }
                       },

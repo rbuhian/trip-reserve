@@ -213,8 +213,12 @@ class FCMService {
       case 'new_message':
         unawaited(_navigateToChat(bookingId, fallbackTitle));
         break;
-      // Other notification types (driver_assigned, trip_started, …) could
-      // deep-link to the booking details screen here in the future.
+      case 'driver_assigned':
+        // Open the booking so the customer can pay (the "Pay now" prompt
+        // appears on the details screen once a driver has accepted).
+        unawaited(_navigateToBooking(bookingId));
+        break;
+      // Other types (trip_started, trip_completed, …) could deep-link here too.
       default:
         break;
     }
@@ -242,5 +246,17 @@ class FCMService {
         : '/bookings/$bookingId/chat';
 
     unawaited(context.push(path, extra: title));
+  }
+
+  /// Open the customer's booking details (e.g. to pay after a driver accepts).
+  /// Retries briefly while the navigator spins up (cold start from terminated).
+  Future<void> _navigateToBooking(String bookingId, {int attempt = 0}) async {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) {
+      if (attempt >= 10) return; // give up after ~5s
+      await Future.delayed(const Duration(milliseconds: 500));
+      return _navigateToBooking(bookingId, attempt: attempt + 1);
+    }
+    unawaited(context.push('/bookings/$bookingId'));
   }
 }

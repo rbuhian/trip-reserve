@@ -9,6 +9,7 @@ import '../../../models/booking.dart';
 import '../../../models/enums.dart';
 import '../../../providers/booking_provider.dart';
 import '../../../providers/message_provider.dart';
+import '../../../providers/payment_provider.dart';
 import '../../../repositories/booking_repository.dart';
 import '../../../widgets/status_pill.dart';
 import '../../../widgets/trip_lifecycle_stepper.dart';
@@ -220,6 +221,9 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
 
         const SizedBox(height: 16),
 
+        // Payment (available once a driver has accepted)
+        ..._buildPaymentSection(context, booking, colorScheme),
+
         // Trip details
         _buildSection(
           colorScheme,
@@ -278,6 +282,102 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
       BookingStatus.completed,
     };
     return booking.driver != null && messageable.contains(booking.status);
+  }
+
+  /// Payment becomes available once a driver has accepted the booking.
+  /// Renders a "Pay now" prompt while unpaid, or a paid confirmation.
+  /// Returns an empty list (no section) for bookings without an assigned driver.
+  List<Widget> _buildPaymentSection(
+    BuildContext context,
+    Booking booking,
+    ColorScheme colorScheme,
+  ) {
+    const payable = {
+      BookingStatus.confirmed,
+      BookingStatus.inProgress,
+      BookingStatus.completed,
+    };
+    if (booking.driver == null || !payable.contains(booking.status)) {
+      return const <Widget>[];
+    }
+
+    final peso = NumberFormat.currency(
+      locale: 'en_PH',
+      symbol: '₱',
+      decimalDigits: 2,
+    );
+    final payment = ref.watch(paymentForBookingProvider(booking.id)).valueOrNull;
+    final isPaid = payment?.isPaid ?? false;
+
+    final Widget child;
+    if (isPaid) {
+      child = Row(
+        children: [
+          const Icon(Icons.check_circle, color: AppColors.success, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Paid',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.success,
+                  ),
+                ),
+                Text(
+                  '${payment!.method.displayName} • ${peso.format(payment.amount)}',
+                  style: const TextStyle(
+                    color: AppColors.textMedium,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    } else {
+      final processing = payment?.status == PaymentStatus.processing;
+      child = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            processing
+                ? 'Your payment is being processed. Tap below if you still need to complete it.'
+                : 'Your driver has accepted. Complete your payment to secure the booking.',
+            style: const TextStyle(color: AppColors.textMedium, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () => context.push('/book/payment/${booking.id}'),
+              icon: const Icon(Icons.lock_outline, size: 18),
+              label: Text('Pay ${peso.format(booking.totalAmount)}'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return [
+      _buildSection(
+        colorScheme,
+        title: 'Payment',
+        icon: isPaid ? Icons.verified_outlined : Icons.payments_outlined,
+        child: child,
+      ),
+      const SizedBox(height: 16),
+    ];
   }
 
   Widget _buildMessageButton(Booking booking, ColorScheme colorScheme) {

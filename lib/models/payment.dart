@@ -89,3 +89,15 @@ abstract class AddonLineItem with _$AddonLineItem {
   factory AddonLineItem.fromJson(Map<String, dynamic> json) =>
       _$AddonLineItemFromJson(json);
 }
+
+/// Result of creating a PayMongo hosted checkout session.
+@freezed
+abstract class PaymentCheckout with _$PaymentCheckout {
+  const factory PaymentCheckout({
+    @JsonKey(name: 'checkout_url') required String checkoutUrl,
+    @JsonKey(name: 'payment_id') required String paymentId,
+  }) = _PaymentCheckout;
+
+  factory PaymentCheckout.fromJson(Map<String, dynamic> json) =>
+      _$PaymentCheckoutFromJson(json);
+}

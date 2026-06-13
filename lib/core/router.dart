@@ -17,6 +17,7 @@ import '../screens/customer/booking/booking_vehicle_screen.dart';
 import '../screens/customer/booking/booking_addons_screen.dart';
 import '../screens/customer/booking/booking_confirmation_screen.dart';
 import '../screens/customer/booking/booking_success_screen.dart';
+import '../screens/customer/booking/payment_method_screen.dart';
 import '../screens/customer/bookings/customer_bookings_screen.dart';
 import '../screens/customer/bookings/booking_details_screen.dart';
 import '../screens/driver/driver_shell.dart';
@@ -144,6 +145,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final ref = state.pathParameters['ref']!;
           return BookingSuccessScreen(referenceNumber: ref);
+        },
+      ),
+      GoRoute(
+        path: '/book/payment/:bookingId',
+        builder: (context, state) {
+          final bookingId = state.pathParameters['bookingId']!;
+          return PaymentMethodScreen(bookingId: bookingId);
         },
       ),
 

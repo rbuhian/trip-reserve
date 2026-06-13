@@ -1145,7 +1145,7 @@ class _DriverBookingDetailsScreenState extends ConsumerState<DriverBookingDetail
           );
           ref.invalidate(driverBookingDetailsProvider(widget.bookingId));
           ref.invalidate(driverUpcomingProvider);
-          ref.invalidate(driverCompletedProvider);
+          ref.invalidate(driverHistoryProvider);
         }
       } catch (e) {
         if (mounted) {

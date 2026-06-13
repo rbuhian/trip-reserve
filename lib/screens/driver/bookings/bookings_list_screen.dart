@@ -23,10 +23,10 @@ final driverUpcomingProvider = FutureProvider<List<BookingListItem>>((ref) async
   return repo.getDriverUpcomingBookings();
 });
 
-/// Provider for driver's completed bookings
-final driverCompletedProvider = FutureProvider<List<BookingListItem>>((ref) async {
+/// Provider for driver's booking history (completed + cancelled)
+final driverHistoryProvider = FutureProvider<List<BookingListItem>>((ref) async {
   final repo = ref.watch(bookingRepositoryProvider);
-  return repo.getDriverCompletedBookings();
+  return repo.getDriverHistoryBookings();
 });
 
 /// Driver bookings list screen with tabs for Pending, Upcoming, Completed
@@ -57,7 +57,7 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
   Future<void> _refresh() async {
     ref.invalidate(pendingRequestsProvider);
     ref.invalidate(driverUpcomingProvider);
-    ref.invalidate(driverCompletedProvider);
+    ref.invalidate(driverHistoryProvider);
   }
 
   @override
@@ -76,7 +76,7 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
           tabs: const [
             Tab(text: 'Requests'),
             Tab(text: 'Upcoming'),
-            Tab(text: 'Completed'),
+            Tab(text: 'History'),
           ],
         ),
       ),
@@ -405,7 +405,7 @@ class _CompletedBookingsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bookingsAsync = ref.watch(driverCompletedProvider);
+    final bookingsAsync = ref.watch(driverHistoryProvider);
     final unread = ref.watch(unreadCountsProvider).valueOrNull ?? const {};
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -414,9 +414,9 @@ class _CompletedBookingsTab extends ConsumerWidget {
         if (bookings.isEmpty) {
           return _buildEmptyState(
             colorScheme,
-            icon: Icons.check_circle_outline,
-            title: 'No completed trips',
-            subtitle: 'Your completed trips will appear here',
+            icon: Icons.history,
+            title: 'No past trips',
+            subtitle: 'Completed and cancelled trips will appear here',
           );
         }
 

@@ -69,6 +69,7 @@ Verify with `supabase secrets list` (shows names + digests, not values).
 | `send-email` | Transactional emails (confirmation, receipt, …) | app | `SMTP_USERNAME`, `SMTP_PASSWORD` | default |
 | `send-trip-reminders` | ~2h email **+ FCM** trip reminder | **cron** (every 30 min) | `SMTP_*`, `FIREBASE_SERVICE_ACCOUNT_JSON` | schedule it (§4) |
 | `notify-driver-assigned` | FCM push when a driver accepts (prompts payment) | app | `FIREBASE_SERVICE_ACCOUNT_JSON` | default |
+| `notify-booking-cancelled` | FCM push to the driver when a customer cancels | app | `FIREBASE_SERVICE_ACCOUNT_JSON` | default |
 | `notify-trip-started` | FCM push when trip starts | app | `FIREBASE_SERVICE_ACCOUNT_JSON` | default |
 | `notify-trip-completed` | FCM push when trip completes | app | `FIREBASE_SERVICE_ACCOUNT_JSON` | default |
 | `notify-new-message` | FCM push for a new chat message | app | `FIREBASE_SERVICE_ACCOUNT_JSON` | default |
@@ -81,6 +82,7 @@ Deploy them:
 supabase functions deploy send-email
 supabase functions deploy send-trip-reminders
 supabase functions deploy notify-driver-assigned
+supabase functions deploy notify-booking-cancelled
 supabase functions deploy notify-trip-started
 supabase functions deploy notify-trip-completed
 supabase functions deploy notify-new-message
@@ -133,7 +135,7 @@ flutter run
 
 - [ ] `supabase db push` (migrations + storage buckets)
 - [ ] `supabase secrets set …` (Firebase / SMTP / PayMongo)
-- [ ] Deploy all 8 functions (`paymongo-webhook` with `--no-verify-jwt`)
+- [ ] Deploy all 9 functions (`paymongo-webhook` with `--no-verify-jwt`)
 - [ ] Schedule `send-trip-reminders` (cron `*/30 * * * *`)
 - [ ] Register the PayMongo webhook → copy `whsk_` into secrets
 - [ ] `google-services.json` in place (push)

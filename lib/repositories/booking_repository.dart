@@ -236,10 +236,32 @@ class BookingRepository {
 
     final booking = Booking.fromJson(response);
 
-    // Send cancellation emails (fire-and-forget)
+    // Send cancellation emails + push the assigned driver (fire-and-forget)
     _sendCancellationEmails(booking, reason);
+    _sendBookingCancelledPush(booking);
 
     return booking;
+  }
+
+  /// Notify the assigned driver that the customer cancelled (fire-and-forget).
+  /// No-op when no driver was assigned yet.
+  void _sendBookingCancelledPush(Booking booking) {
+    if (booking.driverId == null) return;
+    _client.functions.invoke(
+      'notify-booking-cancelled',
+      body: {'bookingId': booking.id},
+    ).then((_) {
+      developer.log(
+        'Booking cancelled push sent for ${booking.referenceNumber}',
+        name: 'BookingRepository',
+      );
+    }).catchError((e) {
+      developer.log(
+        'Error sending booking cancelled push',
+        name: 'BookingRepository',
+        error: e,
+      );
+    });
   }
 
   /// Send cancellation emails (fire-and-forget)
@@ -403,8 +425,8 @@ class BookingRepository {
         .toList();
   }
 
-  /// Get driver's completed bookings
-  Future<List<BookingListItem>> getDriverCompletedBookings({int limit = 50}) async {
+  /// Get driver's past bookings — completed and cancelled (most recent first).
+  Future<List<BookingListItem>> getDriverHistoryBookings({int limit = 50}) async {
     if (_currentUserId == null) {
       throw Exception('User not authenticated');
     }
@@ -418,8 +440,11 @@ class BookingRepository {
           vehicle:vehicles!vehicle_id(id, name, plate_number, category, capacity, image_url)
         ''')
         .eq('driver_id', _currentUserId!)
-        .eq('status', BookingStatus.completed.value)
-        .order('completed_at', ascending: false)
+        .inFilter('status', [
+          BookingStatus.completed.value,
+          BookingStatus.cancelled.value,
+        ])
+        .order('created_at', ascending: false)
         .limit(limit);
 
     return (response as List)

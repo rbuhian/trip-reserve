@@ -218,6 +218,10 @@ class FCMService {
         // appears on the details screen once a driver has accepted).
         unawaited(_navigateToBooking(bookingId));
         break;
+      case 'booking_cancelled':
+        // Open the cancelled booking for the driver.
+        unawaited(_navigateToBooking(bookingId));
+        break;
       // Other types (trip_started, trip_completed, …) could deep-link here too.
       default:
         break;
@@ -248,8 +252,9 @@ class FCMService {
     unawaited(context.push(path, extra: title));
   }
 
-  /// Open the customer's booking details (e.g. to pay after a driver accepts).
-  /// Retries briefly while the navigator spins up (cold start from terminated).
+  /// Open a booking's details, choosing the customer or driver route from the
+  /// signed-in user's role. Retries briefly while the navigator spins up
+  /// (cold start from a terminated state).
   Future<void> _navigateToBooking(String bookingId, {int attempt = 0}) async {
     final context = rootNavigatorKey.currentContext;
     if (context == null) {
@@ -257,6 +262,11 @@ class FCMService {
       await Future.delayed(const Duration(milliseconds: 500));
       return _navigateToBooking(bookingId, attempt: attempt + 1);
     }
-    unawaited(context.push('/bookings/$bookingId'));
+    final role = Supabase
+        .instance.client.auth.currentUser?.userMetadata?['role'] as String?;
+    final path = role == 'driver'
+        ? '/driver/bookings/$bookingId'
+        : '/bookings/$bookingId';
+    unawaited(context.push(path));
   }
 }

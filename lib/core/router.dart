@@ -37,6 +37,7 @@ import '../screens/admin/users/user_details_screen.dart';
 import '../screens/admin/settings/admin_settings_screen.dart';
 import '../screens/admin/reports/admin_reports_screen.dart';
 import '../screens/admin/pricing/admin_pricing_screen.dart';
+import '../screens/shared/chat/chat_screen.dart';
 
 /// Router provider with auth-aware redirects
 final routerProvider = Provider<GoRouter>((ref) {
@@ -152,6 +153,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           return BookingDetailsScreen(bookingId: id);
         },
       ),
+      GoRoute(
+        path: '/bookings/:id/chat',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ChatScreen(bookingId: id, title: state.extra as String?);
+        },
+      ),
 
       // TODO: Add more customer routes as screens are implemented
       // /profile - User profile
@@ -200,6 +208,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final id = state.pathParameters['id']!;
           return DriverBookingDetailsScreen(bookingId: id);
+        },
+      ),
+      GoRoute(
+        path: '/driver/bookings/:id/chat',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return ChatScreen(bookingId: id, title: state.extra as String?);
         },
       ),
 

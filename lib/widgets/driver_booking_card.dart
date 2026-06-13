@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../core/theme/app_colors.dart';
 import '../models/booking.dart';
 import '../models/enums.dart';
+import 'booking_card.dart';
 import 'status_pill.dart';
 
 /// Card displaying a booking for driver views with action buttons
@@ -14,6 +15,7 @@ class DriverBookingCard extends StatelessWidget {
   final VoidCallback? onStart;
   final VoidCallback? onComplete;
   final bool isLoading;
+  final int unreadCount;
 
   const DriverBookingCard({
     super.key,
@@ -23,6 +25,7 @@ class DriverBookingCard extends StatelessWidget {
     this.onStart,
     this.onComplete,
     this.isLoading = false,
+    this.unreadCount = 0,
   });
 
   @override
@@ -64,10 +67,19 @@ class DriverBookingCard extends StatelessWidget {
                     letterSpacing: 0.5,
                   ),
                 ),
-                StatusPill(
-                  status: booking.status,
-                  fontSize: 11,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (unreadCount > 0) ...[
+                      UnreadChatBadge(count: unreadCount),
+                      const SizedBox(width: 8),
+                    ],
+                    StatusPill(
+                      status: booking.status,
+                      fontSize: 11,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    ),
+                  ],
                 ),
               ],
             ),

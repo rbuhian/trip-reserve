@@ -267,15 +267,15 @@ Status Legend:
 
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| MSG-01 | Chat/messages table in database | [ ] | Low |
-| MSG-02 | Conversations table (booking-based) | [ ] | Low |
-| MSG-03 | Real-time messaging with Supabase Realtime | [ ] | Low |
-| MSG-04 | Customer can message driver after booking confirmed | [ ] | Low |
-| MSG-05 | Driver can message customer after accepting | [ ] | Low |
-| MSG-06 | Chat screen UI | [ ] | Low |
-| MSG-07 | Unread message badge/indicator | [ ] | Low |
-| MSG-08 | Push notifications for new messages | [ ] | Low |
-| MSG-09 | Message history per booking | [ ] | Low |
+| MSG-01 | Chat/messages table in database | [x] | Low |
+| MSG-02 | Conversations table (booking-based) | [x] | Low |
+| MSG-03 | Real-time messaging with Supabase Realtime | [x] | Low |
+| MSG-04 | Customer can message driver after booking confirmed | [x] | Low |
+| MSG-05 | Driver can message customer after accepting | [x] | Low |
+| MSG-06 | Chat screen UI | [x] | Low |
+| MSG-07 | Unread message badge/indicator | [x] | Low |
+| MSG-08 | Push notifications for new messages | [x] | Low |
+| MSG-09 | Message history per booking | [x] | Low |
 
 ---
 
@@ -306,5 +306,5 @@ Status Legend:
 | Admin | 25 | 0 | 0 | 25 |
 | UI Components | 8 | 0 | 0 | 8 |
 | Vehicle Categories | 15 | 0 | 0 | 15 |
-| In-App Messaging | 9 | 9 | 0 | 0 |
-| **Total MVP** | **142** | **20** | **0** | **122** |
+| In-App Messaging | 9 | 0 | 0 | 9 |
+| **Total MVP** | **142** | **11** | **0** | **131** |

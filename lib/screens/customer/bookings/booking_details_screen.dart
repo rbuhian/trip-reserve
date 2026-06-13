@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/booking.dart';
 import '../../../models/enums.dart';
 import '../../../providers/booking_provider.dart';
+import '../../../providers/message_provider.dart';
 import '../../../repositories/booking_repository.dart';
 import '../../../widgets/status_pill.dart';
 import '../../../widgets/trip_lifecycle_stepper.dart';
@@ -195,6 +196,10 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
             icon: Icons.directions_car_outlined,
             child: _buildDriverVehicleInfo(booking, colorScheme),
           ),
+          if (_canMessage(booking)) ...[
+            const SizedBox(height: 12),
+            _buildMessageButton(booking, colorScheme),
+          ],
           const SizedBox(height: 16),
         ],
 
@@ -254,6 +259,62 @@ class _BookingDetailsScreenState extends ConsumerState<BookingDetailsScreen> {
 
         const SizedBox(height: 20),
       ],
+    );
+  }
+
+  /// A message thread is available once a driver is assigned and the trip is
+  /// in a messageable state (confirmed / in progress / completed).
+  bool _canMessage(Booking booking) {
+    const messageable = {
+      BookingStatus.confirmed,
+      BookingStatus.inProgress,
+      BookingStatus.completed,
+    };
+    return booking.driver != null && messageable.contains(booking.status);
+  }
+
+  Widget _buildMessageButton(Booking booking, ColorScheme colorScheme) {
+    final unread = ref.watch(unreadCountsProvider).valueOrNull ?? const {};
+    final unreadCount = unread[booking.id] ?? 0;
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => context.push(
+          '/bookings/${booking.id}/chat',
+          extra: booking.driver!.fullName,
+        ),
+        icon: const Icon(Icons.chat_bubble_outline, size: 18),
+        label: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Message driver'),
+            if (unreadCount > 0) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  unreadCount > 99 ? '99+' : '$unreadCount',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.white,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: colorScheme.primary,
+          side: BorderSide(color: colorScheme.primary.withOpacity(0.4)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
     );
   }
 

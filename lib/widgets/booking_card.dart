@@ -3,18 +3,19 @@ import 'package:intl/intl.dart';
 
 import '../core/theme/app_colors.dart';
 import '../models/booking.dart';
-import '../models/enums.dart';
 import 'status_pill.dart';
 
 /// Card displaying a booking summary for list views
 class BookingCard extends StatelessWidget {
   final BookingListItem booking;
   final VoidCallback? onTap;
+  final int unreadCount;
 
   const BookingCard({
     super.key,
     required this.booking,
     this.onTap,
+    this.unreadCount = 0,
   });
 
   @override
@@ -56,10 +57,19 @@ class BookingCard extends StatelessWidget {
                     letterSpacing: 0.5,
                   ),
                 ),
-                StatusPill(
-                  status: booking.status,
-                  fontSize: 11,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (unreadCount > 0) ...[
+                      UnreadChatBadge(count: unreadCount),
+                      const SizedBox(width: 8),
+                    ],
+                    StatusPill(
+                      status: booking.status,
+                      fontSize: 11,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -284,6 +294,43 @@ class BookingCard extends StatelessWidget {
     } else {
       return DateFormat('MMM d, yyyy').format(date);
     }
+  }
+}
+
+/// Small pill showing the unread message count for a booking's chat.
+class UnreadChatBadge extends StatelessWidget {
+  final int count;
+
+  const UnreadChatBadge({super.key, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.accent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.chat_bubble,
+            size: 12,
+            color: AppColors.white,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            count > 99 ? '99+' : '$count',
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColors.white,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

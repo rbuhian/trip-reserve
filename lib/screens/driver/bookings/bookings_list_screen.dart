@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/booking.dart';
 import '../../../models/enums.dart';
 import '../../../models/vehicle.dart';
+import '../../../providers/message_provider.dart';
 import '../../../providers/vehicle_provider.dart';
 import '../../../repositories/booking_repository.dart';
 import '../../../widgets/driver_booking_card.dart';
@@ -301,6 +302,7 @@ class _PendingRequestsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(pendingRequestsProvider);
+    final unread = ref.watch(unreadCountsProvider).valueOrNull ?? const {};
     final colorScheme = Theme.of(context).colorScheme;
 
     return bookingsAsync.when(
@@ -326,6 +328,7 @@ class _PendingRequestsTab extends ConsumerWidget {
                 child: DriverBookingCard(
                   booking: booking,
                   isLoading: loadingBookingId == booking.id,
+                  unreadCount: unread[booking.id] ?? 0,
                   onTap: () => context.push('/driver/bookings/${booking.id}'),
                   onAccept: () => onAccept(booking),
                 ),
@@ -354,6 +357,7 @@ class _UpcomingBookingsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(driverUpcomingProvider);
+    final unread = ref.watch(unreadCountsProvider).valueOrNull ?? const {};
     final colorScheme = Theme.of(context).colorScheme;
 
     return bookingsAsync.when(
@@ -379,6 +383,7 @@ class _UpcomingBookingsTab extends ConsumerWidget {
                 child: DriverBookingCard(
                   booking: booking,
                   isLoading: loadingBookingId == booking.id,
+                  unreadCount: unread[booking.id] ?? 0,
                   onTap: () => context.push('/driver/bookings/${booking.id}'),
                   onStart: booking.canStart ? () => onStart(booking) : null,
                 ),
@@ -401,6 +406,7 @@ class _CompletedBookingsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(driverCompletedProvider);
+    final unread = ref.watch(unreadCountsProvider).valueOrNull ?? const {};
     final colorScheme = Theme.of(context).colorScheme;
 
     return bookingsAsync.when(
@@ -425,6 +431,7 @@ class _CompletedBookingsTab extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: DriverBookingCard(
                   booking: booking,
+                  unreadCount: unread[booking.id] ?? 0,
                   onTap: () => context.push('/driver/bookings/${booking.id}'),
                 ),
               );

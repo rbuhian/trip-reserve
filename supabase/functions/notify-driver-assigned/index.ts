@@ -47,6 +47,7 @@ serve(async (req: Request): Promise<Response> => {
       .select(`
         id,
         customer_id,
+        total_amount,
         driver:users!driver_id(full_name),
         vehicle:vehicles!vehicle_id(name, plate_number)
       `)
@@ -91,10 +92,17 @@ serve(async (req: Request): Promise<Response> => {
     // Step 4: Build notification content
     const driverName = (booking.driver as { full_name: string } | null)?.full_name ?? "Your driver";
     const vehicleName = (booking.vehicle as { name: string; plate_number: string } | null)?.name ?? "the vehicle";
-    const plateNumber = (booking.vehicle as { name: string; plate_number: string } | null)?.plate_number ?? "";
+
+    // Format the amount due as PHP currency (e.g. "₱525.22").
+    const amountDue = Number((booking as { total_amount: number | string }).total_amount);
+    const formattedAmount = Number.isFinite(amountDue)
+      ? amountDue.toLocaleString("en-PH", { style: "currency", currency: "PHP" })
+      : "";
 
     const notificationTitle = "Driver Assigned!";
-    const notificationBody = `${driverName} will be driving you in ${vehicleName} (${plateNumber}).`;
+    const notificationBody = formattedAmount
+      ? `${driverName} accepted your booking in ${vehicleName}. Tap to pay ${formattedAmount} and secure your trip.`
+      : `${driverName} accepted your booking in ${vehicleName}. Tap to pay and secure your trip.`;
 
     const fcmUrl = `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`;
 

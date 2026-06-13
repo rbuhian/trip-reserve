@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../core/router.dart';
 
 /// Top-level handler for background FCM messages (must be a top-level function)
 @pragma('vm:entry-point')
@@ -62,6 +66,15 @@ class FCMService {
 
     // Handle notification tap when app is in background
     FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
+
+    // Handle the tap that cold-started the app from a terminated state
+    final initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      _handleNotificationData(
+        initialMessage.data,
+        fallbackTitle: initialMessage.notification?.title,
+      );
+    }
   }
 
   Future<void> _initLocalNotifications() async {
@@ -72,7 +85,10 @@ class FCMService {
       iOS: iosInit,
     );
 
-    await _localNotifications.initialize(initSettings);
+    await _localNotifications.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: _onLocalNotificationTap,
+    );
 
     // Create high-importance channel on Android
     final androidPlugin = _localNotifications
@@ -158,11 +174,73 @@ class FCMService {
         ),
         iOS: const DarwinNotificationDetails(),
       ),
+      // Carry the FCM data so a tap on the foreground notification can deep-link.
+      payload: jsonEncode(message.data),
     );
   }
 
+  /// Tap on a notification while the app is backgrounded.
   void _onMessageOpenedApp(RemoteMessage message) {
     debugPrint('FCM notification tapped: ${message.data}');
-    // Navigation based on message data can be added here (CUST-44/45/46)
+    _handleNotificationData(
+      message.data,
+      fallbackTitle: message.notification?.title,
+    );
+  }
+
+  /// Tap on a local notification shown while the app was in the foreground.
+  void _onLocalNotificationTap(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload == null || payload.isEmpty) return;
+    try {
+      final data = (jsonDecode(payload) as Map).cast<String, dynamic>();
+      _handleNotificationData(data);
+    } catch (e) {
+      debugPrint('FCM: failed to parse notification payload: $e');
+    }
+  }
+
+  /// Route a notification tap based on its `type` data field.
+  void _handleNotificationData(
+    Map<String, dynamic> data, {
+    String? fallbackTitle,
+  }) {
+    final type = data['type']?.toString();
+    final bookingId = data['booking_id']?.toString();
+    if (bookingId == null || bookingId.isEmpty) return;
+
+    switch (type) {
+      case 'new_message':
+        unawaited(_navigateToChat(bookingId, fallbackTitle));
+        break;
+      // Other notification types (driver_assigned, trip_started, …) could
+      // deep-link to the booking details screen here in the future.
+      default:
+        break;
+    }
+  }
+
+  /// Open the chat for [bookingId], choosing the customer or driver route from
+  /// the signed-in user's role. Retries briefly while the navigator spins up
+  /// (e.g. a cold start from a terminated state).
+  Future<void> _navigateToChat(
+    String bookingId,
+    String? title, {
+    int attempt = 0,
+  }) async {
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) {
+      if (attempt >= 10) return; // give up after ~5s
+      await Future.delayed(const Duration(milliseconds: 500));
+      return _navigateToChat(bookingId, title, attempt: attempt + 1);
+    }
+
+    final role = Supabase
+        .instance.client.auth.currentUser?.userMetadata?['role'] as String?;
+    final path = role == 'driver'
+        ? '/driver/bookings/$bookingId/chat'
+        : '/bookings/$bookingId/chat';
+
+    unawaited(context.push(path, extra: title));
   }
 }

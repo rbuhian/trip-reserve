@@ -39,11 +39,16 @@ import '../screens/admin/reports/admin_reports_screen.dart';
 import '../screens/admin/pricing/admin_pricing_screen.dart';
 import '../screens/shared/chat/chat_screen.dart';
 
+/// Root navigator key — lets non-widget code (e.g. FCM notification taps in
+/// [FCMService]) navigate by pushing onto the active router.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 /// Router provider with auth-aware redirects
 final routerProvider = Provider<GoRouter>((ref) {
   final authUser = ref.watch(authUserProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     debugLogDiagnostics: true,
     redirect: (context, state) {

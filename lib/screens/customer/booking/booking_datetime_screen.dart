@@ -208,8 +208,18 @@ class _BookingDateTimeScreenState extends ConsumerState<BookingDateTimeScreen> {
           },
         );
         if (date != null) {
-          setState(() => _selectedDate = date);
+          // If the previously chosen time is now in the past (e.g. the date
+          // moved to today), clear it so the user re-picks a valid time.
+          final clearTime = _selectedTime != null &&
+              _timeBeforeNow(date, _selectedTime!);
+          setState(() {
+            _selectedDate = date;
+            if (clearTime) _selectedTime = null;
+          });
           ref.read(bookingFormProvider.notifier).setDate(date);
+          if (clearTime && mounted) {
+            _showPastTimeError();
+          }
         }
       },
       child: Container(
@@ -273,6 +283,10 @@ class _BookingDateTimeScreenState extends ConsumerState<BookingDateTimeScreen> {
           },
         );
         if (time != null) {
+          if (_isTimeInPast(time)) {
+            _showPastTimeError();
+            return;
+          }
           setState(() => _selectedTime = time);
           final timeString =
               '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
@@ -351,32 +365,42 @@ class _BookingDateTimeScreenState extends ConsumerState<BookingDateTimeScreen> {
           children: quickTimes.map((time) {
             final isSelected = _selectedTime?.hour == time.hour &&
                 _selectedTime?.minute == time.minute;
-            return GestureDetector(
-              onTap: () {
-                setState(() => _selectedTime = time);
-                final timeString =
-                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-                ref.read(bookingFormProvider.notifier).setTime(timeString);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primary.withOpacity(0.1)
-                      : AppColors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.border,
+            final isPast = _isTimeInPast(time);
+            return Opacity(
+              opacity: isPast ? 0.4 : 1,
+              child: GestureDetector(
+                onTap: isPast
+                    ? null
+                    : () {
+                        setState(() => _selectedTime = time);
+                        final timeString =
+                            '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+                        ref
+                            .read(bookingFormProvider.notifier)
+                            .setTime(timeString);
+                      },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
                   ),
-                ),
-                child: Text(
-                  _formatTime(time),
-                  style: TextStyle(
-                    color: isSelected ? AppColors.primary : AppColors.textDark,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary.withOpacity(0.1)
+                        : AppColors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? AppColors.primary : AppColors.border,
+                    ),
+                  ),
+                  child: Text(
+                    _formatTime(time),
+                    style: TextStyle(
+                      color:
+                          isSelected ? AppColors.primary : AppColors.textDark,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
                   ),
                 ),
               ),
@@ -394,8 +418,40 @@ class _BookingDateTimeScreenState extends ConsumerState<BookingDateTimeScreen> {
     return '$hour:$minute $period';
   }
 
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day;
+  }
+
+  /// True when [time] falls before now on [date] (only matters when [date] is today).
+  bool _timeBeforeNow(DateTime date, TimeOfDay time) {
+    if (!_isToday(date)) return false;
+    final dateTime =
+        DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    return dateTime.isBefore(DateTime.now());
+  }
+
+  /// True when [time] is in the past for the currently-selected date.
+  bool _isTimeInPast(TimeOfDay time) {
+    final date = _selectedDate;
+    return date != null && _timeBeforeNow(date, time);
+  }
+
+  void _showPastTimeError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please pick a time later than the current time.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Widget _buildBottomButton() {
-    final isComplete = _selectedDate != null && _selectedTime != null;
+    final isComplete = _selectedDate != null &&
+        _selectedTime != null &&
+        !_isTimeInPast(_selectedTime!);
 
     return SafeArea(
       child: Padding(

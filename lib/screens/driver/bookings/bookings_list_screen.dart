@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../models/booking.dart';
-import '../../../models/enums.dart';
 import '../../../models/vehicle.dart';
 import '../../../providers/message_provider.dart';
 import '../../../providers/vehicle_provider.dart';
@@ -31,7 +30,10 @@ final driverHistoryProvider = FutureProvider<List<BookingListItem>>((ref) async 
 
 /// Driver bookings list screen with tabs for Pending, Upcoming, Completed
 class DriverBookingsListScreen extends ConsumerStatefulWidget {
-  const DriverBookingsListScreen({super.key});
+  /// Initial tab to open: 0 = Requests, 1 = Upcoming, 2 = History.
+  final int initialTab;
+
+  const DriverBookingsListScreen({super.key, this.initialTab = 0});
 
   @override
   ConsumerState<DriverBookingsListScreen> createState() => _DriverBookingsListScreenState();
@@ -45,7 +47,11 @@ class _DriverBookingsListScreenState extends ConsumerState<DriverBookingsListScr
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab.clamp(0, 2),
+    );
   }
 
   @override

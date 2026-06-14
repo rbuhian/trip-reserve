@@ -201,7 +201,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/driver/bookings',
-            builder: (context, state) => const DriverBookingsListScreen(),
+            builder: (context, state) {
+              // ?tab= selects the initial tab (0=Requests, 1=Upcoming, 2=History).
+              final tab = int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0;
+              return DriverBookingsListScreen(initialTab: tab);
+            },
           ),
           GoRoute(
             path: '/driver/profile',

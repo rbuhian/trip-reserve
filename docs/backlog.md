@@ -279,6 +279,41 @@ Status Legend:
 
 ---
 
+## Driver Payouts & Withdrawals
+
+> Drivers earn from completed, **paid** trips, see their collectible balance, and request
+> withdrawals (amount ≤ available balance). Admins approve/reject and disburse. Every money
+> movement is an immutable ledger entry, so both driver and admin have a full transaction
+> history / audit trail. Builds on the existing `driver_earnings` table (DB-09).
+
+### Database
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| PO-01 | driver_ledger table — immutable, append-only credit/debit entries (audit trail) | [ ] | High |
+| PO-02 | withdrawals table — amount, status, requested_by/reviewed_by, timestamps, note | [ ] | High |
+| PO-03 | RLS — driver reads own ledger & withdrawals; admin manages all | [ ] | High |
+| PO-04 | Driver balance function/view — available = credited − (paid + pending withdrawals) | [ ] | High |
+
+### Driver
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| PO-10 | Credit earnings to the driver ledger when payment is paid AND trip completed (idempotent) | [ ] | High |
+| PO-11 | View collectible balance (available + pending) | [ ] | High |
+| PO-12 | Request withdrawal (amount ≤ available balance, with validation) | [ ] | High |
+| PO-13 | View own withdrawal status & history (pending / approved / rejected / paid) | [ ] | Medium |
+| PO-14 | View own earnings / transaction history (ledger) | [ ] | Medium |
+
+### Admin
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| PO-20 | View withdrawal requests (filter by status) | [ ] | High |
+| PO-21 | Approve withdrawal request | [ ] | High |
+| PO-22 | Reject withdrawal request (with reason) | [ ] | High |
+| PO-23 | Mark withdrawal as paid / disbursed | [ ] | Medium |
+| PO-24 | Withdrawal + ledger history with full audit trail (who / when) | [ ] | High |
+
+---
+
 ## Future (Phase 2+)
 
 | ID | Feature | Status | Priority | Phase |
@@ -308,3 +343,5 @@ Status Legend:
 | Vehicle Categories | 15 | 0 | 0 | 15 |
 | In-App Messaging | 9 | 0 | 0 | 9 |
 | **Total MVP** | **142** | **8** | **0** | **134** |
+| Driver Payouts & Withdrawals *(new, post-MVP)* | 14 | 14 | 0 | 0 |
+| **Total (all tracked)** | **156** | **22** | **0** | **134** |

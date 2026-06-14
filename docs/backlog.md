@@ -289,28 +289,28 @@ Status Legend:
 ### Database
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| PO-01 | driver_ledger table — immutable, append-only credit/debit entries (audit trail) | [ ] | High |
-| PO-02 | withdrawals table — amount, status, requested_by/reviewed_by, timestamps, note | [ ] | High |
-| PO-03 | RLS — driver reads own ledger & withdrawals; admin manages all | [ ] | High |
-| PO-04 | Driver balance function/view — available = credited − (paid + pending withdrawals) | [ ] | High |
+| PO-01 | driver_ledger table — immutable, append-only credit/debit entries (audit trail) | [x] | High |
+| PO-02 | withdrawals table — amount, status, requested_by/reviewed_by, timestamps, note | [x] | High |
+| PO-03 | RLS — driver reads own ledger & withdrawals; admin manages all | [x] | High |
+| PO-04 | Driver balance function/view — available = credited − (paid + pending withdrawals) | [x] | High |
 
 ### Driver
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| PO-10 | Credit earnings to the driver ledger when payment is paid AND trip completed (idempotent) | [ ] | High |
-| PO-11 | View collectible balance (available + pending) | [ ] | High |
-| PO-12 | Request withdrawal (amount ≤ available balance, with validation) | [ ] | High |
-| PO-13 | View own withdrawal status & history (pending / approved / rejected / paid) | [ ] | Medium |
-| PO-14 | View own earnings / transaction history (ledger) | [ ] | Medium |
+| PO-10 | Credit earnings to the driver ledger when payment is paid AND trip completed (idempotent) | [x] | High |
+| PO-11 | View collectible balance (available + pending) | [x] | High |
+| PO-12 | Request withdrawal (amount ≤ available balance, with validation) | [x] | High |
+| PO-13 | View own withdrawal status & history (pending / approved / rejected / paid) | [x] | Medium |
+| PO-14 | View own earnings / transaction history (ledger) | [x] | Medium |
 
 ### Admin
 | ID | Feature | Status | Priority |
 |----|---------|--------|----------|
-| PO-20 | View withdrawal requests (filter by status) | [ ] | High |
-| PO-21 | Approve withdrawal request | [ ] | High |
-| PO-22 | Reject withdrawal request (with reason) | [ ] | High |
-| PO-23 | Mark withdrawal as paid / disbursed | [ ] | Medium |
-| PO-24 | Withdrawal + ledger history with full audit trail (who / when) | [ ] | High |
+| PO-20 | View withdrawal requests (filter by status) | [x] | High |
+| PO-21 | Approve withdrawal request | [x] | High |
+| PO-22 | Reject withdrawal request (with reason) | [x] | High |
+| PO-23 | Mark withdrawal as paid / disbursed | [x] | Medium |
+| PO-24 | Withdrawal + ledger history with full audit trail (who / when) | [x] | High |
 
 ---
 
@@ -392,6 +392,6 @@ Status Legend:
 | Vehicle Categories | 15 | 0 | 0 | 15 |
 | In-App Messaging | 9 | 0 | 0 | 9 |
 | **Total MVP** | **142** | **8** | **0** | **134** |
-| Driver Payouts & Withdrawals *(new, post-MVP)* | 14 | 14 | 0 | 0 |
+| Driver Payouts & Withdrawals *(new, post-MVP)* | 14 | 0 | 0 | 14 |
 | Refunds & Cancellation Policy *(new, post-MVP)* | 15 | 15 | 0 | 0 |
-| **Total (all tracked)** | **171** | **37** | **0** | **134** |
+| **Total (all tracked)** | **171** | **23** | **0** | **148** |

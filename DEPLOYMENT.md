@@ -43,6 +43,7 @@ Current migrations (applied in order):
 | 00012 | messaging | conversations + messages (+ Realtime) |
 | 00013 | customer_read_driver | RLS: customer can read assigned driver |
 | 00014 | payments_checkout | payments.checkout_session_id (+ Realtime) |
+| 00015 | payouts | withdrawals + withdrawal_events, balance/withdrawal RPCs, earnings credit reconciliation (completed+paid), `payout-proofs` storage bucket, Realtime |
 
 ## 2. Secrets
 

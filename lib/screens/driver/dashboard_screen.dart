@@ -304,7 +304,13 @@ class DriverDashboardScreen extends ConsumerWidget {
   Widget _buildEarningsCard(BuildContext context, AsyncValue<EarningsSummary> earnings) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => context.push('/driver/earnings'),
+        child: Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -355,20 +361,31 @@ class DriverDashboardScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _getCurrentWeekLabel(),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white70,
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      _getCurrentWeekLabel(),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white70,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Colors.white70,
+                    size: 20,
+                  ),
+                ],
               ),
             ],
           ),
@@ -444,6 +461,8 @@ class DriverDashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+        ),
       ),
     );
   }

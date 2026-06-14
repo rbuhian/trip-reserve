@@ -118,6 +118,12 @@ class AdminSettingsScreen extends ConsumerWidget {
                 // TODO: Navigate to vehicle management
               },
             ),
+            _SettingItem(
+              icon: Icons.account_balance_wallet_outlined,
+              title: 'Driver Payouts',
+              subtitle: 'Review and process withdrawal requests',
+              onTap: () => context.push('/admin/withdrawals'),
+            ),
           ]),
 
           const SizedBox(height: 24),

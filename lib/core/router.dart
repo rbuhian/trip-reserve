@@ -29,6 +29,7 @@ import '../screens/driver/calendar/calendar_screen.dart';
 import '../screens/driver/bookings/bookings_list_screen.dart';
 import '../screens/driver/bookings/booking_details_screen.dart';
 import '../screens/driver/profile/driver_profile_screen.dart';
+import '../screens/driver/earnings/driver_earnings_screen.dart';
 import '../screens/admin/admin_shell.dart';
 import '../screens/admin/dashboard_screen.dart';
 import '../screens/admin/bookings/admin_bookings_screen.dart';
@@ -38,6 +39,7 @@ import '../screens/admin/users/user_details_screen.dart';
 import '../screens/admin/settings/admin_settings_screen.dart';
 import '../screens/admin/reports/admin_reports_screen.dart';
 import '../screens/admin/pricing/admin_pricing_screen.dart';
+import '../screens/admin/withdrawals/admin_withdrawals_screen.dart';
 import '../screens/shared/chat/chat_screen.dart';
 import '../screens/customer/profile/customer_profile_screen.dart';
 
@@ -234,6 +236,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           return ChatScreen(bookingId: id, title: state.extra as String?);
         },
       ),
+      GoRoute(
+        path: '/driver/earnings',
+        builder: (context, state) => const DriverEarningsScreen(),
+      ),
 
       // Admin routes with shell for bottom navigation
       ShellRoute(
@@ -280,6 +286,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/pricing',
         builder: (context, state) => const AdminPricingScreen(),
+      ),
+      GoRoute(
+        path: '/admin/withdrawals',
+        builder: (context, state) => const AdminWithdrawalsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

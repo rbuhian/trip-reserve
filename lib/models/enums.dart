@@ -212,6 +212,67 @@ enum EarningStatus {
   }
 }
 
+/// Withdrawal request statuses
+@JsonEnum(valueField: 'value')
+enum WithdrawalStatus {
+  pending('pending'),
+  approved('approved'),
+  rejected('rejected'),
+  paid('paid');
+
+  const WithdrawalStatus(this.value);
+  final String value;
+
+  static WithdrawalStatus fromString(String value) {
+    return WithdrawalStatus.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => WithdrawalStatus.pending,
+    );
+  }
+
+  String get displayName {
+    switch (this) {
+      case WithdrawalStatus.pending:
+        return 'Pending';
+      case WithdrawalStatus.approved:
+        return 'Approved';
+      case WithdrawalStatus.rejected:
+        return 'Rejected';
+      case WithdrawalStatus.paid:
+        return 'Paid';
+    }
+  }
+}
+
+/// Payout methods for withdrawals
+@JsonEnum(valueField: 'value')
+enum PayoutMethod {
+  gcash('gcash'),
+  maya('maya'),
+  bank('bank');
+
+  const PayoutMethod(this.value);
+  final String value;
+
+  static PayoutMethod fromString(String value) {
+    return PayoutMethod.values.firstWhere(
+      (e) => e.value == value,
+      orElse: () => PayoutMethod.gcash,
+    );
+  }
+
+  String get displayName {
+    switch (this) {
+      case PayoutMethod.gcash:
+        return 'GCash';
+      case PayoutMethod.maya:
+        return 'Maya';
+      case PayoutMethod.bank:
+        return 'Bank Transfer';
+    }
+  }
+}
+
 /// Vehicle categories
 @JsonEnum(valueField: 'value')
 enum VehicleCategory {

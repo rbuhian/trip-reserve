@@ -114,10 +114,8 @@ class AdminSettingsScreen extends ConsumerWidget {
             _SettingItem(
               icon: Icons.directions_car,
               title: 'Vehicle Management',
-              subtitle: 'Vehicle types and categories',
-              onTap: () {
-                // TODO: Navigate to vehicle management
-              },
+              subtitle: 'Fleet utilization and per-vehicle breakdown',
+              onTap: () => context.push('/admin/reports'),
             ),
             _SettingItem(
               icon: Icons.account_balance_wallet_outlined,
@@ -142,9 +140,7 @@ class AdminSettingsScreen extends ConsumerWidget {
               icon: Icons.download,
               title: 'Export Data',
               subtitle: 'Download bookings and revenue data',
-              onTap: () {
-                // TODO: Export functionality
-              },
+              onTap: () => _showComingSoon(context, 'Export data'),
             ),
           ]),
 
@@ -157,9 +153,7 @@ class AdminSettingsScreen extends ConsumerWidget {
               icon: Icons.notifications_outlined,
               title: 'Notifications',
               subtitle: 'Configure notification preferences',
-              onTap: () {
-                // TODO: Navigate to notifications
-              },
+              onTap: () => _showComingSoon(context, 'Notification settings'),
             ),
             _SettingItem(
               icon: Icons.logout,
@@ -198,6 +192,15 @@ class AdminSettingsScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showComingSoon(BuildContext context, String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$feature — coming soon'),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

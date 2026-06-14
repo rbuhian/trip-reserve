@@ -35,7 +35,10 @@ final fleetUtilizationReportProvider = FutureProvider<FleetUtilizationReport>((r
 });
 
 class AdminReportsScreen extends ConsumerStatefulWidget {
-  const AdminReportsScreen({super.key});
+  /// Initial tab: 0 = Trips, 1 = Revenue, 2 = Fleet.
+  final int initialTab;
+
+  const AdminReportsScreen({super.key, this.initialTab = 0});
 
   @override
   ConsumerState<AdminReportsScreen> createState() => _AdminReportsScreenState();
@@ -48,7 +51,11 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab.clamp(0, 2),
+    );
   }
 
   @override

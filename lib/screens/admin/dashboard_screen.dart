@@ -148,6 +148,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               iconColor: AppColors.success,
                               changePercent: s.tripsTodayChange.toDouble(),
                               changeLabel: 'vs avg',
+                              onTap: () => context.go('/admin/bookings'),
                             ),
                             loading: () => const KpiCard(
                               title: 'Trips Today',
@@ -173,6 +174,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               subtitle: '${s.activeVehicles} active vehicles',
                               icon: Icons.local_shipping_outlined,
                               iconColor: AppColors.accent,
+                              onTap: () => context.push('/admin/reports?tab=2'),
                             ),
                             loading: () => const KpiCard(
                               title: 'Fleet Utilization',
@@ -204,7 +206,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               subtitle: 'of ${s.totalVehicles} total',
                               icon: Icons.directions_car_filled_outlined,
                               iconColor: colorScheme.primary,
-                              onTap: () => context.go('/admin/vehicles'),
+                              onTap: () => context.push('/admin/reports?tab=2'),
                             ),
                             loading: () => KpiCard(
                               title: 'Active Vehicles',
@@ -229,9 +231,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                             subtitle: 'Analytics & insights',
                             icon: Icons.analytics_outlined,
                             iconColor: AppColors.warning,
-                            onTap: () {
-                              // TODO: Navigate to reports
-                            },
+                            onTap: () => context.push('/admin/reports'),
                           ),
                         ),
                       ],

@@ -245,25 +245,44 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const DriverEarningsScreen(),
       ),
 
-      // Admin routes with shell for bottom navigation
-      ShellRoute(
-        builder: (context, state, child) => AdminShell(child: child),
-        routes: [
-          GoRoute(
-            path: '/admin',
-            builder: (context, state) => const AdminDashboardScreen(),
+      // Admin routes with stateful shell for bottom navigation.
+      // StatefulShellRoute integrates with back handling so Android back can
+      // be redirected to the first tab instead of minimizing the app.
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            AdminShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin',
+                builder: (context, state) => const AdminDashboardScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/admin/bookings',
-            builder: (context, state) => const AdminBookingsScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/bookings',
+                builder: (context, state) => const AdminBookingsScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/admin/users',
-            builder: (context, state) => const AdminUsersScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/users',
+                builder: (context, state) => const AdminUsersScreen(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/admin/settings',
-            builder: (context, state) => const AdminSettingsScreen(),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/admin/settings',
+                builder: (context, state) => const AdminSettingsScreen(),
+              ),
+            ],
           ),
         ],
       ),
@@ -285,7 +304,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/admin/reports',
-        builder: (context, state) => const AdminReportsScreen(),
+        builder: (context, state) {
+          // ?tab= selects the initial report tab (0=Trips, 1=Revenue, 2=Fleet).
+          final tab = int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0;
+          return AdminReportsScreen(initialTab: tab);
+        },
       ),
       GoRoute(
         path: '/admin/pricing',

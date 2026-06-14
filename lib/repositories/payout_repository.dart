@@ -90,6 +90,15 @@ class PayoutRepository {
     return Withdrawal.fromJson(_rowFrom(response));
   }
 
+  /// Cancel the driver's own withdrawal while it is still pending.
+  Future<Withdrawal> cancelWithdrawal(String id) async {
+    final response = await _client.rpc(
+      'cancel_withdrawal',
+      params: {'p_id': id},
+    );
+    return Withdrawal.fromJson(_rowFrom(response));
+  }
+
   /// Get the audit trail events for a withdrawal, oldest first.
   Future<List<WithdrawalEvent>> getEvents(String withdrawalId) async {
     final response = await _client

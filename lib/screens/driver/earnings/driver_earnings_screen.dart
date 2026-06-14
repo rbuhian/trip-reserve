@@ -717,6 +717,12 @@ class WithdrawalDetailScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
+          // Cancel (pending only) — driver can withdraw their own request
+          if (w.status == WithdrawalStatus.pending) ...[
+            _CancelWithdrawalButton(withdrawalId: w.id),
+            const SizedBox(height: 16),
+          ],
+
           // Reject reason
           if (w.status == WithdrawalStatus.rejected &&
               w.rejectReason != null) ...[
@@ -817,6 +823,101 @@ class WithdrawalDetailScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Outlined "Cancel Request" button for a pending withdrawal.
+class _CancelWithdrawalButton extends ConsumerStatefulWidget {
+  const _CancelWithdrawalButton({required this.withdrawalId});
+
+  final String withdrawalId;
+
+  @override
+  ConsumerState<_CancelWithdrawalButton> createState() =>
+      _CancelWithdrawalButtonState();
+}
+
+class _CancelWithdrawalButtonState
+    extends ConsumerState<_CancelWithdrawalButton> {
+  bool _busy = false;
+
+  Future<void> _cancel() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cancel withdrawal?'),
+        content: const Text(
+          'This request will be cancelled and the amount returned to your '
+          'available balance.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Keep'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Cancel request',
+              style: TextStyle(color: AppColors.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
+    setState(() => _busy = true);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      await ref
+          .read(payoutRepositoryProvider)
+          .cancelWithdrawal(widget.withdrawalId);
+      if (!mounted) return;
+      ref.invalidate(myBalanceProvider);
+      navigator.pop(); // back to the wallet; the stream updates the list
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Withdrawal cancelled'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Could not cancel: $e'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _busy ? null : _cancel,
+        icon: _busy
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.close, size: 18),
+        label: Text(_busy ? 'Cancelling…' : 'Cancel Request'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.error,
+          side: BorderSide(color: AppColors.error.withOpacity(0.5)),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
       ),
     );
   }
@@ -1060,6 +1161,8 @@ class WithdrawalStatusPill extends StatelessWidget {
         return (AppColors.statusCancelledBg, AppColors.statusCancelledText);
       case WithdrawalStatus.paid:
         return (AppColors.statusConfirmedBg, AppColors.statusConfirmedText);
+      case WithdrawalStatus.cancelled:
+        return (AppColors.statusCompletedBg, AppColors.statusCompletedText);
     }
   }
 }

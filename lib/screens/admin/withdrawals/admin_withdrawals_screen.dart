@@ -46,20 +46,19 @@ class _AdminWithdrawalsScreenState extends ConsumerState<AdminWithdrawalsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Driver Payouts'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
-          labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
-          indicatorColor: colorScheme.primary,
+          labelColor: AppColors.accent,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: AppColors.accent,
           tabs: _tabs.map((t) => Tab(text: t.label)).toList(),
         ),
       ),
@@ -187,6 +186,8 @@ class _EmptyState extends StatelessWidget {
       return (bg: AppColors.errorLight, fg: AppColors.error);
     case WithdrawalStatus.paid:
       return (bg: AppColors.successLight, fg: AppColors.success);
+    case WithdrawalStatus.cancelled:
+      return (bg: AppColors.statusCompletedBg, fg: AppColors.statusCompletedText);
   }
 }
 
@@ -389,6 +390,7 @@ class _CardActions extends ConsumerWidget {
           ),
         );
       case WithdrawalStatus.rejected:
+      case WithdrawalStatus.cancelled:
         return const SizedBox.shrink();
     }
   }

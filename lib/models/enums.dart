@@ -218,7 +218,8 @@ enum WithdrawalStatus {
   pending('pending'),
   approved('approved'),
   rejected('rejected'),
-  paid('paid');
+  paid('paid'),
+  cancelled('cancelled');
 
   const WithdrawalStatus(this.value);
   final String value;
@@ -240,6 +241,8 @@ enum WithdrawalStatus {
         return 'Rejected';
       case WithdrawalStatus.paid:
         return 'Paid';
+      case WithdrawalStatus.cancelled:
+        return 'Cancelled';
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_colors.dart';
 
 import '../../../models/enums.dart';
 import '../../../models/user.dart';
@@ -81,8 +82,8 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Management'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
         actions: [
           IconButton(
             onPressed: () => _showFilterSheet(context),

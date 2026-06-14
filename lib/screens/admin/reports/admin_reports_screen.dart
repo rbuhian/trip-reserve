@@ -59,18 +59,17 @@ class _AdminReportsScreenState extends ConsumerState<AdminReportsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reports & Analytics'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
-          indicatorColor: colorScheme.primary,
+          labelColor: AppColors.accent,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: AppColors.accent,
           tabs: const [
             Tab(text: 'Trips'),
             Tab(text: 'Revenue'),

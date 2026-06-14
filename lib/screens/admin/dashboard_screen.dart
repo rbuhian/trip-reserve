@@ -33,7 +33,10 @@ class AdminDashboardScreen extends ConsumerWidget {
     final recentBookings = ref.watch(recentBookingsProvider);
 
     return Scaffold(
+      // top: false so the SliverAppBar paints behind the status bar (navy),
+      // instead of a white strip above the header.
       body: SafeArea(
+        top: false,
         child: RefreshIndicator(
           onRefresh: () async {
             ref.invalidate(dashboardStatsProvider);
@@ -44,16 +47,18 @@ class AdminDashboardScreen extends ConsumerWidget {
               // App Bar
               SliverAppBar(
                 floating: true,
-                backgroundColor: colorScheme.surface,
-                foregroundColor: colorScheme.onSurface,
+                pinned: true,
+                toolbarHeight: 70,
+                backgroundColor: AppColors.primaryDark,
+                foregroundColor: AppColors.white,
                 title: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Admin Dashboard',
                       style: TextStyle(
                         fontSize: 20,
-                        color: colorScheme.onSurface,
+                        color: AppColors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -62,7 +67,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                         'Welcome back, ${user?.firstName ?? 'Admin'}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: colorScheme.onSurfaceVariant,
+                          color: AppColors.white.withOpacity(0.8),
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -76,9 +81,9 @@ class AdminDashboardScreen extends ConsumerWidget {
                     onPressed: () {},
                     icon: Badge(
                       smallSize: 8,
-                      child: Icon(
+                      child: const Icon(
                         Icons.notifications_outlined,
-                        color: colorScheme.onSurfaceVariant,
+                        color: AppColors.white,
                       ),
                     ),
                   ),
@@ -88,11 +93,11 @@ class AdminDashboardScreen extends ConsumerWidget {
                       onPressed: () => _showProfileMenu(context, ref),
                       icon: CircleAvatar(
                         radius: 16,
-                        backgroundColor: colorScheme.primary.withOpacity(0.1),
-                        child: Icon(
+                        backgroundColor: AppColors.white.withOpacity(0.15),
+                        child: const Icon(
                           Icons.person,
                           size: 18,
-                          color: colorScheme.primary,
+                          color: AppColors.white,
                         ),
                       ),
                     ),

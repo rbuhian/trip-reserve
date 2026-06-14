@@ -52,8 +52,8 @@ class _AdminBookingDetailsScreenState extends ConsumerState<AdminBookingDetailsS
     return Scaffold(
       appBar: AppBar(
         title: const Text('Booking Details'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
         actions: [
           bookingAsync.whenOrNull(
             data: (booking) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_colors.dart';
 
 import '../../../models/booking.dart';
 import '../../../models/enums.dart';
@@ -60,15 +61,15 @@ class _AdminBookingsScreenState extends ConsumerState<AdminBookingsScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('All Bookings'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
-          labelColor: colorScheme.primary,
-          unselectedLabelColor: colorScheme.onSurfaceVariant,
-          indicatorColor: colorScheme.primary,
+          labelColor: AppColors.accent,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: AppColors.accent,
           tabs: _tabs.map((tab) {
             final count = tab.status == null
                 ? counts.valueOrNull?.values.fold<int>(0, (a, b) => a + b) ?? 0

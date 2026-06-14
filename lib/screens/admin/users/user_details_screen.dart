@@ -163,8 +163,8 @@ class _UserDetailsScreenState extends ConsumerState<UserDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Details'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
         actions: [
           if (!_isEditing && userAsync.valueOrNull != null)
             IconButton(

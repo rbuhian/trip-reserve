@@ -38,8 +38,8 @@ class AdminPricingScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pricing Configuration'),
-        backgroundColor: colorScheme.surface,
-        foregroundColor: colorScheme.onSurface,
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.white,
       ),
       body: RefreshIndicator(
         onRefresh: () async {

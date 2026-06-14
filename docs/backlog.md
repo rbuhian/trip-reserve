@@ -314,6 +314,55 @@ Status Legend:
 
 ---
 
+## Refunds & Cancellation Policy
+
+> **Suggested approach (policy + fault model).** Rather than treating every refund as a manual
+> request, compute the refund from a **configurable cancellation policy** plus **who is at fault**:
+> a **customer cancellation** incurs a fee (free before the cancellation deadline — CUST-37 —
+> then a tiered fee), while a **driver no-show or driver/admin cancellation is a full refund, no
+> fee**. Auto-refund the clear cases (cancel before deadline, verified no-show); route disputes
+> through an **admin-approved refund request**. A refund must **reverse the driver's earnings
+> ledger credit** (ties to PO-10/PO-13) and is itself an immutable ledger entry — one shared audit
+> trail with Payouts. PayMongo performs the actual refund (Refunds API), confirmed by a webhook.
+> The `payments` table already has `refunded_at` / `refund_reason` / `refunded` status.
+
+### Database & Policy
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| RFN-01 | refunds table — payment_id, amount, fee, reason, status, requested_by/reviewed_by, timestamps | [ ] | High |
+| RFN-02 | Configurable cancellation/refund policy — fee tiers by time-to-pickup + fault | [ ] | High |
+| RFN-03 | RLS — customer reads own refunds; admin manages all | [ ] | High |
+
+### Refund rules
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| RFN-10 | Customer cancellation: refund = paid − cancellation fee (free before deadline, CUST-37) | [ ] | High |
+| RFN-11 | Driver no-show / driver- or admin-cancelled: full refund, no fee | [ ] | High |
+| RFN-12 | Reverse the driver's earnings ledger credit when a paid trip is refunded (links PO-10/PO-13) | [ ] | High |
+
+### Customer
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| RFN-20 | Request a refund (with reason, e.g. driver no-show) | [ ] | High |
+| RFN-21 | View refund status, fee breakdown & history | [ ] | Medium |
+
+### Admin
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| RFN-30 | View refund requests (filter by status / reason) | [ ] | High |
+| RFN-31 | Approve refund (full / partial) and process via PayMongo | [ ] | High |
+| RFN-32 | Reject refund (with reason) | [ ] | High |
+| RFN-33 | Refund history with full audit trail | [ ] | Medium |
+
+### Processing
+| ID | Feature | Status | Priority |
+|----|---------|--------|----------|
+| RFN-40 | PayMongo Refunds API integration (edge function) | [ ] | High |
+| RFN-41 | Refund webhook — mark payment refunded on PayMongo confirmation | [ ] | High |
+| RFN-42 | Driver no-show report / verification flow (customer report + admin verify) | [ ] | Medium |
+
+---
+
 ## Future (Phase 2+)
 
 | ID | Feature | Status | Priority | Phase |
@@ -344,4 +393,5 @@ Status Legend:
 | In-App Messaging | 9 | 0 | 0 | 9 |
 | **Total MVP** | **142** | **8** | **0** | **134** |
 | Driver Payouts & Withdrawals *(new, post-MVP)* | 14 | 14 | 0 | 0 |
-| **Total (all tracked)** | **156** | **22** | **0** | **134** |
+| Refunds & Cancellation Policy *(new, post-MVP)* | 15 | 15 | 0 | 0 |
+| **Total (all tracked)** | **171** | **37** | **0** | **134** |

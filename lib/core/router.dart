@@ -49,13 +49,21 @@ final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Router provider with auth-aware redirects
 final routerProvider = Provider<GoRouter>((ref) {
-  final authUser = ref.watch(authUserProvider);
+  // Build the router ONCE. Re-run redirects on auth changes via a
+  // refreshListenable rather than recreating the router — recreation resets
+  // navigation to initialLocation ('/') and breaks in-progress flows such as
+  // password recovery, where verifying the OTP establishes a session mid-flow.
+  final refreshSignal = ValueNotifier<int>(0);
+  ref.onDispose(refreshSignal.dispose);
+  ref.listen(authUserProvider, (_, __) => refreshSignal.value++);
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     debugLogDiagnostics: true,
+    refreshListenable: refreshSignal,
     redirect: (context, state) {
+      final authUser = ref.read(authUserProvider);
       final isLoading = authUser.isLoading;
       final user = authUser.valueOrNull;
       final isAuthenticated = user != null;
@@ -103,6 +111,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      // New-password step of the recovery flow. NOT an auth route: the recovery
+      // OTP creates a session, and an authenticated user must be allowed to
+      // stay here to set the new password.
+      GoRoute(
+        path: '/reset-password',
+        builder: (context, state) =>
+            const ForgotPasswordScreen(startAtNewPassword: true),
       ),
 
       // Customer routes

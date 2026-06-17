@@ -11,7 +11,11 @@ import '../../services/auth_service.dart';
 enum _ResetStep { enterEmail, enterOtp, enterNewPassword }
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
-  const ForgotPasswordScreen({super.key});
+  /// When true the screen opens directly on the new-password step (used by the
+  /// dedicated /reset-password route after the recovery OTP is verified).
+  final bool startAtNewPassword;
+
+  const ForgotPasswordScreen({super.key, this.startAtNewPassword = false});
 
   @override
   ConsumerState<ForgotPasswordScreen> createState() =>
@@ -29,6 +33,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   _ResetStep _step = _ResetStep.enterEmail;
   bool _isLoading = false;
   bool _obscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.startAtNewPassword) _step = _ResetStep.enterNewPassword;
+  }
 
   @override
   void dispose() {
@@ -68,7 +78,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             email: _emailController.text.trim(),
             token: code,
           );
-      if (mounted) setState(() => _step = _ResetStep.enterNewPassword);
+      // Move to the new-password step on its own non-auth route. The recovery
+      // OTP created a session; /reset-password is not an auth route, so the
+      // authenticated user is allowed to stay there (no redirect to home).
+      if (mounted) context.go('/reset-password');
     } on AuthServiceException catch (e) {
       if (mounted) _showError(e.message);
     } catch (_) {
@@ -153,7 +166,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         if (_step == _ResetStep.enterOtp) {
                           setState(() => _step = _ResetStep.enterEmail);
                         } else if (_step == _ResetStep.enterNewPassword) {
-                          setState(() => _step = _ResetStep.enterOtp);
+                          // New-password is its own route after OTP verify.
+                          context.go('/login');
                         } else {
                           context.pop();
                         }

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../providers/supabase_provider.dart';
 import '../../services/auth_service.dart';
+
+/// Steps in the OTP-based password reset flow.
+enum _ResetStep { enterEmail, enterOtp, enterNewPassword }
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -15,41 +19,104 @@ class ForgotPasswordScreen extends ConsumerStatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final _emailFormKey = GlobalKey<FormState>();
+  final _passwordFormKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  final _otpController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+
+  _ResetStep _step = _ResetStep.enterEmail;
   bool _isLoading = false;
-  bool _emailSent = false;
+  bool _obscure = true;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _otpController.dispose();
+    _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleSendResetLink() async {
-    if (!_formKey.currentState!.validate()) return;
-
+  // Step 1 — send the recovery email (with OTP)
+  Future<void> _handleSendOtp() async {
+    if (!_emailFormKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-
     try {
-      final authService = ref.read(authServiceProvider);
-      await authService.resetPassword(_emailController.text.trim());
+      await ref.read(authServiceProvider).resetPassword(_emailController.text.trim());
+      if (mounted) setState(() => _step = _ResetStep.enterOtp);
+    } on AuthServiceException catch (e) {
+      if (mounted) _showError(e.message);
+    } catch (_) {
+      if (mounted) _showError('Something went wrong. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
+  // Step 2 — verify the 6-digit OTP (establishes a recovery session)
+  Future<void> _handleVerifyOtp() async {
+    final code = _otpController.text.trim();
+    if (code.length != 6) {
+      _showError('Please enter the 6-digit code');
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(authServiceProvider).verifyRecoveryOtp(
+            email: _emailController.text.trim(),
+            token: code,
+          );
+      if (mounted) setState(() => _step = _ResetStep.enterNewPassword);
+    } on AuthServiceException catch (e) {
+      if (mounted) _showError(e.message);
+    } catch (_) {
+      if (mounted) _showError('Invalid or expired code. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // Step 3 — set the new password and enter the app
+  Future<void> _handleSetNewPassword() async {
+    if (!_passwordFormKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(authServiceProvider).updatePassword(_passwordController.text);
       if (mounted) {
-        setState(() => _emailSent = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password updated successfully'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        // The recovery session is authenticated → go to the role home.
+        context.go('/');
       }
     } on AuthServiceException catch (e) {
-      if (mounted) {
-        _showError(e.message);
-      }
-    } catch (e) {
-      if (mounted) {
-        _showError('Something went wrong. Please try again.');
-      }
+      if (mounted) _showError(e.message);
+    } catch (_) {
+      if (mounted) _showError('Could not update password. Please try again.');
     } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _resendOtp() async {
+    try {
+      await ref.read(authServiceProvider).resetPassword(_emailController.text.trim());
       if (mounted) {
-        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('A new code has been sent'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
+    } catch (_) {
+      if (mounted) _showError('Could not resend the code.');
     }
   }
 
@@ -81,160 +148,249 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () {
+                        // Back steps through the flow, then out of the screen.
+                        if (_step == _ResetStep.enterOtp) {
+                          setState(() => _step = _ResetStep.enterEmail);
+                        } else if (_step == _ResetStep.enterNewPassword) {
+                          setState(() => _step = _ResetStep.enterOtp);
+                        } else {
+                          context.pop();
+                        }
+                      },
                       icon: const Icon(Icons.arrow_back),
                       style: IconButton.styleFrom(
                         backgroundColor: colorScheme.surfaceContainerHighest,
                       ),
                     ),
                     const Spacer(),
-                    Image.asset(
-                      'assets/images/logo.png',
-                      height: 50,
-                    ),
+                    Image.asset('assets/images/logo.png', height: 50),
                     const Spacer(),
                     const SizedBox(width: 48),
                   ],
                 ),
-
                 const SizedBox(height: 40),
-
                 Center(
                   child: Container(
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: _emailSent
-                          ? AppColors.success.withOpacity(0.1)
-                          : colorScheme.primary.withOpacity(0.1),
+                      color: colorScheme.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      _emailSent
-                          ? Icons.mark_email_read_outlined
-                          : Icons.lock_reset_outlined,
-                      size: 40,
-                      color: _emailSent ? AppColors.success : colorScheme.primary,
-                    ),
+                    child: Icon(_stepIcon, size: 40, color: colorScheme.primary),
                   ),
                 ),
-
                 const SizedBox(height: 32),
-
-                if (_emailSent) ...[
-                  Center(
-                    child: Text(
-                      'Check Your Email',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Center(
-                    child: Text(
-                      'We sent a password reset link to',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      _emailController.text.trim(),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.primary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      'Follow the link in the email to reset your password.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  _buildPrimaryButton(
-                    label: 'Back to Login',
-                    onPressed: () => context.go('/login'),
-                  ),
-                ] else ...[
-                  Center(
-                    child: Text(
-                      'Forgot Password?',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Center(
-                    child: Text(
-                      'Enter your email address and we\'ll send you a link to reset your password.',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel('Email'),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.done,
-                          autocorrect: false,
-                          onFieldSubmitted: (_) =>
-                              _isLoading ? null : _handleSendResetLink(),
-                          decoration: _buildInputDecoration(
-                            hint: 'juan@example.com',
-                            prefixIcon: Icons.email_outlined,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Email is required';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Enter a valid email';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        _buildPrimaryButton(
-                          label: 'Send Reset Link',
-                          onPressed: _isLoading ? null : _handleSendResetLink,
-                          isLoading: _isLoading,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                switch (_step) {
+                  _ResetStep.enterEmail => _buildEmailStep(theme, colorScheme),
+                  _ResetStep.enterOtp => _buildOtpStep(theme, colorScheme),
+                  _ResetStep.enterNewPassword =>
+                    _buildNewPasswordStep(theme, colorScheme),
+                },
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  IconData get _stepIcon => switch (_step) {
+        _ResetStep.enterEmail => Icons.lock_reset_outlined,
+        _ResetStep.enterOtp => Icons.mark_email_read_outlined,
+        _ResetStep.enterNewPassword => Icons.password_outlined,
+      };
+
+  Widget _buildEmailStep(ThemeData theme, ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Text('Forgot Password?',
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w700)),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            'Enter your email address and we\'ll send you a 6-digit code to reset your password.',
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(color: colorScheme.onSurfaceVariant),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 40),
+        Form(
+          key: _emailFormKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildLabel('Email'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.done,
+                autocorrect: false,
+                onFieldSubmitted: (_) => _isLoading ? null : _handleSendOtp(),
+                decoration: _buildInputDecoration(
+                  hint: 'juan@example.com',
+                  prefixIcon: Icons.email_outlined,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Email is required';
+                  if (!value.contains('@')) return 'Enter a valid email';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 32),
+              _buildPrimaryButton(
+                label: 'Send Code',
+                onPressed: _isLoading ? null : _handleSendOtp,
+                isLoading: _isLoading,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOtpStep(ThemeData theme, ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Text('Enter Code',
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w700)),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            'We sent a 6-digit code to ${_emailController.text.trim()}.',
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(color: colorScheme.onSurfaceVariant),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 40),
+        _buildLabel('6-digit code'),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _otpController,
+          keyboardType: TextInputType.number,
+          textAlign: TextAlign.center,
+          maxLength: 6,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 12,
+          ),
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          onChanged: (v) {
+            if (v.length == 6 && !_isLoading) _handleVerifyOtp();
+          },
+          decoration: _buildInputDecoration(
+            hint: '••••••',
+            prefixIcon: Icons.key_outlined,
+          ).copyWith(counterText: ''),
+        ),
+        const SizedBox(height: 24),
+        _buildPrimaryButton(
+          label: 'Verify Code',
+          onPressed: _isLoading ? null : _handleVerifyOtp,
+          isLoading: _isLoading,
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: TextButton(
+            onPressed: _isLoading ? null : _resendOtp,
+            child: const Text('Resend code'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNewPasswordStep(ThemeData theme, ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Text('New Password',
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w700)),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: Text(
+            'Choose a new password for your account.',
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(color: colorScheme.onSurfaceVariant),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 40),
+        Form(
+          key: _passwordFormKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildLabel('New password'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscure,
+                decoration: _buildInputDecoration(
+                  hint: 'At least 6 characters',
+                  prefixIcon: Icons.lock_outline,
+                ).copyWith(
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscure
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Password is required';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              _buildLabel('Confirm password'),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _confirmController,
+                obscureText: _obscure,
+                decoration: _buildInputDecoration(
+                  hint: 'Re-enter password',
+                  prefixIcon: Icons.lock_outline,
+                ),
+                validator: (value) {
+                  if (value != _passwordController.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 32),
+              _buildPrimaryButton(
+                label: 'Update Password',
+                onPressed: _isLoading ? null : _handleSetNewPassword,
+                isLoading: _isLoading,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -274,10 +430,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(
-          color: colorScheme.primary,
-          width: 1.5,
-        ),
+        borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

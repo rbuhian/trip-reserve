@@ -42,6 +42,17 @@ class AuthService {
         throw AuthServiceException('Failed to create account');
       }
 
+      // When the email is already registered, Supabase does not error (to
+      // prevent email enumeration) — it returns an obfuscated user with an
+      // empty `identities` list. Treat that as "already exists" so the UI can
+      // tell the user to log in instead of dead-ending on the OTP screen.
+      final identities = response.user!.identities;
+      if (identities != null && identities.isEmpty) {
+        throw AuthServiceException(
+          'An account with this email already exists. Please log in instead.',
+        );
+      }
+
       return response;
     } on AuthException catch (e) {
       throw AuthServiceException.fromAuthException(e);
@@ -78,10 +89,32 @@ class AuthService {
     }
   }
 
-  /// Send password reset email
+  /// Send password reset email (contains a 6-digit OTP when the recovery
+  /// email template includes {{ .Token }}).
   Future<void> resetPassword(String email) async {
     try {
       await _client.auth.resetPasswordForEmail(email);
+    } on AuthException catch (e) {
+      throw AuthServiceException.fromAuthException(e);
+    }
+  }
+
+  /// Verify the password-recovery OTP sent to [email]. On success a recovery
+  /// session is established, after which [updatePassword] can be called.
+  Future<AuthResponse> verifyRecoveryOtp({
+    required String email,
+    required String token,
+  }) async {
+    try {
+      final response = await _client.auth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.recovery,
+      );
+      if (response.session == null) {
+        throw AuthServiceException('Invalid or expired code');
+      }
+      return response;
     } on AuthException catch (e) {
       throw AuthServiceException.fromAuthException(e);
     }

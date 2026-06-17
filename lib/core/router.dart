@@ -73,8 +73,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         return '/login';
       }
 
-      // Authenticated but on auth route, redirect to home
-      if (isAuthenticated && isAuthRoute) {
+      // Authenticated but on auth route, redirect to home.
+      // Exception: password recovery establishes a session on OTP verify, but
+      // the user must stay on /forgot-password to set their new password.
+      if (isAuthenticated && isAuthRoute &&
+          state.matchedLocation != '/forgot-password') {
         return _getHomeForRole(user.role);
       }
 
